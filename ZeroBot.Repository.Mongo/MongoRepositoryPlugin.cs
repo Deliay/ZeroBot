@@ -12,7 +12,6 @@ public class MongoRepositoryPlugin(IOptions<MongoRepositoryOptions> options, IBo
 {
     public ValueTask<IServiceCollection> BuildComponents(CancellationToken cancellationToken = default)
     {
-        BsonClassMap.RegisterClassMap<Event>();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(_ =>
         {
