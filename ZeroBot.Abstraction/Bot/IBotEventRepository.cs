@@ -5,8 +5,9 @@ namespace ZeroBot.Abstraction.Bot;
 
 public interface IBotEventRepository
 {
-    IAsyncEnumerable<T> SearchEventAsync<T>(Expression<Func<T, bool>> predictor, CancellationToken cancellationToken)
+    IAsyncEnumerable<Event<T>> SearchEventAsync<T>(long accountId, Expression<Func<Event<T>, bool>> predictor,
+        CancellationToken cancellationToken)
         where T : Event;
 
-    ValueTask SaveEventAsync(Event @event, CancellationToken cancellationToken);
+    ValueTask SaveEventAsync(long accountId, Event @event, CancellationToken cancellationToken);
 }

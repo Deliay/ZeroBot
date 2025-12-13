@@ -55,7 +55,7 @@ public class BotContext : IBotContext
         _services.Remove(account.Uin, out _);
     }
 
-    public IBotEventRepository EventRepository { get; private set; }
+    public IBotEventRepository? EventRepository { get; private set; }
     
     public void SetEventRepository(IBotEventRepository repository)
     {

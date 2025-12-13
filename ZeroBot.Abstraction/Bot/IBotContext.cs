@@ -16,7 +16,7 @@ public interface IBotContext
     ValueTask RegisterBotAsync(IBotService botService, CancellationToken cancellationToken = default);
     ValueTask UnregisterBot(IBotService botService, CancellationToken cancellationToken = default);
     
-    public IBotEventRepository EventRepository { get; }
+    public IBotEventRepository? EventRepository { get; }
     
     void SetEventRepository(IBotEventRepository repository);
 }

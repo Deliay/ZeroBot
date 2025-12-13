@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Abstraction", "Zero
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Milky", "ZeroBot.Milky\ZeroBot.Milky.csproj", "{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Repository.Mongo", "ZeroBot.Repository.Mongo\ZeroBot.Repository.Mongo.csproj", "{7C0486A5-6ED3-4430-9B4D-10483D6F588A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C0486A5-6ED3-4430-9B4D-10483D6F588A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C0486A5-6ED3-4430-9B4D-10483D6F588A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C0486A5-6ED3-4430-9B4D-10483D6F588A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C0486A5-6ED3-4430-9B4D-10483D6F588A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
