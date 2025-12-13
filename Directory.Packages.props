@@ -19,6 +19,7 @@
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.1" />
     <PackageVersion Include="Milky.Net.Client" Version="1.0.0" />
+    <PackageVersion Include="Milky.Net.Model" Version="1.0.0" />
     <PackageVersion Include="MongoDB.Driver" Version="3.5.2" />
   </ItemGroup>
 </Project>

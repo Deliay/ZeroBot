@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
       <ProjectReference Include="..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+      <PackageReference Include="Milky.Net.Client" />
     </ItemGroup>
 </Project>
