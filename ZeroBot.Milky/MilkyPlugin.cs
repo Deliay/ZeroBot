@@ -15,7 +15,7 @@ public class MilkyPlugin : IPlugin
         services.AddMemoryCache();
         services.AddSingleton<MilkyHttpClient>();
         services.AddSingleton<MilkyWebSocketReceiver>();
-        services.AddSingleton<LagrangeMilkyBot>();
+        services.AddSingleton<MilkyBot>();
         services.AddSingleton((sp) => new MilkyClient(sp.GetRequiredService<MilkyHttpClient>()));
         services.AddSingleton<BotInfos>();
 

@@ -5,7 +5,7 @@ using ZeroBot.Abstraction.Bot;
 
 namespace ZeroBot.Milky.Bot;
 
-public class LagrangeMilkyBot(
+public class MilkyBot(
     MilkyClient milky,
     BotInfos botInfos,
     MilkyWebSocketReceiver receiver,
