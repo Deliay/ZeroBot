@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Core", "ZeroBot.Core\ZeroBot.Core.csproj", "{B3A8A5E3-318B-4085-9E9F-BEED594EC312}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Abstraction", "ZeroBot.Abstraction\ZeroBot.Abstraction.csproj", "{ABF22022-4C2F-4B9D-BCF3-BABCD66D78FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Milky", "ZeroBot.Milky\ZeroBot.Milky.csproj", "{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B3A8A5E3-318B-4085-9E9F-BEED594EC312}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3A8A5E3-318B-4085-9E9F-BEED594EC312}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3A8A5E3-318B-4085-9E9F-BEED594EC312}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3A8A5E3-318B-4085-9E9F-BEED594EC312}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABF22022-4C2F-4B9D-BCF3-BABCD66D78FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABF22022-4C2F-4B9D-BCF3-BABCD66D78FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABF22022-4C2F-4B9D-BCF3-BABCD66D78FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABF22022-4C2F-4B9D-BCF3-BABCD66D78FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
