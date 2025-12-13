@@ -54,4 +54,13 @@ public class BotContext : IBotContext
         var account = await botService.GetCurrentAccountAsync(cancellationToken);
         _services.Remove(account.Uin, out _);
     }
+
+    public IBotEventRepository EventRepository { get; private set; }
+    
+    public void SetEventRepository(IBotEventRepository repository)
+    {
+        if (EventRepository is not null) throw new InvalidOperationException("Repository already set.");
+        
+        EventRepository = repository;
+    }
 }
