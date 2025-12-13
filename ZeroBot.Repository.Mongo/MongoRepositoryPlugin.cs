@@ -1,6 +1,8 @@
 ﻿using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Milky.Net.Model;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using ZeroBot.Abstraction.Bot;
 
@@ -10,6 +12,7 @@ public class MongoRepositoryPlugin(IOptions<MongoRepositoryOptions> options, IBo
 {
     public ValueTask<IServiceCollection> BuildComponents(CancellationToken cancellationToken = default)
     {
+        BsonClassMap.RegisterClassMap<Event>();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(_ =>
         {

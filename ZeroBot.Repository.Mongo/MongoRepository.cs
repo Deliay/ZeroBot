@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Milky.Net.Model;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using ZeroBot.Abstraction.Bot;
 
@@ -16,13 +15,8 @@ public class MongoRepository(IMongoClient mongo) : IBotEventRepository
             .Find(predictor).ToAsyncEnumerable();
     }
 
-    private static readonly InsertOneOptions EmptyInsertOptions = new(); 
-    
     public async ValueTask SaveEventAsync(long accountId, Event @event, CancellationToken cancellationToken)
     {
-        var eventType = @event.GetType().GetGenericArguments().First();
-        await mongo.GetDatabase($"events-{accountId}")
-            .GetCollection<BsonDocument>(eventType.Name)
-            .InsertOneAsync(BsonDocument.Create(@event), EmptyInsertOptions, cancellationToken);
+        await @event.InsertAsync(mongo, accountId, cancellationToken);
     }
 }
