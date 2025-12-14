@@ -11,7 +11,7 @@ public static class MongoRepositoryExtensions
 
     private static async ValueTask SaveEventAsyncCore<T>(IMongoClient mongo, long accountId, Event<T> @event, CancellationToken cancellationToken)
     {
-        await mongo.GetDatabase($"events-{accountId}")
+        await mongo.GetDatabase(GetEventDatabase(accountId))
             .GetCollection<Event<T>>(nameof(T))
             .InsertOneAsync(@event, EmptyInsertOptions, cancellationToken);
     }
@@ -44,10 +44,12 @@ public static class MongoRepositoryExtensions
         return method;
     }
     
+    public static string GetEventDatabase(long accountId) => $"events-{accountId}";
+    
     extension(Event @event)
     {
         private InsertEventDelegate GetInsertMethod() => MakeInsertMethod(@event);
-
+        
         public Task InsertAsync(IMongoClient mongoClient, long accountId,
             CancellationToken cancellationToken)
         {

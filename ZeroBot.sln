@@ -1,12 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Core", "ZeroBot.Core\ZeroBot.Core.csproj", "{B3A8A5E3-318B-4085-9E9F-BEED594EC312}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Core", "src\ZeroBot.Core\ZeroBot.Core.csproj", "{B3A8A5E3-318B-4085-9E9F-BEED594EC312}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Abstraction", "ZeroBot.Abstraction\ZeroBot.Abstraction.csproj", "{ABF22022-4C2F-4B9D-BCF3-BABCD66D78FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Abstraction", "src\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj", "{ABF22022-4C2F-4B9D-BCF3-BABCD66D78FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Milky", "ZeroBot.Milky\ZeroBot.Milky.csproj", "{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Milky", "src\ZeroBot.Milky\ZeroBot.Milky.csproj", "{96248AF0-9AB9-4E39-900E-5647CCAC2DF0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Repository.Mongo", "ZeroBot.Repository.Mongo\ZeroBot.Repository.Mongo.csproj", "{7C0486A5-6ED3-4430-9B4D-10483D6F588A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Repository.Mongo", "src\ZeroBot.Repository.Mongo\ZeroBot.Repository.Mongo.csproj", "{7C0486A5-6ED3-4430-9B4D-10483D6F588A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Utility", "src\ZeroBot.Utility\ZeroBot.Utility.csproj", "{9C2B752B-9529-4C1C-A051-A4476125D78F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroBot.Utility.Test", "test\ZeroBot.Utility.Test\ZeroBot.Utility.Test.csproj", "{C0A535CB-F7E6-4706-82AB-37BF5F327D20}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +34,13 @@ Global
 		{7C0486A5-6ED3-4430-9B4D-10483D6F588A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C0486A5-6ED3-4430-9B4D-10483D6F588A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C0486A5-6ED3-4430-9B4D-10483D6F588A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C2B752B-9529-4C1C-A051-A4476125D78F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C2B752B-9529-4C1C-A051-A4476125D78F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C2B752B-9529-4C1C-A051-A4476125D78F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C2B752B-9529-4C1C-A051-A4476125D78F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0A535CB-F7E6-4706-82AB-37BF5F327D20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0A535CB-F7E6-4706-82AB-37BF5F327D20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0A535CB-F7E6-4706-82AB-37BF5F327D20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0A535CB-F7E6-4706-82AB-37BF5F327D20}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

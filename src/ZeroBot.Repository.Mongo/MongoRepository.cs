@@ -10,7 +10,7 @@ public class MongoRepository(IMongoClient mongo) : IBotEventRepository
     public IAsyncEnumerable<Event<T>> SearchEventAsync<T>(long accountId, Expression<Func<Event<T>, bool>> predictor,
         CancellationToken cancellationToken) where T : Event
     {
-        return mongo.GetDatabase($"events-{accountId}")
+        return mongo.GetDatabase(MongoRepositoryExtensions.GetEventDatabase(accountId))
             .GetCollection<Event<T>>(nameof(T))
             .Find(predictor).ToAsyncEnumerable();
     }
