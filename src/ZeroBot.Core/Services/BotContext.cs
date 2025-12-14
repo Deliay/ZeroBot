@@ -10,6 +10,8 @@ public class BotContext : IBotContext
     private readonly Dictionary<long, IBotService> _services = new();
     private readonly Channel<Event> _messageQueue = Channel.CreateUnbounded<Event>();
     
+    public IEnumerable<IBotService> BotServices => _services.Values;
+    
     public IAsyncEnumerable<Event> ReadEvents(CancellationToken cancellationToken = default)
     {
         return _messageQueue.Reader.ReadAllAsync(cancellationToken);
