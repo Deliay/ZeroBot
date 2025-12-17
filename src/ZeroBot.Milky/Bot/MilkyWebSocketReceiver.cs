@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using Milky.Net.Model;
 using ZeroBot.Abstraction;
@@ -9,11 +10,17 @@ namespace ZeroBot.Milky.Bot;
 
 public class MilkyWebSocketReceiver(HttpClient client)
 {
-    private static readonly Uri EventRelativeUri = new("/event");
+    private readonly JsonSerializerOptions _jsonOptions = new() { AllowOutOfOrderMetadataProperties = true };
+    
     public async IAsyncEnumerable<Event> ReadEvents([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var ws = new ClientWebSocket();
-        await ws.ConnectAsync(new Uri(client.BaseAddress!, EventRelativeUri), client, cancellationToken);
+        var uriBuilder = new UriBuilder(client.BaseAddress!);
+        if (client.DefaultRequestHeaders.Authorization?.Parameter is { Length: > 0 } token)
+        {
+            uriBuilder.Query = $"access_token={token}";
+        }
+        await ws.ConnectAsync(uriBuilder.Uri, client, cancellationToken);
         using var ms = new MemoryStream();
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -32,9 +39,8 @@ public class MilkyWebSocketReceiver(HttpClient client)
             {
                 ArrayPool<byte>.Shared.Return(rawBuffer);
             }
-
-            var @event = await JsonSerializer.DeserializeAsync<Event>(ms, MilkyJsonSerializerContext.Default.Event,
-                cancellationToken);
+            ms.Seek(0L, SeekOrigin.Begin);
+            var @event = JsonSerializer.Deserialize<Event>(ms, _jsonOptions);
             if (@event != null) yield return @event;
             ms.SetLength(0L);
         }

@@ -1,10 +1,12 @@
-﻿using ZeroBot.Core.Services;
+﻿using Microsoft.Extensions.Logging;
+using ZeroBot.Core.Services;
 
 namespace ZeroBot.Core.Test;
 
 public class BotContextTest
 {
-    private (BotContext, TestBotService) CreateTestContext() => (new BotContext(), new TestBotService());
+    private readonly ILoggerFactory _factory = LoggerFactory.Create((_) => { });
+    private (BotContext, TestBotService) CreateTestContext() => (new BotContext(_factory.CreateLogger<BotContext>()), new TestBotService());
 
     private async Task RegisterAndAssert(BotContext botContext, TestBotService botService)
     {

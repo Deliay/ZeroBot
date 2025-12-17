@@ -1,3 +1,7 @@
 namespace ZeroBot.Repository.Mongo;
 
-public record MongoRepositoryOptions(string ConnectionString, int PoolSize);
+public record MongoRepositoryOptions
+{
+    public string? ConnectionString { get; init; }
+    public int PoolSize { get; init; } = 10;
+}

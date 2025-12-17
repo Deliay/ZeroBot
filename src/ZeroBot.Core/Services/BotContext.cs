@@ -1,11 +1,12 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
+using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 
 namespace ZeroBot.Core.Services;
 
-public class BotContext : IBotContext
+public class BotContext(ILogger<BotContext> logger) : IBotContext
 {
     private readonly Dictionary<long, IBotService> _services = new();
     private readonly Channel<Event> _messageQueue = Channel.CreateUnbounded<Event>();
@@ -49,6 +50,8 @@ public class BotContext : IBotContext
             throw new InvalidOperationException(
                 $"Bot {botService.GetType().Name} with account {account.Nickname}({account.Uin}) already registered.");
         }
+        
+        logger.LogInformation("Bot {NickName}({Uid}) was registered.", account.Nickname, account.Uin);
     }
 
     public async ValueTask UnregisterBot(IBotService botService, CancellationToken cancellationToken = default)

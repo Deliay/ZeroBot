@@ -1,3 +1,7 @@
 namespace ZeroBot.Milky.Configuration;
 
-public record MilkyOptions(Uri? MilkyServer, string? AccessToken);
+public record MilkyOptions
+{
+    public Uri? MilkyServer { get; init; }
+    public string? AccessToken { get; init; }
+}

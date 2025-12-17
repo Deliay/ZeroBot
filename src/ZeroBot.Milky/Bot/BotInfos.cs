@@ -1,11 +1,10 @@
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Internal;
 using Milky.Net.Client;
 using Milky.Net.Model;
 
 namespace ZeroBot.Milky.Bot;
 
-public class BotInfos(MilkyClient milky, MemoryCache cache)
+public class BotInfos(MilkyClient milky, IMemoryCache cache)
 {
     public async ValueTask<GetLoginInfoOutput> GetAccountInfoAsync(CancellationToken cancellationToken = default)
     {

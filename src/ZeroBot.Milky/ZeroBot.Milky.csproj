@@ -3,5 +3,6 @@
       <ProjectReference Include="..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
       <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
       <PackageReference Include="Milky.Net.Client" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     </ItemGroup>
 </Project>
