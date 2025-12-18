@@ -21,6 +21,7 @@ var root = RootBuilder
         services.AddSingleton<ILifetimeManager, LifetimeManager>();
         services.AddSingleton<IBotContext, BotContext>();
         services.AddSingleton<IServiceManager, ServiceManager>();
+        services.AddSingleton<ICommandDispatcher, CommandDispatcher>();
         services.AddOptions();
     })
     .UseLoader<TypedPluginLoader>()
