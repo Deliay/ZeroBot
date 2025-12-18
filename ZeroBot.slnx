@@ -1,5 +1,7 @@
 <Solution>
-  <Folder Name="/src/" />
+  <Folder Name="/src/">
+    <Project Path="src/ZeroBot.Utility/ZeroBot.Utility.csproj" />
+  </Folder>
   <Folder Name="/src/core/">
     <Project Path="src/ZeroBot.Abstraction/ZeroBot.Abstraction.csproj" />
     <Project Path="src/ZeroBot.Core/ZeroBot.Core.csproj" />

@@ -1,6 +1,6 @@
 using ZeroBot.Abstraction.Bot;
 
-namespace ZeroBot.Core.Services.Commands;
+namespace ZeroBot.Utility.Commands;
 
 internal record TextCommand(string Name, string[] Arguments) : ITextCommand
 {

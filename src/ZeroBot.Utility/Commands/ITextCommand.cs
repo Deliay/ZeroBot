@@ -1,4 +1,4 @@
-namespace ZeroBot.Abstraction.Bot;
+namespace ZeroBot.Utility.Commands;
 
 public interface ITextCommand
 {

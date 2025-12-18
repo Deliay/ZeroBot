@@ -1,9 +1,10 @@
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
+using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 
-namespace ZeroBot.Core.Services.Commands;
+namespace ZeroBot.Utility.Commands;
 
 public static class TextCommandExtensions
 {
@@ -72,6 +73,11 @@ public static class TextCommandExtensions
             callExpr, argsExpr, cancellationTokenExpr).Compile();
         AsyncHandlerCache.Add(@delegate, handler);
         return handler;
+    }
+
+    extension(IncomingMessage message)
+    {
+        public ITextCommand
     }
     
     extension(ITextCommand command)

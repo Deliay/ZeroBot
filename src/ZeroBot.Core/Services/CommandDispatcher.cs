@@ -7,36 +7,17 @@ namespace ZeroBot.Core.Services;
 
 public class CommandDispatcher(IBotContext botContext) : ICommandDispatcher, IComponentInitializer
 {
-    private readonly Dictionary<string, HashSet<string>> _commandHandlers = [];
     private readonly Dictionary<string, CommandHandler> _idToHandlers = [];
     private readonly CancellationTokenSource _cts = new();
     
     public Registration RegisterCommand(CommandHandler commandHandler)
     {
         var id = commandHandler.Id ?? Guid.NewGuid().ToString();
-        if (_idToHandlers.ContainsKey(id)) throw new InvalidOperationException($"Command handler with id {id} already exists.");
-        List<string> registerCommands = [];
-        if (commandHandler.Aliases is not null)
-        {
-            foreach (var commandHandlerAlias in commandHandler.Aliases) 
-            {
-                if (commandHandlerAlias is { Length: > 0 }) registerCommands.Add(commandHandlerAlias);
-            }   
-        }
-        foreach (var registerCommand in registerCommands)
-        {
-            if (!_commandHandlers.ContainsKey(registerCommand)) _commandHandlers.Add(registerCommand, []);
-            _commandHandlers[registerCommand].Add(id);
-        }
-        
-        _idToHandlers.Add(id, commandHandler);
+        if (!_idToHandlers.TryAdd(id, commandHandler)) throw new InvalidOperationException($"Command handler with id {id} already exists.");
+
         return new Registration(() =>
         {
             _idToHandlers.Remove(id);
-            foreach (var registerCommand in registerCommands)
-            {
-                if (_commandHandlers.TryGetValue(registerCommand, out var handlers)) handlers.Remove(id);
-            }
         });
     }
 
@@ -49,7 +30,15 @@ public class CommandDispatcher(IBotContext botContext) : ICommandDispatcher, ICo
 
         await foreach (var message in messages)
         {
-             
+            if (message.Data.Segments[0] is not TextIncomingSegment segment) continue;
+            if (!segment.Data.Text.StartsWith('/')) continue;
+            
+            var handler = await _idToHandlers.Values.ToAsyncEnumerable()
+                .FirstOrDefaultAsync(async (handler, token) => await handler.Predicate(message, token), initCts.Token);
+            
+            if (handler == null) continue;
+            
+            await handler.Handler(message, initCts.Token);
         }
     }
 
@@ -64,11 +53,9 @@ public class CommandDispatcher(IBotContext botContext) : ICommandDispatcher, ICo
         _cts.Dispose();
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        if (_cts is IAsyncDisposable ctsAsyncDisposable)
-            await ctsAsyncDisposable.DisposeAsync();
-        else
-            _cts.Dispose();
+        _cts.Dispose();
+        return default;
     }
 }
