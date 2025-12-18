@@ -1,8 +1,9 @@
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
+using ZeroBot.Abstraction.Bot;
 
-namespace ZeroBot.Utility.Commands;
+namespace ZeroBot.Core.Services.Commands;
 
 public static class IncomingCommandExtensions
 {

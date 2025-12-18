@@ -1,4 +1,4 @@
-namespace ZeroBot.Utility.Commands;
+namespace ZeroBot.Abstraction.Bot;
 
 public interface IIncomingCommand
 {

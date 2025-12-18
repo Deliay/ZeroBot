@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
-        <ProjectReference Include="..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
+        <ProjectReference Include="..\..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="MongoDB.Driver" />

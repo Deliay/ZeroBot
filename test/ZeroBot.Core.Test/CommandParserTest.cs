@@ -1,6 +1,6 @@
-﻿using ZeroBot.Utility.Commands;
+﻿using ZeroBot.Core.Services.Commands;
 
-namespace ZeroBot.Utility.Test;
+namespace ZeroBot.Core.Test;
 
 public class CommandParserTest
 {

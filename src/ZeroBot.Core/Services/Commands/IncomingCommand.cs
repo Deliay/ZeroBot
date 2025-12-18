@@ -1,6 +1,6 @@
-using System.Globalization;
+using ZeroBot.Abstraction.Bot;
 
-namespace ZeroBot.Utility.Commands;
+namespace ZeroBot.Core.Services.Commands;
 
 internal record IncomingCommand(string Name, string[] Arguments) : IIncomingCommand
 {

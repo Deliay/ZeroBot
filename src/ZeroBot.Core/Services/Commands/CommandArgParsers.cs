@@ -1,4 +1,4 @@
-namespace ZeroBot.Utility.Commands;
+namespace ZeroBot.Core.Services.Commands;
 
 public static class CommandArgParsers
 {

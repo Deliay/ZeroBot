@@ -1,6 +1,7 @@
-using ZeroBot.Utility.Commands;
+using ZeroBot.Abstraction.Bot;
+using ZeroBot.Core.Services.Commands;
 
-namespace ZeroBot.Utility.Test;
+namespace ZeroBot.Core.Test;
 
 public class CommandInvokerTest
 {

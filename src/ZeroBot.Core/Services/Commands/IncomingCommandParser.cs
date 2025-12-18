@@ -1,4 +1,6 @@
-﻿namespace ZeroBot.Utility.Commands;
+﻿using ZeroBot.Abstraction.Bot;
+
+namespace ZeroBot.Core.Services.Commands;
 
 public class IncomingCommandParser(char prefix, char[] argumentSplitters)
 {
