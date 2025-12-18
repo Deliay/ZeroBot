@@ -5,7 +5,7 @@ using ZeroBot.Abstraction.Bot;
 
 namespace ZeroBot.Core.Services.Commands;
 
-public static class IncomingCommandExtensions
+public static class TextCommandExtensions
 {
     private static T Parse<T>(string data) where T : IParsable<T> => T.Parse(data, CultureInfo.InvariantCulture);
     private static Delegate Of(Delegate @delegate) => @delegate;
@@ -74,7 +74,7 @@ public static class IncomingCommandExtensions
         return handler;
     }
     
-    extension(IIncomingCommand command)
+    extension(ITextCommand command)
     {
         public T? ParseNextArgument<T>() where T : IParsable<T>
         {

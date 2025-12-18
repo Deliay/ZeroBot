@@ -2,7 +2,7 @@ using ZeroBot.Abstraction.Bot;
 
 namespace ZeroBot.Core.Services.Commands;
 
-internal record IncomingCommand(string Name, string[] Arguments) : IIncomingCommand
+internal record TextCommand(string Name, string[] Arguments) : ITextCommand
 {
     private int Position { get; set; } = 0;
 

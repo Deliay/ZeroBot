@@ -4,7 +4,7 @@ namespace ZeroBot.Core.Test;
 
 public class CommandParserTest
 {
-    private static readonly IncomingCommandParser DefaultParser = new('/', [':', '：', '-']);
+    private static readonly TextCommandParser DefaultParser = new('/', [':', '：', '-']);
     
     [Fact]
     public void ShouldNotParseEmptyCommand()

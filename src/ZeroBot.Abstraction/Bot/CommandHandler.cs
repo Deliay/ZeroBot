@@ -4,6 +4,6 @@ namespace ZeroBot.Abstraction.Bot;
 
 public record CommandHandler(
     Delegate Handler,
-    Func<IIncomingCommand, Event<IncomingMessage>, ValueTask<bool>> Predictor,
+    Func<ITextCommand, Event<IncomingMessage>, ValueTask<bool>> Predictor,
     string? Id = null,
     IEnumerable<string>? Aliases = null);

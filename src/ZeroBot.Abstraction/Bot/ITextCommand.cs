@@ -1,6 +1,6 @@
 namespace ZeroBot.Abstraction.Bot;
 
-public interface IIncomingCommand
+public interface ITextCommand
 {
     string Name { get; }
     string[] Arguments { get; }

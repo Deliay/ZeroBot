@@ -10,7 +10,7 @@ public class CommandInvokerTest
     public void ShouldGenerateConvertMethodCorrectly()
     {
         var methodCalled = false;
-        var handler = IncomingCommandExtensions.GetInvoker(TestSyncMethod);
+        var handler = TextCommandExtensions.GetInvoker(TestSyncMethod);
         string[] commandArgs = ["1", "2", "abc"];
         handler(commandArgs);
         Assert.True(methodCalled);
@@ -32,7 +32,7 @@ public class CommandInvokerTest
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
         var token = cts.Token;
-        var handler = IncomingCommandExtensions.GetAsyncInvoker(TestSyncMethod);
+        var handler = TextCommandExtensions.GetAsyncInvoker(TestSyncMethod);
         string[] commandArgs = ["1", "2", "abc"];
         await handler(commandArgs, token);
         Assert.True(methodCalled);
@@ -50,8 +50,8 @@ public class CommandInvokerTest
         }
     }
 
-    private static IncomingCommandParser Parser = new('/', [':']);
-    private static IIncomingCommand Command = Parser.Parse("/test:1:2:abc").First();
+    private static TextCommandParser Parser = new('/', [':']);
+    private static ITextCommand Command = Parser.Parse("/test:1:2:abc").First();
     
     [Fact]
     public void ShouldThrowWhenArgumentCountNotMatch()

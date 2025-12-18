@@ -1,6 +1,6 @@
 namespace ZeroBot.Abstraction.Bot;
 
-public interface IIncomingCommandParser
+public interface ITextCommandParser
 {
     
 }

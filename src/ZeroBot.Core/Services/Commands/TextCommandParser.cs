@@ -2,9 +2,9 @@
 
 namespace ZeroBot.Core.Services.Commands;
 
-public class IncomingCommandParser(char prefix, char[] argumentSplitters)
+public class TextCommandParser(char prefix, char[] argumentSplitters)
 {
-    public IEnumerable<IIncomingCommand> Parse(string text)
+    public IEnumerable<ITextCommand> Parse(string text)
     {
         if (text.Length == 0) yield break;
         var currentPos = 0;
@@ -14,11 +14,11 @@ public class IncomingCommandParser(char prefix, char[] argumentSplitters)
         }
         yield break;
 
-        IIncomingCommand ParseIncomingCommand(string raw)
+        ITextCommand ParseIncomingCommand(string raw)
         {
             var splitResult = raw.Split(argumentSplitters);
             
-            return new IncomingCommand(splitResult[0], splitResult.Skip(1).ToArray());
+            return new TextCommand(splitResult[0], splitResult.Skip(1).ToArray());
         }
         IEnumerable<string> ReadEntireIncomingCommands(string raw)
         {
