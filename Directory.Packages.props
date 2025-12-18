@@ -24,12 +24,12 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.1" />
-    <PackageVersion Include="Milky.Net.Client" Version="1.0.0" />
-    <PackageVersion Include="Milky.Net.Model" Version="1.0.0" />
     <PackageVersion Include="MongoDB.Driver" Version="3.5.2" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="ZeroAsh.Milky.Net.Client" Version="1.0.1-preview.3" />
+    <PackageVersion Include="ZeroAsh.Milky.Net.Model" Version="1.0.1-preview.3" />
   </ItemGroup>
 </Project>
