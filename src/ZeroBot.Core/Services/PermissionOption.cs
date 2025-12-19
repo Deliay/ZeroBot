@@ -1,4 +1,4 @@
-namespace ZeroBot.Permission;
+namespace ZeroBot.Core.Services;
 
 public record PermissionOption
 {

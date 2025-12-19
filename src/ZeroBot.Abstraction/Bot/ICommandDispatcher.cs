@@ -4,5 +4,5 @@ namespace ZeroBot.Abstraction.Bot;
 
 public interface ICommandDispatcher
 {
-    public Registration RegisterCommand(CommandHandler commandHandler);
+    public Registration RegisterCommand(CommandHandlerMetadata commandHandlerMetadata);
 }

@@ -17,6 +17,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\ZeroBot.Core\ZeroBot.Core.csproj" />
+      <ProjectReference Include="..\..\src\ZeroBot.Utility\ZeroBot.Utility.csproj" />
     </ItemGroup>
 
 </Project>

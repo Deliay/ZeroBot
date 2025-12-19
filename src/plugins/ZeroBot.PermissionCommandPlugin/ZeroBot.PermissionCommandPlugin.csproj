@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
-      <ProjectReference Include="..\ZeroBot.Permission.Abstraction\ZeroBot.Permission.Abstraction.csproj" />
+      <ProjectReference Include="..\..\ZeroBot.Utility\ZeroBot.Utility.csproj" />
     </ItemGroup>
 
 </Project>

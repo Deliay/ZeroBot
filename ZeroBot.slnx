@@ -9,8 +9,9 @@
   </Folder>
   <Folder Name="/src/plugins/">
     <Project Path="src/plugins/ZeroBot.Milky/ZeroBot.Milky.csproj" />
-    <Project Path="src/plugins/ZeroBot.Permission.Abstraction/ZeroBot.Permission.Abstraction.csproj" />
-    <Project Path="src/plugins/ZeroBot.Permission/ZeroBot.Permission.csproj" />
+    <Project Path="src/plugins/ZeroBot.PermissionCommandPlugin/ZeroBot.PermissionCommandPlugin.csproj" />
     <Project Path="src/plugins/ZeroBot.Repository.Mongo/ZeroBot.Repository.Mongo.csproj" />
+    <Project Path="src/plugins/ZeroBot.TestPlugin/ZeroBot.TestPlugin.csproj" />
+    <Project Path="src\plugins\ZeroBot.ComfyUI\ZeroBot.ComfyUI.csproj" />
   </Folder>
 </Solution>

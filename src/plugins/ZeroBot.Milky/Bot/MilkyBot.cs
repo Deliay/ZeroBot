@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Milky.Net.Client;
 using Milky.Net.Model;
@@ -41,6 +42,15 @@ public class MilkyBot(
         return await botInfos.GetAccountInfoAsync(cancellationToken);
     }
 
+    public async ValueTask<Event<IncomingMessage>> GetGroupMessageAsync(MessageScene scene, long peerId, long messageId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await milky.Message.GetMessageAsync(new GetMessageInput(scene, peerId, messageId),
+            cancellationToken);
+        var account = await GetCurrentAccountAsync(cancellationToken);
+        return new Event<IncomingMessage>(result.Message.Time, account.Uin, result.Message);
+    }
+    
     public async ValueTask<MultiGroupSendResult> SendGroupMessageAsync(HashSet<long> groupIds, CancellationToken cancellationToken = default,
         params OutgoingSegment[] messageSegments)
     {
@@ -61,6 +71,25 @@ public class MilkyBot(
         }
 
         return result;
+    }
+
+    public async ValueTask UpdateGroupReactionAsync(long groupId, long messageId, string reactionId, bool add,
+        CancellationToken cancellationToken = default)
+    {
+        await milky.Group.SendGroupMessageReactionAsync(
+            new SendGroupMessageReactionInput(groupId, messageId, reactionId, add), cancellationToken);
+    }
+
+    public async ValueTask<GetGroupInfoOutput> GetGroupInformationAsync(long groupId,
+        CancellationToken cancellationToken = default)
+    {
+        return await botInfos.GetGroupInfoAsync(groupId, cancellationToken);
+    }
+    
+    public async ValueTask<GetGroupMemberListOutput?> GetGroupMembersAsync(long groupId,
+        CancellationToken cancellationToken = default)
+    {
+        return await botInfos.GetGroupMembersAsync(groupId, cancellationToken);
     }
 
     public async ValueTask DisposeAsync()

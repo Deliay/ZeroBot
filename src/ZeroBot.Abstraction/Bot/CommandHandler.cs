@@ -1,8 +1,36 @@
+using EmberFramework.Abstraction.Layer.Plugin;
 using Milky.Net.Model;
+using ZeroBot.Abstraction.Service;
 
 namespace ZeroBot.Abstraction.Bot;
 
-public delegate ValueTask CommandHandle(Event<IncomingMessage> message, CancellationToken cancellationToken = default);
-public delegate ValueTask<bool> CommandPredicate(Event<IncomingMessage> message, CancellationToken cancellationToken = default);
+public abstract class CommandHandler(ICommandDispatcher dispatcher) : IComponentInitializer
+{
+    private Registration? _registration;
 
-public record CommandHandler(CommandHandle Handler, CommandPredicate Predicate, string? Id = null);
+    public ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        _registration = dispatcher.RegisterCommand(new CommandHandlerMetadata(HandleAsync, PredicateAsync));
+        return InitializeCommandAsync(cancellationToken);
+    }
+
+    protected virtual ValueTask InitializeCommandAsync(CancellationToken cancellationToken = default) =>
+        ValueTask.CompletedTask;
+
+    protected abstract ValueTask HandleAsync(Event<IncomingMessage> message,
+        CancellationToken cancellationToken = default);
+
+    protected abstract ValueTask<bool> PredicateAsync(Event<IncomingMessage> message,
+        CancellationToken cancellationToken = default);
+
+    public void Dispose()
+    {
+        _registration?.Dispose();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _registration?.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

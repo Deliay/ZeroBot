@@ -15,7 +15,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="EmberFramework" Version="1.0.1" />
+    <PackageVersion Include="EmberFramework" Version="1.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
@@ -29,7 +29,8 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
-    <PackageVersion Include="ZeroAsh.Milky.Net.Client" Version="1.0.1-preview.3" />
-    <PackageVersion Include="ZeroAsh.Milky.Net.Model" Version="1.0.1-preview.3" />
+    <PackageVersion Include="ZeroAsh.ComfySharp" Version="0.1.0" />
+    <PackageVersion Include="ZeroAsh.Milky.Net.Client" Version="1.0.1-preview.4" />
+    <PackageVersion Include="ZeroAsh.Milky.Net.Model" Version="1.0.1-preview.4" />
   </ItemGroup>
 </Project>

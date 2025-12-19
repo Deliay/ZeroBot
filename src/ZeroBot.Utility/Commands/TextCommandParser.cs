@@ -6,6 +6,11 @@ public class TextCommandParser(char prefix, char[] argumentSplitters)
 {
     public IEnumerable<ITextCommand> Parse(string text)
     {
+        return Parse(prefix, argumentSplitters, text);
+    }
+    
+    public static IEnumerable<ITextCommand> Parse(char prefix, char[] argumentSplitters, string text)
+    {
         if (text.Length == 0) yield break;
         var currentPos = 0;
         foreach (var rawIncomingCommand in ReadEntireIncomingCommands(text))

@@ -10,8 +10,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\plugins\ZeroBot.ComfyUI\ZeroBot.ComfyUI.csproj" />
+      <ProjectReference Include="..\plugins\ZeroBot.PermissionCommandPlugin\ZeroBot.PermissionCommandPlugin.csproj" />
+      <ProjectReference Include="..\plugins\ZeroBot.TestPlugin\ZeroBot.TestPlugin.csproj" />
       <ProjectReference Include="..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
-      <ProjectReference Include="..\plugins\ZeroBot.Permission\ZeroBot.Permission.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Milky\ZeroBot.Milky.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Repository.Mongo\ZeroBot.Repository.Mongo.csproj" />
     </ItemGroup>

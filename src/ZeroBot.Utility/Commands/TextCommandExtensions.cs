@@ -74,11 +74,6 @@ public static class TextCommandExtensions
         AsyncHandlerCache.Add(@delegate, handler);
         return handler;
     }
-
-    extension(IncomingMessage message)
-    {
-        public ITextCommand
-    }
     
     extension(ITextCommand command)
     {

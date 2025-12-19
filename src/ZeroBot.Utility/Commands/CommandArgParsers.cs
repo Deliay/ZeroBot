@@ -6,7 +6,7 @@ public static class CommandArgParsers
 
     public static void RegisterParser<T>(Func<string, T> parser)
     {
-        _parsers.Add(typeof(T), parser);
+        _parsers.TryAdd(typeof(T), parser);
     }
     
     public static bool HasParser(Type type) => _parsers.ContainsKey(type);

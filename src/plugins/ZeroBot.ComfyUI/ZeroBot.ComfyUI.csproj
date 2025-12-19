@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
+      <ProjectReference Include="..\..\ZeroBot.Utility\ZeroBot.Utility.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ZeroAsh.ComfySharp" />
+    </ItemGroup>
+
+</Project>

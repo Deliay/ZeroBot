@@ -32,4 +32,26 @@ internal class TestBotService : IBotService
         SendGroupMessageAsyncCalled = true;
         return ValueTask.FromResult(FakeSendResult);
     }
+
+    public ValueTask<Event<IncomingMessage>> GetGroupMessageAsync(MessageScene scene, long peerId, long messageId,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ValueTask UpdateGroupReactionAsync(long groupId, long messageId, string reactionId, bool add,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ValueTask<GetGroupInfoOutput> GetGroupInformationAsync(long groupId, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ValueTask<GetGroupMemberListOutput?> GetGroupMembersAsync(long groupId, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

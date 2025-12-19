@@ -33,6 +33,36 @@ public class BotContext(ILogger<BotContext> logger) : IBotContext
         return await botService.SendGroupMessageAsync(groupIds, cancellationToken, messageSegments);
     }
 
+    public async ValueTask<GetGroupInfoOutput?> GetGroupInformationAsync(long accountId, long groupId,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_services.TryGetValue(accountId, out var botService))
+        {
+            return null;
+        }
+
+        return await botService.GetGroupInformationAsync(groupId, cancellationToken);
+    }
+    
+    public async ValueTask<GetGroupMemberListOutput?> GetGroupMembersAsync(long accountId, long groupId,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_services.TryGetValue(accountId, out var botService))
+        {
+            return null;
+        }
+        
+        return await botService.GetGroupMembersAsync(groupId, cancellationToken);
+    }
+
+    public async ValueTask<Event<IncomingMessage>?> GetHistoryMessageAsync(long accountId, MessageScene scene, long peerId, long messageId,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_services.TryGetValue(accountId, out var botService)) return null;
+
+        return await botService.GetGroupMessageAsync(scene, peerId, messageId, cancellationToken);
+    }
+
     public async IAsyncEnumerable<GetLoginInfoOutput> GetAccountInfoAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -67,5 +97,13 @@ public class BotContext(ILogger<BotContext> logger) : IBotContext
         if (EventRepository is not null) throw new InvalidOperationException("Repository already set.");
         
         EventRepository = repository;
+    }
+
+    public async ValueTask UpdateGroupReactionAsync(long accountId, long groupId, long messageId, string reactionId, bool add,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_services.TryGetValue(accountId, out var botService)) return;
+
+        await botService.UpdateGroupReactionAsync(groupId, messageId, reactionId, add, cancellationToken);
     }
 }

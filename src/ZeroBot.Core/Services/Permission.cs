@@ -1,17 +1,16 @@
 using System.Text.Json;
-using EmberFramework.Abstraction.Layer.Plugin;
+using EmberFramework.Abstraction;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ZeroBot.Abstraction.Service;
-using ZeroBot.Permission.Abstraction;
 
-namespace ZeroBot.Permission;
+namespace ZeroBot.Core.Services;
 
-public class PermissionManager(
+public class Permission(
     IOptions<PermissionOption> options,
     IServiceManager serviceManager,
-    ILogger<PermissionManager> logger)
-    : IPermissionManager, IComponentInitializer
+    ILogger<Permission> logger)
+    : IPermission, IInfrastructureInitializer
 {
     private FileSystemWatcher? _watcher;
     private Dictionary<string, HashSet<string>> _permissions = new();
@@ -21,7 +20,7 @@ public class PermissionManager(
     public async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
         await InitializePermissionAsync(cancellationToken);
-        _serviceRegistration = serviceManager.Register<IPermissionManager>(this);
+        serviceManager.TryRegister<IPermission>(this, out _serviceRegistration);
         var config = options.Value;
         if (config.WatchFileChanges)
         {

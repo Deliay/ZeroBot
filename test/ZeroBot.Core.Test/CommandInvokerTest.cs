@@ -1,5 +1,4 @@
-using ZeroBot.Abstraction.Bot;
-using ZeroBot.Core.Services.Commands;
+using ZeroBot.Utility.Commands;
 
 namespace ZeroBot.Core.Test;
 

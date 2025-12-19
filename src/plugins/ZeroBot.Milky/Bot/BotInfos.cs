@@ -26,6 +26,16 @@ public class BotInfos(MilkyClient milky, IMemoryCache cache)
 
         return result!;
     }
+    
+    public async ValueTask<GetGroupMemberListOutput> GetGroupMembersAsync(long groupId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await cache.GetOrCreateAsync($"group-members-{groupId}",
+            _ => milky.System.GetGroupMemberListAsync(new GetGroupMemberListInput(groupId, true), cancellationToken),
+            _defaultExpireOptions);
+
+        return result!;
+    }
     public async ValueTask<Dictionary<long, GroupEntity>> GetGroupListAsync(
         CancellationToken cancellationToken = default)
     {

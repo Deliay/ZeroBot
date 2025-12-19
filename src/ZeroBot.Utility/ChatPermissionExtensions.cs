@@ -1,8 +1,10 @@
-namespace ZeroBot.Permission.Abstraction;
+using ZeroBot.Abstraction.Service;
+
+namespace ZeroBot.Utility;
 
 public static class ChatPermissionExtensions
 {
-    extension(IPermissionManager manager)
+    extension(IPermission manager)
     {
         public ValueTask<bool> CheckUserInGroupPermissionAsync(long group, long user, string permission,
             CancellationToken cancellationToken = default)

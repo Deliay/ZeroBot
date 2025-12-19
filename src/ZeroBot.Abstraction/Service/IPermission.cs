@@ -1,6 +1,6 @@
-﻿namespace ZeroBot.Permission.Abstraction;
+﻿namespace ZeroBot.Abstraction.Service;
 
-public interface IPermissionManager
+public interface IPermission
 {
     ValueTask<bool> CheckPermissionAsync(string principal, string permission,
         CancellationToken cancellationToken = default);

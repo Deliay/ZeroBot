@@ -20,10 +20,19 @@ public class ServiceManager : IServiceManager
         return result;
     }
 
-    public Registration Register<T>(T service) where T : class
+    public bool TryRegister<T>(T service, [NotNullWhen(true)]out Registration? registration) where T : class
     {
-        _services.Add(typeof(T), service);
+        if (_services.TryGetValue(typeof(T), out var exists))
+        {
+            registration = null;
+            return false;
+        }
+        else
+        {
+            _services.Add(typeof(T), service);
 
-        return new Registration(() => _services.Remove(typeof(T)));
+            registration = new Registration(() => _services.Remove(typeof(T)));
+            return true;
+        }
     }
 }
