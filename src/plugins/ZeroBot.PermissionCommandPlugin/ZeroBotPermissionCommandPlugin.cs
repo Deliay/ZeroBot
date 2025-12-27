@@ -1,5 +1,6 @@
 ﻿using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.DependencyInjection;
+using ZeroBot.Utility;
 
 namespace ZeroBot.PermissionCommandPlugin;
 
@@ -9,7 +10,7 @@ public class ZeroBotPermissionCommandPlugin : IPlugin
     {
         IServiceCollection services = new ServiceCollection();
 
-        services.AddSingleton<IComponentInitializer, PermissionManagerCommand>();
+        services.AddSingletonComponent<PermissionManagerCommand>();
 
         return ValueTask.FromResult(services);
     }

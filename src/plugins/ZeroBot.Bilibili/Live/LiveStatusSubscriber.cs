@@ -1,4 +1,4 @@
-using EmberFramework.Abstraction.Layer.Plugin;
+using EmberFramework.Abstraction;
 using Microsoft.Extensions.Logging;
 using Mikibot.Crawler.Http.Bilibili;
 using ZeroBot.Abstraction.Bot;
@@ -11,20 +11,11 @@ public class LiveStatusSubscriber(
     IJsonConfig<BilibiliOptions> config,
     BiliLiveCrawler crawler,
     ILogger<LiveStatusSubscriber> logger,
-    IBotContext bot) : IComponentInitializer
+    IBotContext bot) : IExecutable
 {
-    private CancellationTokenSource? _cts;
-    
-    public ValueTask InitializeAsync(CancellationToken cancellationToken = default)
-    {
-        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        _ = WatchLiveStatusAsync(_cts.Token);
-        return default;
-    }
-
     private readonly Random _random = new();
     
-    private async Task WatchLiveStatusAsync(CancellationToken cancellationToken)
+    public async ValueTask RunAsync(CancellationToken cancellationToken = default)
     {
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -77,18 +68,5 @@ public class LiveStatusSubscriber(
             }
             await Task.Delay(TimeSpan.FromSeconds(_random.Next(10, 15)), cancellationToken);
         }
-    }
-
-    public void Dispose()
-    {
-        _cts?.Cancel();
-        _cts?.Dispose();
-    }
-
-    public ValueTask DisposeAsync()
-    {
-
-        Dispose();
-        return default;
     }
 }

@@ -2,6 +2,7 @@
 using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using ZeroBot.Utility;
 
 namespace ZeroBot.ComfyUI;
 
@@ -18,7 +19,7 @@ public class ZeroBotComfyUiPlugin : IPlugin
 
             return new ComfyClient(config.ComfyUiEndpoint, maxAttempts: 1);
         });
-        service.AddSingleton<IComponentInitializer, ToAkumaria>();
+        service.AddSingletonComponent<ToAkumaria>();
         
         return ValueTask.FromResult(service);
     }

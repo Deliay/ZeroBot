@@ -11,7 +11,7 @@ public static class JsonFileWatcherExtensions
         public IServiceCollection ConfigureJsonConfig<T>(string path, T defaultValue,
             CancellationToken cancellationToken = default) where T : class
         {
-            services.ConfigureComponent<JsonConfig<T>>(_ =>
+            services.AddSingletonComponent<JsonConfig<T>>(_ =>
                 new JsonConfig<T>(path, defaultValue, cancellationToken));
             
             services.AddSingleton<IJsonConfig<T>, JsonConfig<T>>(sp => sp.GetRequiredService<JsonConfig<T>>());

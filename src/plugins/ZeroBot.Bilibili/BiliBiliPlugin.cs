@@ -1,4 +1,5 @@
-﻿using EmberFramework.Abstraction.Layer.Plugin;
+﻿using EmberFramework.Abstraction;
+using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.DependencyInjection;
 using Mikibot.Crawler.Http.Bilibili;
 using ZeroBot.Bilibili.Live;
@@ -17,9 +18,9 @@ public class BiliBiliPlugin : IPlugin
         services.AddSingleton<BiliVideoCrawler>();
         services.AddSingleton<BiliLiveCrawler>();
         services.ConfigureJsonConfig("bilibili-config.json", BilibiliOptions.Default, cancellationToken);
-        services.ConfigureComponent<VideoLinkParser>();
-        services.ConfigureComponent<LiveStatutCommandHandler>();
-        services.ConfigureComponent<LiveStatusSubscriber>();
+        services.AddSingletonComponent<VideoLinkParser>();
+        services.AddSingletonComponent<LiveStatutCommandHandler>();
+        services.AddSingletonExecutable<LiveStatusSubscriber>();
         
         return ValueTask.FromResult(services);
     }

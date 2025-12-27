@@ -6,6 +6,7 @@ using Milky.Net.Client;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.Milky.Bot;
 using ZeroBot.Milky.Configuration;
+using ZeroBot.Utility;
 
 namespace ZeroBot.Milky;
 
@@ -19,9 +20,8 @@ public class MilkyPlugin(IConfiguration config) : IPlugin
         services.AddSingleton<MilkyHttpClient>();
         services.AddSingleton<HttpClient>(s => s.GetRequiredService<MilkyHttpClient>());
         services.AddSingleton<MilkyWebSocketReceiver>();
-        services.AddSingleton<IBotService, MilkyBot>();
         services.AddSingleton<BotInfos>();
-        services.AddSingleton<IExecutable>(s => s.GetRequiredService<IBotService>());
+        services.AddSingletonExecutable<IBotService, MilkyBot>();
         services.AddSingleton(sp =>
         {
             var milkyHttpClient = sp.GetRequiredService<MilkyHttpClient>();

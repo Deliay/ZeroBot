@@ -4,5 +4,6 @@
       <ProjectReference Include="..\..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
       <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+      <ProjectReference Include="..\..\ZeroBot.Utility\ZeroBot.Utility.csproj" />
     </ItemGroup>
 </Project>

@@ -13,6 +13,7 @@ using ZeroBot.Milky;
 using ZeroBot.PermissionCommandPlugin;
 using ZeroBot.Repository.Mongo;
 using ZeroBot.TestPlugin;
+using ZeroBot.Utility;
 
 TypedPluginLoader.Register<MilkyPlugin>();
 TypedPluginLoader.Register<TestPlugin>();
@@ -30,12 +31,8 @@ var root = RootBuilder
         services.AddSingleton<ILifetimeManager, LifetimeManager>();
         services.AddSingleton<IBotContext, BotContext>();
         services.AddSingleton<IServiceManager, ServiceManager>();
-        services.AddSingleton<CommandDispatcher>();
-        services.AddSingleton<ICommandDispatcher>(sp => sp.GetRequiredService<CommandDispatcher>());
-        services.AddSingleton<IInfrastructureInitializer>(sp => sp.GetRequiredService<CommandDispatcher>());
-        services.AddSingleton<Permission>();
-        services.AddSingleton<IPermission>(sp => sp.GetRequiredService<Permission>());
-        services.AddSingleton<IInfrastructureInitializer>(sp => sp.GetRequiredService<Permission>());
+        services.AddSingletonInfra<ICommandDispatcher, CommandDispatcher>();
+        services.AddSingletonInfra<IPermission, Permission>();
         services.AddOptions();
     })
     .UseLoader<TypedPluginLoader>()
