@@ -36,7 +36,7 @@ public class CommandDispatcher(IBotContext botContext, ILogger<CommandDispatcher
         {
             var command = message.ToText().Trim();
             if (!command.StartsWith('/')) continue;
-            logger.LogInformation("Dispatching command {Command}", command);
+            logger.LogDebug("Dispatching command {Command}", command);
             
             var handler = await _idToHandlers.Values.ToAsyncEnumerable()
                 .FirstOrDefaultAsync(async (handler, token) => await handler.Predicate(message, token), initCts.Token);

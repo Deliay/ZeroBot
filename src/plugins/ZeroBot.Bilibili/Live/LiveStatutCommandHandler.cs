@@ -46,6 +46,7 @@ public class LiveStatutCommandHandler(
                     case "取消":
                         if (!value.RoomIdToGroupSubscriptions.TryGetValue(roomId, out subscriptions)) break;
                         subscriptions.Remove(groupId);
+                        if (subscriptions.Count == 0) value.RoomIdToGroupSubscriptions.Remove(roomId);
                         await config.SaveAsync(value, token);
                         await message.ReplyAsGroup(bot, token,
                             [$"已取消订阅直播间{roomId}的开播通知！".ToMilkyTextSegment()]);

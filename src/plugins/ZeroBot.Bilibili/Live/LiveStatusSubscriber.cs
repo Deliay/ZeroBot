@@ -24,6 +24,7 @@ public class LiveStatusSubscriber(
             {
                 try
                 {
+                    if (targetGroups.Count == 0) continue;
                     var roomId = long.Parse(strRoomId);
                     var info = await crawler.GetLiveRoomInfo(roomId, cancellationToken);
                     var streaming = info.LiveStatus == 1;
@@ -48,7 +49,7 @@ public class LiveStatusSubscriber(
                         {
                             foreach (var targetGroup in targetGroups)
                             {
-                                var atAll = await bot.TryAtAllMembers(accountId, targetGroup, cancellationToken);
+                                var atAll = streaming ? await bot.TryAtAllMembers(accountId, targetGroup, cancellationToken) : [];
                                 await bot.WriteManyGroupMessageAsync(accountId, targetGroups, cancellationToken,
                                 [
                                     info.UserCover.ToMilkyImageSegment(),
