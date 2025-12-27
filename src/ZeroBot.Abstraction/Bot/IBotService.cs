@@ -23,4 +23,6 @@ public interface IBotService : IExecutable
 
     ValueTask<GetGroupMemberListOutput?> GetGroupMembersAsync(long groupId,
         CancellationToken cancellationToken = default);
+
+    ValueTask<string> GetTempResourceUrlAsync(string id, CancellationToken cancellationToken = default);
 }

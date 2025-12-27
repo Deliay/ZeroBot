@@ -31,4 +31,6 @@ public interface IBotContext
     public IBotEventRepository? EventRepository { get; }
     
     void SetEventRepository(IBotEventRepository repository);
+    
+    ValueTask<string> GetTempResourceUrlAsync(long accountId, string id, CancellationToken cancellationToken = default);
 }

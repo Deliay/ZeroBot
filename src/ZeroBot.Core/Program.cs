@@ -6,16 +6,20 @@ using Microsoft.Extensions.Logging;
 using ZeroBot.Abstraction;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.Abstraction.Service;
+using ZeroBot.Bilibili;
 using ZeroBot.ComfyUI;
 using ZeroBot.Core.Services;
 using ZeroBot.Milky;
 using ZeroBot.PermissionCommandPlugin;
+using ZeroBot.Repository.Mongo;
 using ZeroBot.TestPlugin;
 
 TypedPluginLoader.Register<MilkyPlugin>();
 TypedPluginLoader.Register<TestPlugin>();
+TypedPluginLoader.Register<MongoRepositoryPlugin>();
 TypedPluginLoader.Register<ZeroBotComfyUiPlugin>();
 TypedPluginLoader.Register<ZeroBotPermissionCommandPlugin>();
+TypedPluginLoader.Register<BiliBiliPlugin>();
 
 Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
 var root = RootBuilder

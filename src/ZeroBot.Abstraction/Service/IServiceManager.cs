@@ -7,4 +7,6 @@ public interface IServiceManager
     public T Resolve<T>() where T : class;
     bool TryResolve<T>([NotNullWhen(true)]out T? service) where T : class;
     public bool TryRegister<T>(T service, [NotNullWhen(true)]out Registration? registration) where T : class;
+    
+    ValueTask<T> WaitServiceAsync<T>(CancellationToken cancellationToken) where T : class;
 }

@@ -54,4 +54,9 @@ internal class TestBotService : IBotService
     {
         throw new NotImplementedException();
     }
+
+    public ValueTask<string> GetTempResourceUrlAsync(string id, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

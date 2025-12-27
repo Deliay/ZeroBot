@@ -40,6 +40,16 @@ public static class EventExtensions
     
     extension(Event<IncomingMessage> message)
     {
+        public IEnumerable<ITextCommand> ToTextCommands(char prefix = '/', string argumentSplitters = ":：-")
+        {
+            return message.Data.ToTextCommands(prefix, argumentSplitters);
+        }
+
+        public string ToText(string separator = "")
+        {
+            return message.Data.ToText(separator);
+        }
+        
         public async ValueTask ReplyAsGroup(IBotContext bot,
             CancellationToken cancellationToken = default,
             params OutgoingSegment[] segments)
@@ -56,13 +66,22 @@ public static class EventExtensions
             _ => throw new ArgumentOutOfRangeException()
         };
         
-        public async IAsyncEnumerable<ImageIncomingSegment> GetImageMessagesAsync(IBotContext bot,
+        public async IAsyncEnumerable<ImageIncomingSegment> GetMilkyImageMessagesAsync(IBotContext bot,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
 
             if (message.Data.Segments.OfType<ReplyIncomingSegment>().FirstOrDefault() is { } reply)
             {
-                var replyMessage = await bot.GetHistoryMessageAsync(message.SelfId, message.Scene, message.Data.PeerId,
+                Event<IncomingMessage>? replyMessage = null;
+                if (bot.EventRepository is not null)
+                {
+                    replyMessage = await bot.EventRepository.SearchEventAsync<IncomingMessage>(message.SelfId, msg =>
+                            msg.Data.PeerId == message.Data.PeerId
+                            && msg.Data.MessageSeq == reply.Data.MessageSeq, cancellationToken)
+                        .FirstOrDefaultAsync(cancellationToken);
+                }
+
+                replyMessage ??= await bot.GetHistoryMessageAsync(message.SelfId, message.Scene, message.Data.PeerId,
                     reply.Data.MessageSeq, cancellationToken);
 
                 if (replyMessage?.Data.Segments.OfType<ImageIncomingSegment>().FirstOrDefault() is { } replyImage)
@@ -80,19 +99,54 @@ public static class EventExtensions
 
     extension(string message)
     {
-        public TextOutgoingSegment ToSegment()
+        public TextOutgoingSegment ToMilkyTextSegment()
         {
             return new TextOutgoingSegment(new TextOutgoingSegmentData(message));
+        }
+
+        public ImageOutgoingSegment ToMilkyImageSegment()
+        {
+            return new ImageOutgoingSegment(new ImageOutgoingSegmentData(new MilkyUri(message), null, SubType.Normal));
         }
     }
 
     extension(byte[] data)
     {
-        public ImageOutgoingSegment ToImageSegment(string? summary = null, SubType subType = SubType.Normal)
+        public ImageOutgoingSegment ToMilkyImageSegment(string? summary = null, SubType subType = SubType.Normal)
         {
             return new ImageOutgoingSegment(
                 new ImageOutgoingSegmentData(new MilkyUri($"base64://{Convert.ToBase64String(data)}"), summary,
                     subType));
+        }
+    }
+
+    private static readonly HttpClient ImageRequestHttpClient = new();
+    extension(ImageIncomingSegment message)
+    {
+        public async ValueTask<string> GetMilkyImageUrlAsync(IBotContext bot, Event @event,
+            CancellationToken cancellationToken = default)
+        {
+            if (DateTimeOffset.UtcNow - @event.Time < TimeSpan.FromHours(1))
+            {
+                return message.Data.TempUrl;
+            }
+            return await bot.GetTempResourceUrlAsync(@event.SelfId, message.Data.ResourceId, cancellationToken);
+        }
+
+        public async ValueTask<Stream> GetMilkyImageStreamAsync(IBotContext bot, Event @event,
+            CancellationToken cancellationToken = default)
+        {
+            var imageUrlAsync = await message.GetMilkyImageUrlAsync(bot, @event, cancellationToken);
+            return await ImageRequestHttpClient.GetStreamAsync(
+                imageUrlAsync, cancellationToken);
+        }
+
+        public async ValueTask<byte[]> GetMilkyImageBytesAsync(IBotContext bot, Event @event,
+            CancellationToken cancellationToken = default)
+        {
+            var imageUrlAsync = await message.GetMilkyImageUrlAsync(bot, @event, cancellationToken);
+            return await ImageRequestHttpClient.GetByteArrayAsync(
+                imageUrlAsync, cancellationToken);
         }
     }
 }

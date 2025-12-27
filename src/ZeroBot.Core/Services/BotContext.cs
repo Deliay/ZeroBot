@@ -13,9 +13,25 @@ public class BotContext(ILogger<BotContext> logger) : IBotContext
     
     public IEnumerable<IBotService> BotServices => _services.Values;
     
-    public IAsyncEnumerable<Event> ReadEvents(CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Event> ReadEvents(
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        return _messageQueue.Reader.ReadAllAsync(cancellationToken);
+        await foreach (var @event in _messageQueue.Reader.ReadAllAsync(cancellationToken))
+        {
+            if (EventRepository is not null)
+            {
+                try
+                {
+                    await EventRepository.SaveEventAsync(@event.SelfId, @event, cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "An error occurred while saving the event.");
+                }
+            }
+                
+            yield return @event;
+        }
     }
 
     public async ValueTask WriteEvent(Event @event, CancellationToken cancellationToken = default)
@@ -97,6 +113,14 @@ public class BotContext(ILogger<BotContext> logger) : IBotContext
         if (EventRepository is not null) throw new InvalidOperationException("Repository already set.");
         
         EventRepository = repository;
+    }
+
+    public ValueTask<string> GetTempResourceUrlAsync(long accountId, string id,
+        CancellationToken cancellationToken = default)
+    {
+        return !_services.TryGetValue(accountId, out var botService)
+            ? default
+            : botService.GetTempResourceUrlAsync(id, cancellationToken);
     }
 
     public async ValueTask UpdateGroupReactionAsync(long accountId, long groupId, long messageId, string reactionId, bool add,

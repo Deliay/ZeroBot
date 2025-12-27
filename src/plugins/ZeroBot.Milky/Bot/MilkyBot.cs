@@ -33,8 +33,15 @@ public class MilkyBot(
             catch (Exception e)
             {
                 logger.LogError(e, "An error occurred while receiving events");
+                await Task.Delay(5000, cancellationToken);
             }
         }
+    }
+
+    public async ValueTask<string> GetTempResourceUrlAsync(string id, CancellationToken cancellationToken = default)
+    {
+        var result = await milky.Message.GetResourceTempUrlAsync(new GetResourceTempUrlInput(id), cancellationToken);
+        return result.Url;
     }
 
     public async ValueTask<GetLoginInfoOutput> GetCurrentAccountAsync(CancellationToken cancellationToken = default)

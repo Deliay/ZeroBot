@@ -18,7 +18,7 @@ public class ZeroBotComfyUiPlugin : IPlugin
 
             return new ComfyClient(config.ComfyUiEndpoint, maxAttempts: 1);
         });
-        service.AddSingleton<IComponentInitializer, ToAkumariaCommand>();
+        service.AddSingleton<IComponentInitializer, ToAkumaria>();
         
         return ValueTask.FromResult(service);
     }

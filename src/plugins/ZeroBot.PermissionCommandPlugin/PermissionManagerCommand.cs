@@ -35,23 +35,14 @@ public class PermissionManagerCommand(
         return ValueTask.FromResult(message.Data is GroupIncomingMessage && message.Data.ToText().Trim().StartsWith("/$权限设置"));
     }
 
-    private async ValueTask<bool> IsSudoerAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
-    {
-        return await permission.CheckUserPermissionAsync(message.Data.SenderId, "sudoers",
-            cancellationToken);
-    }
-    
     private static readonly TextOutgoingSegment HelpStrings = 
         ("/$权限设置:g:enable:{perm}\n" +
-        "/$权限设置:g:disable:{perm}\n").ToSegment();
+        "/$权限设置:g:disable:{perm}\n").ToMilkyTextSegment();
 
-    private async ValueTask<bool> VerifyGroupPermissionAsync(Event<IncomingMessage> message,
+    private ValueTask<bool> VerifyGroupPermissionAsync(Event<IncomingMessage> message,
         CancellationToken cancellationToken = default)
     {
-        if (await IsSudoerAsync(message, cancellationToken)) return true;
-        var groupMembers = await bot.GetGroupMembersAsync(message.SelfId, message.Data.PeerId, cancellationToken);
-        return groupMembers is not null &&
-               groupMembers.Members.Any(m => m.UserId == message.Data.SenderId && m.Role != Role.Member);
+        return permission.IsSudoerOrGroupAdminAsync(bot, message, cancellationToken);
     }
     
     private Func<MessageScene, string, string, CancellationToken, Task> ManageGroupPermission(Event<IncomingMessage> message)
@@ -63,14 +54,14 @@ public class PermissionManagerCommand(
             {
                 case "enable":
                     await permission.GrantGroupPermissionAsync(message.Data.PeerId, perm, cancellationToken);
-                    await message.ReplyAsGroup(bot, cancellationToken, $"群已开启功能:{perm}".ToSegment());
+                    await message.ReplyAsGroup(bot, cancellationToken, [$"群已开启功能:{perm}".ToMilkyTextSegment()]);
                     break;
                 case "disable":
                     await permission.RevokeGroupPermissionAsync(message.Data.PeerId, perm, cancellationToken);
-                    await message.ReplyAsGroup(bot, cancellationToken, $"群已关闭功能:{perm}".ToSegment());
+                    await message.ReplyAsGroup(bot, cancellationToken, [$"群已关闭功能:{perm}".ToMilkyTextSegment()]);
                     break;
                 default:
-                    await message.ReplyAsGroup(bot, cancellationToken, "未知的操作，只允许enable/disable".ToSegment());
+                    await message.ReplyAsGroup(bot, cancellationToken, ["未知的操作，只允许enable/disable".ToMilkyTextSegment()]);
                     break;
             }
         };
@@ -81,7 +72,7 @@ public class PermissionManagerCommand(
         var command = message.Data.ToTextCommands().First();
         if (command.Arguments.Length == 0)
         { 
-            await message.ReplyAsGroup(bot, cancellationToken, HelpStrings);
+            await message.ReplyAsGroup(bot, cancellationToken, [HelpStrings]);
             return;            
         }
 
@@ -93,7 +84,7 @@ public class PermissionManagerCommand(
             }
             catch (Exception e)
             {
-                await message.ReplyAsGroup(bot, cancellationToken, e.Message.ToSegment());
+                await message.ReplyAsGroup(bot, cancellationToken, [e.Message.ToMilkyTextSegment()]);
                 logger.LogError(e, "An error occurred while processing the command");
             }
             

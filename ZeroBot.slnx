@@ -2,12 +2,15 @@
   <Folder Name="/src/">
     <Project Path="src/ZeroBot.Utility/ZeroBot.Utility.csproj" />
   </Folder>
-  <Folder Name="/src/core/">
+  <Folder Name="/src/abstraction/">
     <Project Path="src/ZeroBot.Abstraction/ZeroBot.Abstraction.csproj" />
+  </Folder>
+  <Folder Name="/src/core/">
     <Project Path="src/ZeroBot.Core/ZeroBot.Core.csproj" />
     <Project Path="test/ZeroBot.Core.Test/ZeroBot.Core.Test.csproj" />
   </Folder>
   <Folder Name="/src/plugins/">
+    <Project Path="src/plugins/ZeroBot.Bilibili/ZeroBot.Bilibili.csproj" />
     <Project Path="src/plugins/ZeroBot.Milky/ZeroBot.Milky.csproj" />
     <Project Path="src/plugins/ZeroBot.PermissionCommandPlugin/ZeroBot.PermissionCommandPlugin.csproj" />
     <Project Path="src/plugins/ZeroBot.Repository.Mongo/ZeroBot.Repository.Mongo.csproj" />

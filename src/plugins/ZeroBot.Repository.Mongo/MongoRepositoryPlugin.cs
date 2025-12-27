@@ -13,7 +13,6 @@ public class MongoRepositoryPlugin(IOptions<MongoRepositoryOptions> options, IBo
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(_ =>
         {
-            if (options.Value.ConnectionString is null) throw new InvalidOperationException("Mongo connection string is null.");
             var mongoSettings = MongoClientSettings.FromConnectionString(options.Value.ConnectionString);
             mongoSettings.MaxConnectionPoolSize = options.Value.PoolSize;
             return mongoSettings;

@@ -8,7 +8,7 @@ public class TestPlugin : IPlugin
     public ValueTask<IServiceCollection> BuildComponents(CancellationToken cancellationToken = new CancellationToken())
     {
         IServiceCollection services = new ServiceCollection();
-        services.AddSingleton<IComponentInitializer, PingCommand>();
+        services.AddSingleton<IComponentInitializer, Ping>();
         
         return ValueTask.FromResult(services);
     }
