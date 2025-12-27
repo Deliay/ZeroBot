@@ -30,12 +30,12 @@ public class Permission(
 
     public ValueTask<bool> CheckPermissionAsync(string principal, string permission, CancellationToken cancellationToken = default)
     {
-        return ValueTask.FromResult(Permissions.Has(principal, permission));
+        return ValueTask.FromResult(Permissions.Has(permission, principal));
     }
 
     public async ValueTask<bool> GrantPermissionAsync(string principal, string permission, CancellationToken cancellationToken = default)
     {
-        Permissions.Grant(principal, permission);
+        Permissions.Grant(permission ,principal);
         await _config.SaveAsync(Permissions, cancellationToken);
         return true;
     }

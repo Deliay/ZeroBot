@@ -44,7 +44,7 @@ public class ToAkumaria(
 
     protected override async ValueTask<bool> PredicateAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
-        if (message.Data.ToText().Trim() != "/变毬") return false;
+        if (message.ToText().Trim() != "/变毬") return false;
         if (!await message.GetMilkyImageMessagesAsync(bot, cancellationToken).AnyAsync(cancellationToken)) return false;
         
         return await permission.CheckGroupPermissionAsync(message.Data.PeerId, "comfyUi.to_akumaria",

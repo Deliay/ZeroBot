@@ -32,7 +32,7 @@ public class PermissionManagerCommand(
     
     protected override ValueTask<bool> PredicateAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
-        return ValueTask.FromResult(message.Data is GroupIncomingMessage && message.Data.ToText().Trim().StartsWith("/$权限设置"));
+        return ValueTask.FromResult(message.Data is GroupIncomingMessage && message.ToText().Trim().StartsWith("/$权限设置"));
     }
 
     private static readonly TextOutgoingSegment HelpStrings = 

@@ -17,7 +17,7 @@ public class LiveStatutCommandHandler(
 {
     protected override async ValueTask<bool> PredicateAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
-        var text = message.ToText();
+        var text = message.ToText().Trim();
         return text.StartsWith("/直播状态")
                && await permission.IsSudoerOrGroupAdminOrHasPermissionAsync(bot, message, "live-stastus.subscribe",
                    cancellationToken);
