@@ -117,7 +117,6 @@ public class VideoLinkParser(
     private async ValueTask<bool> PredicateAsync(Event<IncomingMessage> message,
         CancellationToken cancellationToken = default)
     {
-        Console.WriteLine(string.Join("\n", message.Data.Segments.Select(s => s.GetType().Name)));
         if (message.Data.Segments.Any(seg => seg is not TextIncomingSegment)) return false;
         var text = message.Data.ToText();
         var validMessage = (text.IndexOf("/BV", StringComparison.InvariantCulture) > -1

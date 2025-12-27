@@ -8,7 +8,8 @@ public class Ping(ICommandDispatcher dispatcher, IBotContext bot) : CommandQueue
 {
     protected override ValueTask<bool> PredicateAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
-        return ValueTask.FromResult(message.Data.ToText() == "/ping");
+        var incoming = message.Data.ToText();
+        return ValueTask.FromResult(incoming == "/ping");
     }
     
     protected override ValueTask DequeueAsync(Event<IncomingMessage> @event, CancellationToken cancellationToken = default)
