@@ -1,11 +1,12 @@
 using System.Threading.Channels;
+using EmberFramework.Abstraction;
 using EmberFramework.Abstraction.Layer.Plugin;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 
 namespace ZeroBot.Utility;
 
-public abstract class MessageQueueHandler(IBotContext bot) : IComponentInitializer
+public abstract class MessageQueueHandler(IBotContext bot) : IExecutable
 {
     private readonly Channel<Event<IncomingMessage>> _processQueue = Channel.CreateUnbounded<Event<IncomingMessage>>();
     protected abstract ValueTask DequeueAsync(Event<IncomingMessage> @event, CancellationToken cancellationToken = default);
@@ -30,15 +31,12 @@ public abstract class MessageQueueHandler(IBotContext bot) : IComponentInitializ
 
     protected virtual ValueTask InitializeHandler(CancellationToken cancellationToken = default) => default;
 
-    public ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+    public async ValueTask RunAsync(CancellationToken cancellationToken = default)
     {
-        _ = StartQueueAsync(cancellationToken);
-        _ = StartDequeueAsync(cancellationToken);
-        return InitializeHandler(cancellationToken);
+        await InitializeHandler(cancellationToken);
+        var enqueueTask = StartQueueAsync(cancellationToken);
+        var dequeueTask = StartDequeueAsync(cancellationToken);
+        
+        await Task.WhenAll(enqueueTask, dequeueTask);
     }
-
-
-    public virtual void Dispose() {}
-
-    public virtual ValueTask DisposeAsync() => default;
 }

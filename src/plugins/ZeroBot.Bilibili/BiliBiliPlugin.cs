@@ -18,8 +18,8 @@ public class BiliBiliPlugin : IPlugin
         services.AddSingleton<BiliVideoCrawler>();
         services.AddSingleton<BiliLiveCrawler>();
         services.ConfigureJsonConfig("bilibili-config.json", BilibiliOptions.Default, cancellationToken);
-        services.AddSingletonComponent<VideoLinkParser>();
         services.AddSingletonComponent<LiveStatutCommandHandler>();
+        services.AddSingletonExecutable<VideoLinkParser>();
         services.AddSingletonExecutable<LiveStatusSubscriber>();
         
         return ValueTask.FromResult(services);
