@@ -14,35 +14,38 @@ public class MilkyWebSocketReceiver(HttpClient client)
     
     public async IAsyncEnumerable<Event> ReadEvents([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        using var ws = new ClientWebSocket();
-        var uriBuilder = new UriBuilder(client.BaseAddress!);
-        if (client.DefaultRequestHeaders.Authorization?.Parameter is { Length: > 0 } token)
-        {
-            uriBuilder.Query = $"access_token={token}";
-        }
-        await ws.ConnectAsync(uriBuilder.Uri, client, cancellationToken);
-        using var ms = new MemoryStream();
         while (!cancellationToken.IsCancellationRequested)
         {
-            var rawBuffer = ArrayPool<byte>.Shared.Rent(4096);
-            Memory<byte> buffer = rawBuffer;
-            try
+            using var ws = new ClientWebSocket();
+            var uriBuilder = new UriBuilder(client.BaseAddress!);
+            if (client.DefaultRequestHeaders.Authorization?.Parameter is { Length: > 0 } token)
             {
-                ValueWebSocketReceiveResult result;
-                do
+                uriBuilder.Query = $"access_token={token}";
+            }
+            await ws.ConnectAsync(uriBuilder.Uri, client, cancellationToken);
+            using var ms = new MemoryStream();
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var rawBuffer = ArrayPool<byte>.Shared.Rent(4096);
+                Memory<byte> buffer = rawBuffer;
+                try
                 {
-                    result = await ws.ReceiveAsync(buffer, cancellationToken);
-                    await ms.WriteAsync(buffer[..result.Count], cancellationToken);
-                } while (!result.EndOfMessage);
+                    ValueWebSocketReceiveResult result;
+                    do
+                    {
+                        result = await ws.ReceiveAsync(buffer, cancellationToken);
+                        await ms.WriteAsync(buffer[..result.Count], cancellationToken);
+                    } while (!result.EndOfMessage);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(rawBuffer);
+                }
+                ms.Seek(0L, SeekOrigin.Begin);
+                var @event = JsonSerializer.Deserialize<Event>(ms, _jsonOptions);
+                if (@event != null) yield return @event;
+                ms.SetLength(0L);
             }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(rawBuffer);
-            }
-            ms.Seek(0L, SeekOrigin.Begin);
-            var @event = JsonSerializer.Deserialize<Event>(ms, _jsonOptions);
-            if (@event != null) yield return @event;
-            ms.SetLength(0L);
         }
     }
 }

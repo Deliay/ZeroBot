@@ -15,10 +15,11 @@ public class VideoLinkParser(
     IBotContext bot,
     HttpClient client,
     BiliVideoCrawler crawler,
-    ILogger<VideoLinkParser> logger) : MessageQueueHandler(bot)
+    ILogger<VideoLinkParser> logger) : MessageQueueHandler<VideoLinkParser>(bot, logger)
 {
     private readonly Channel<Event<IncomingMessage>> _processQueue = Channel.CreateUnbounded<Event<IncomingMessage>>();
     private readonly IBotContext _bot = bot;
+    private readonly ILogger<VideoLinkParser> _logger = logger;
 
     private static readonly HashSet<char> ValidBv = [
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -137,7 +138,7 @@ public class VideoLinkParser(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error while processing incoming message");
+            _logger.LogError(e, "Error while processing incoming message");
         }
     }
 }

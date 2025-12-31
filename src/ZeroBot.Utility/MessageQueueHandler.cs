@@ -1,12 +1,14 @@
 using System.Threading.Channels;
 using EmberFramework.Abstraction;
 using EmberFramework.Abstraction.Layer.Plugin;
+using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 
 namespace ZeroBot.Utility;
 
-public abstract class MessageQueueHandler(IBotContext bot) : IExecutable
+public abstract class MessageQueueHandler<T>(IBotContext bot, ILogger<T> logger)
+    : IExecutable where T : MessageQueueHandler<T>
 {
     private readonly Channel<Event<IncomingMessage>> _processQueue = Channel.CreateUnbounded<Event<IncomingMessage>>();
     protected abstract ValueTask DequeueAsync(Event<IncomingMessage> @event, CancellationToken cancellationToken = default);
@@ -31,12 +33,24 @@ public abstract class MessageQueueHandler(IBotContext bot) : IExecutable
 
     protected virtual ValueTask InitializeHandler(CancellationToken cancellationToken = default) => default;
 
-    public async ValueTask RunAsync(CancellationToken cancellationToken = default)
+    private async ValueTask RunAsyncCore(CancellationToken cancellationToken = default)
     {
         await InitializeHandler(cancellationToken);
         var enqueueTask = StartQueueAsync(cancellationToken);
         var dequeueTask = StartDequeueAsync(cancellationToken);
         
         await Task.WhenAll(enqueueTask, dequeueTask);
+    }
+    
+    public async ValueTask RunAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await RunAsyncCore(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occurred while processing the message queue.");
+        }
     }
 }
