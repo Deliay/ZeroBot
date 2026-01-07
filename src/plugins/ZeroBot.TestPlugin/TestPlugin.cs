@@ -10,6 +10,7 @@ public class TestPlugin : IPlugin
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingletonComponent<Ping>();
+        services.AddSingletonComponent<Wish>();
         
         return ValueTask.FromResult(services);
     }

@@ -17,6 +17,7 @@ public class MilkyBot(
     {
         await foreach (var @event in receiver.ReadEvents(cancellationToken))
         {
+            logger.LogInformation("Received event {@Event}", @event);
             await botContext.WriteEvent(@event, cancellationToken);
         }
     }

@@ -9,34 +9,41 @@ namespace ZeroBot.Core.Services;
 public class BotContext(ILogger<BotContext> logger) : IBotContext
 {
     private readonly Dictionary<long, IBotService> _services = new();
-    private readonly Channel<Event> _messageQueue = Channel.CreateUnbounded<Event>();
     
     public IEnumerable<IBotService> BotServices => _services.Values;
+
+    private readonly Dictionary<Guid, ChannelWriter<Event>> _subscribers = [];
     
     public async IAsyncEnumerable<Event> ReadEvents(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        await foreach (var @event in _messageQueue.Reader.ReadAllAsync(cancellationToken))
+        var id = Guid.NewGuid();
+        var channel = Channel.CreateUnbounded<Event>();
+        _subscribers.Add(id, channel.Writer);
+        await foreach (var @event in channel.Reader.ReadAllAsync(cancellationToken))
         {
-            if (EventRepository is not null)
-            {
-                try
-                {
-                    await EventRepository.SaveEventAsync(@event.SelfId, @event, cancellationToken);
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "An error occurred while saving the event.");
-                }
-            }
-                
             yield return @event;
         }
+        _subscribers.Remove(id);
     }
 
     public async ValueTask WriteEvent(Event @event, CancellationToken cancellationToken = default)
     {
-        await _messageQueue.Writer.WriteAsync(@event, cancellationToken);
+        if (EventRepository is not null)
+        {
+            try
+            {
+                await EventRepository.SaveEventAsync(@event.SelfId, @event, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "An error occurred while saving the event.");
+            }
+        }
+        foreach (var writer in _subscribers.Values)
+        {
+            await writer.WriteAsync(@event, cancellationToken);
+        }
     }
 
     public async ValueTask<MultiGroupSendResult> WriteManyGroupMessageAsync(long accountId, HashSet<long> groupIds,

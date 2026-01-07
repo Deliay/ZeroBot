@@ -50,7 +50,6 @@ public class LiveStatusSubscriber(
                             var atAll = streaming ? await bot.TryAtAllMembers(accountId, targetGroup, cancellationToken) : [];
                             await bot.WriteManyGroupMessageAsync(accountId, targetGroups, cancellationToken,
                             [
-                                info.UserCover.ToMilkyImageSegment(),
                                 ..atAll,
                                 $"{status}啦~\n{info.Title} {url}".ToMilkyTextSegment(),
                             ]);
