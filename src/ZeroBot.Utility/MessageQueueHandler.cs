@@ -17,7 +17,14 @@ public abstract class MessageQueueHandler<T>(IBotContext bot, ILogger<T> logger)
     {
         await foreach (var @event in _processQueue.Reader.ReadAllAsync(cancellationToken))
         {
-            await DequeueAsync(@event, cancellationToken);
+            try
+            {
+                await DequeueAsync(@event, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "An error occurred while processing the message queue.");
+            }
         }
     }
     

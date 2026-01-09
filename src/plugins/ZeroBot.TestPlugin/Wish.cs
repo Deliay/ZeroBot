@@ -29,13 +29,14 @@ public class Wish(ICommandDispatcher dispatcher, IBotContext bot, ILogger<Wish> 
         DefaultRequestHeaders =
         {
             { "origin",  "https://wish.closeai.moe" },
-        }
+        },
+        Timeout = TimeSpan.FromSeconds(15),
     };
     protected override async ValueTask DequeueAsync(Event<IncomingMessage> @event, CancellationToken cancellationToken = default)
     {
         var wish = @event.ToText().Trim()[3..];
         await @event.AddReaction(bot, KnownReactionEmojiIds.Click, cancellationToken);
-        
+
         try
         {
             var response = await _client.PostAsJsonAsync(WishUrl, new WishPayload(wish), cancellationToken);
@@ -46,6 +47,7 @@ public class Wish(ICommandDispatcher dispatcher, IBotContext bot, ILogger<Wish> 
                     [$"请求失败，请稍后再重试喵~ HttpStatus: {response.StatusCode}".ToMilkyTextSegment()]);
                 return;
             }
+
             switch (result.result.category)
             {
                 case "allow":
@@ -65,6 +67,10 @@ public class Wish(ICommandDispatcher dispatcher, IBotContext bot, ILogger<Wish> 
                     logger.LogWarning("Unknown case: {JSON}", JsonSerializer.Serialize(result));
                     break;
             }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occurred while processing the command");
         }
         finally
         {

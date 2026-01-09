@@ -11,4 +11,8 @@
       <ProjectReference Include="..\..\ZeroBot.Utility\ZeroBot.Utility.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="TinyPinyin.Net" />
+    </ItemGroup>
+
 </Project>

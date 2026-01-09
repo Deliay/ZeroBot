@@ -9,5 +9,8 @@ public interface IJsonConfig<T>
     ValueTask BeginConfigMutationScopeAsync(Func<T, CancellationToken, ValueTask> op,
         CancellationToken cancellationToken = default);
     
+    ValueTask<R> BeginConfigMutationScopeAsync<R>(Func<T, CancellationToken, ValueTask<R>> op,
+        CancellationToken cancellationToken = default);
+    
     ValueTask WaitForInitializedAsync(CancellationToken cancellationToken = default);
 }

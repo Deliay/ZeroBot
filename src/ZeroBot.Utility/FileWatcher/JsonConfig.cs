@@ -51,7 +51,19 @@ public class JsonConfig<T>(string file, T defaultValue, CancellationToken cancel
         try
         {
             await op(Current, cancellationToken);
-            ;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public async ValueTask<R> BeginConfigMutationScopeAsync<R>(Func<T, CancellationToken, ValueTask<R>> op, CancellationToken cancellationToken = default)
+    {
+        await _semaphore.WaitAsync(cancellationToken);
+        try
+        {
+            return await op(Current, cancellationToken);
         }
         finally
         {

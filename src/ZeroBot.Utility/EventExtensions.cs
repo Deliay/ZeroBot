@@ -50,12 +50,19 @@ public static class EventExtensions
             return message.Data.ToText(separator);
         }
         
-        public async ValueTask ReplyAsGroup(IBotContext bot,
+        public async ValueTask SendAsGroup(IBotContext bot,
             CancellationToken cancellationToken = default,
             params OutgoingSegment[] segments)
         {
             await bot.WriteManyGroupMessageAsync(message.SelfId, [message.Data.PeerId], cancellationToken,
-                [message.Data.Reply(), ..segments]);
+                segments);
+        }
+        
+        public async ValueTask ReplyAsGroup(IBotContext bot,
+            CancellationToken cancellationToken = default,
+            params OutgoingSegment[] segments)
+        {
+            await message.SendAsGroup(bot, cancellationToken, [message.Data.Reply(), ..segments]);
         }
         
         public MessageScene Scene => message.Data switch
@@ -107,6 +114,19 @@ public static class EventExtensions
         public ImageOutgoingSegment ToMilkyImageSegment()
         {
             return new ImageOutgoingSegment(new ImageOutgoingSegmentData(new MilkyUri(message), null, SubType.Normal));
+        }
+    }
+
+    extension(long longId)
+    {
+        public ReplyOutgoingSegment ReplyAsMessage()
+        {
+            return new ReplyOutgoingSegment(new ReplyOutgoingSegmentData(longId));
+        }
+
+        public MentionOutgoingSegment MentionAsUser()
+        {
+            return new MentionOutgoingSegment(new MentionOutgoingSegmentData(longId));
         }
     }
 
