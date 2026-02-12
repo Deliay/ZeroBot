@@ -97,14 +97,22 @@ public class BotContext(ILogger<BotContext> logger) : IBotContext
 
     public async ValueTask RegisterBotAsync(IBotService botService, CancellationToken cancellationToken = default)
     {
-        var account = await botService.GetCurrentAccountAsync(cancellationToken);
-        if (!_services.TryAdd(account.Uin, botService))
+        try
         {
-            throw new InvalidOperationException(
-                $"Bot {botService.GetType().Name} with account {account.Nickname}({account.Uin}) already registered.");
+            var account = await botService.GetCurrentAccountAsync(cancellationToken);
+            if (!_services.TryAdd(account.Uin, botService))
+            {
+                throw new InvalidOperationException(
+                    $"Bot {botService.GetType().Name} with account {account.Nickname}({account.Uin}) already registered.");
+            }
+
+            logger.LogInformation("Bot {NickName}({Uid}) was registered.", account.Nickname, account.Uin);
         }
-        
-        logger.LogInformation("Bot {NickName}({Uid}) was registered.", account.Nickname, account.Uin);
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occurred while registering bot.");
+            throw;
+        }
     }
 
     public async ValueTask UnregisterBot(IBotService botService, CancellationToken cancellationToken = default)
