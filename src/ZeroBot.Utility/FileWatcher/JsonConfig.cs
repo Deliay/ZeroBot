@@ -36,6 +36,7 @@ public class JsonConfig<T>(string file, T defaultValue, CancellationToken cancel
         await using var stream = File.OpenWrite(tempFile);
         await JsonSerializer.SerializeAsync(stream, value, cancellationToken: cancellationToken);
         File.Replace(tempFile, file, $"{file}.bak");
+        _watcher.ForceSetCurrentValue(value);
     }
 
     private static InvalidOperationException ThrowInvalidConfig() =>

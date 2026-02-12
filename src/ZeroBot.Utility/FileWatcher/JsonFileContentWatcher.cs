@@ -41,6 +41,8 @@ public class JsonFileContentWatcher<T> : IComponentInitializer
             _semaphore.Release();
         }
     }
+    
+    public void ForceSetCurrentValue(T value) => Current = value;
 
     private async ValueTask UpdateCurrentValueAsync(CancellationToken cancellationToken)
     {

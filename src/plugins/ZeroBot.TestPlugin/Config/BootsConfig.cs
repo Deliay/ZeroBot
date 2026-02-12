@@ -6,15 +6,17 @@ public record BootsTest(
     long messageId,
     DateTimeOffset questedAt,
     bool isResolved = false,
-    DateTimeOffset resolvedAt = default);
+    DateTimeOffset resolvedAt = default,
+    long resolvedBy = 0);
 
 
 public record GroupBoots(
     long groupId,
     string? currentQuestion,
-    Dictionary<string, BootsTest> questionRecords)
+    Dictionary<string, BootsTest> questionRecords,
+    Dictionary<long, List<string>>? questRecords)
 {
-    public static GroupBoots Create(long groupId) => new(groupId, null, []);
+    public static GroupBoots Create(long groupId) => new(groupId, null, [], []);
 }
 
 
