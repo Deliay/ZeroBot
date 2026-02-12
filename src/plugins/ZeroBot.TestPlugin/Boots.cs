@@ -145,7 +145,7 @@ public class Boots(IBotContext bot, ILogger<Boots> logger, IJsonConfig<BootsConf
         }).Uri.AbsoluteUri;
         _logger.LogInformation("Sending final question {question}, path={path}", question, uri);
         await @event.ReplyAsGroup(_bot, cancellationToken, [
-            uri.ToMilkyImageSegment(),
+            await path.ToMilkyNonLocalImageSegmentAsync(cancellationToken),
             hint.ToMilkyTextSegment()
         ]);
     }

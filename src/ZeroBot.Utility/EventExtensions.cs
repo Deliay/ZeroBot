@@ -113,7 +113,17 @@ public static class EventExtensions
 
         public ImageOutgoingSegment ToMilkyImageSegment()
         {
-            return new ImageOutgoingSegment(new ImageOutgoingSegmentData(new MilkyUri(message), null, SubType.Normal));
+            return new ImageOutgoingSegment(
+                new ImageOutgoingSegmentData(new MilkyUri(message), null, SubType.Normal));
+        }
+
+        public async ValueTask<ImageOutgoingSegment> ToMilkyNonLocalImageSegmentAsync(CancellationToken cancellationToken = default)
+        {
+            var data = message.StartsWith("base64") || message.StartsWith("http")
+                ? message
+                : $"base64://{Convert.ToBase64String(await File.ReadAllBytesAsync(message, cancellationToken))}";
+            return new ImageOutgoingSegment(
+                new ImageOutgoingSegmentData(new MilkyUri(data), null, SubType.Normal));
         }
     }
 
