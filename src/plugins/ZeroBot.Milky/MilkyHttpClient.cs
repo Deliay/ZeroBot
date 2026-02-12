@@ -13,5 +13,6 @@ public class MilkyHttpClient : HttpClient
         DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
             config.Value.AccessToken ??
             throw new InvalidOperationException("Milky access token is not configured."));
+        DefaultRequestHeaders.Add("Content-Type", "application/json");
     }
 }
