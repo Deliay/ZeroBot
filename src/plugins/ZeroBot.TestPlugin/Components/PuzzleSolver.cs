@@ -35,7 +35,7 @@ public readonly record struct Puzzle(
         return array;
     }
 
-    private static readonly string[] EmojiIndexes = ["🟥", "🟧", "🟩", "🟦", "🟪", "🟫", "⬛"];
+    private static readonly string[] EmojiIndexes = ["⬛", "🟥", "🟧", "🟩", "🟦", "🟪", "🟫"];
 
     public static string ToEmoji(int[][] arrayPuzzle)
     {
