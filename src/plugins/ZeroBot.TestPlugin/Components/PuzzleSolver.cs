@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.TestPlugin.Config;
@@ -70,7 +71,8 @@ public readonly record struct Solve(int Id, int[] Anchor, int[][] Shape)
 public class PuzzleSolver(
     IBotContext bot,
     ICommandDispatcher dispatcher,
-    IJsonConfig<PuzzleSolverConfig> config) : CommandQueuedHandler(dispatcher)
+    IJsonConfig<PuzzleSolverConfig> config,
+    ILogger<PuzzleSolver> logger) : CommandQueuedHandler(dispatcher)
 {
     private static readonly MediaTypeHeaderValue JsonContentType = new("application/json");
     private readonly HttpClient _httpClient = new()
@@ -97,7 +99,6 @@ public class PuzzleSolver(
         using var imageContent = new ByteArrayContent(imageData);
         imageContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
         content.Add(imageContent, "file", "/tmp/file.png");
-        Console.WriteLine(await content.ReadAsStringAsync(cancellationToken));
         var parseResult = await _httpClient.PostAsync("/parse", content, cancellationToken);
         parseResult.EnsureSuccessStatusCode();
         return await parseResult.Content.ReadAsStringAsync(cancellationToken);
@@ -133,6 +134,7 @@ public class PuzzleSolver(
         catch (Exception ex)
         {
             await @event.ReplyAsGroup(bot, cancellationToken, [$"解题失败！{ex.Message}".ToMilkyTextSegment()]);
+            logger.LogError(ex, "解题失败");
         }
     }
 }
