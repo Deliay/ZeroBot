@@ -94,7 +94,9 @@ public class PuzzleSolver(
             
         var imageData = await image.GetMilkyImageBytesAsync(bot, @event, cancellationToken);
         using var content = new MultipartFormDataContent();
-        content.Add(new ByteArrayContent(imageData), "file", "/tmp/file.jpg");
+        using var imageContent = new ByteArrayContent(imageData);
+        imageContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+        content.Add(imageContent, "file", "/tmp/file.png");
         Console.WriteLine(await content.ReadAsStringAsync(cancellationToken));
         var parseResult = await _httpClient.PostAsync("/parse", content, cancellationToken);
         parseResult.EnsureSuccessStatusCode();
