@@ -18,6 +18,7 @@ public class TestPlugin : IPlugin
         services.ConfigureJsonConfig("boat.json", BootsConfig.Default, cancellationToken);
         services.AddSingletonExecutable<Boots>();
 
+        services.ConfigureJsonConfig("puzzle.json", BootsConfig.Default, cancellationToken);
         services.AddSingletonComponent<PuzzleSolver>();
         
         return ValueTask.FromResult(services);
