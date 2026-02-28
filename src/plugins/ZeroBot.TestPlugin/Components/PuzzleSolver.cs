@@ -135,7 +135,8 @@ public class PuzzleSolver(
             {
                 solve.PutTo(puzzle);
             }
-            
+
+            Console.WriteLine(Puzzle.ToEmoji(puzzle));
             await @event.ReplyAsGroup(bot, cancellationToken, [Puzzle.ToEmoji(puzzle).ToMilkyTextSegment()]);
         }
         catch (Exception ex)
