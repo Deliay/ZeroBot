@@ -1,5 +1,6 @@
 ﻿using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.DependencyInjection;
+using ZeroBot.TestPlugin.Components;
 using ZeroBot.TestPlugin.Config;
 using ZeroBot.Utility;
 using ZeroBot.Utility.FileWatcher;
@@ -16,6 +17,8 @@ public class TestPlugin : IPlugin
         
         services.ConfigureJsonConfig("boat.json", BootsConfig.Default, cancellationToken);
         services.AddSingletonExecutable<Boots>();
+
+        services.AddSingletonComponent<PuzzleSolver>();
         
         return ValueTask.FromResult(services);
     }

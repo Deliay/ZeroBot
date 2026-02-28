@@ -2,7 +2,7 @@ using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.Utility;
 
-namespace ZeroBot.TestPlugin;
+namespace ZeroBot.TestPlugin.Components;
 
 public class Ping(ICommandDispatcher dispatcher, IBotContext bot) : CommandQueuedHandler(dispatcher)
 {

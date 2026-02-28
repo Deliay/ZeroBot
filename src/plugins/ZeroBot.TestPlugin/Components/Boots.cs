@@ -6,7 +6,7 @@ using ZeroBot.TestPlugin.Config;
 using ZeroBot.Utility;
 using ZeroBot.Utility.FileWatcher;
 
-namespace ZeroBot.TestPlugin;
+namespace ZeroBot.TestPlugin.Components;
 
 public class Boots(IBotContext bot, ILogger<Boots> logger, IJsonConfig<BootsConfig> config) : MessageQueueHandler<Boots>(bot, logger) 
 {
