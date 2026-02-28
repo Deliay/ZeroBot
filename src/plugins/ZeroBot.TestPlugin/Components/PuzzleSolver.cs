@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
@@ -12,7 +13,10 @@ using ZeroBot.Utility.FileWatcher;
 
 namespace ZeroBot.TestPlugin.Components;
 
-public readonly record struct Puzzle(int Rows, int Cols, int[][] Obstacles)
+public readonly record struct Puzzle(
+    [property: JsonPropertyName("rows")]int Rows,
+    [property: JsonPropertyName("cols")]int Cols,
+    [property: JsonPropertyName("obstacles")]int[][] Obstacles)
 {
     public int[][] PuzzleArray()
     {
@@ -54,7 +58,10 @@ public readonly record struct Puzzle(int Rows, int Cols, int[][] Obstacles)
     }
 }
 
-public readonly record struct Solve(int Id, int[] Anchor, int[][] Shape)
+public readonly record struct Solve(
+    [property: JsonPropertyName("id")]int Id,
+    [property: JsonPropertyName("anchor")]int[] Anchor,
+    [property: JsonPropertyName("shape")]int[][] Shape)
 {
     public void PutTo(int[][] puzzle)
     {
