@@ -35,7 +35,7 @@ public readonly record struct Puzzle(
         return array;
     }
 
-    private static readonly string[] EmojiIndexes = ["🟥", "🟧", "🟩", "🟦", "🟪", "🟫", "⬛", "⬜"];
+    private static readonly string[] EmojiIndexes = ["🟥", "🟧", "🟩", "🟦", "🟪", "🟫", "⬛"];
 
     public static string ToEmoji(int[][] arrayPuzzle)
     {
@@ -46,7 +46,7 @@ public readonly record struct Puzzle(
             {
                 sb.Append(col switch
                 {
-                    -1 => "🈲",
+                    -1 => "⬜",
                     _ => EmojiIndexes[col]
                 });
             }
