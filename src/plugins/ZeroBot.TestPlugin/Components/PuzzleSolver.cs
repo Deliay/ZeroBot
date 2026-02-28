@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
@@ -137,6 +138,10 @@ public class PuzzleSolver(
             }
 
             await @event.ReplyAsGroup(bot, cancellationToken, [Puzzle.ToEmoji(puzzle).ToMilkyTextSegment()]);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
+        {
+            await @event.ReplyAsGroup(bot, cancellationToken, ["解题失败！这个题无解，请只接图棋盘和方块区域，其不要管理员提示，其他区域尽量去除避免干扰。".ToMilkyTextSegment()]);
         }
         catch (Exception ex)
         {
