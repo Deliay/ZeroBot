@@ -19,7 +19,6 @@ public class Wish(ICommandDispatcher dispatcher, IBotContext bot, ILogger<Wish> 
     protected override ValueTask<bool> PredicateAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
         var text = message.ToText().Trim();
-        logger.LogInformation("Wish incoming message: {Wish}", text);
         return ValueTask.FromResult(text.StartsWith("/许愿"));
     }
 
