@@ -70,7 +70,7 @@ public readonly record struct Solve(
         
         foreach (var point in Shape)
         {
-            Shape[x + point[0]][y + point[1]] = Id;
+            puzzle[x + point[0]][y + point[1]] = Id;
         }
     }
 }
