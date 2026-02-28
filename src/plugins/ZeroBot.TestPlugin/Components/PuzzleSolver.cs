@@ -35,7 +35,7 @@ public readonly record struct Puzzle(
         return array;
     }
 
-    private const string EmojiIndexes = "🟥🟧🟨🟩🟦🟪🟫⬛⬜";
+    private const string EmojiIndexes = "🥰😅🤣🥵😡🥹👿👻🤡";
 
     public static string ToEmoji(int[][] arrayPuzzle)
     {
