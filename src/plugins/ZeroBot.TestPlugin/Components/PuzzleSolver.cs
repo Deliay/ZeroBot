@@ -7,6 +7,7 @@ using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.TestPlugin.Config;
 using ZeroBot.Utility;
+using ZeroBot.Utility.FileWatcher;
 
 namespace ZeroBot.TestPlugin.Components;
 
@@ -69,12 +70,12 @@ public readonly record struct Solve(int Id, int[] Anchor, int[][] Shape)
 public class PuzzleSolver(
     IBotContext bot,
     ICommandDispatcher dispatcher,
-    PuzzleSolverConfig config) : CommandQueuedHandler(dispatcher)
+    IJsonConfig<PuzzleSolverConfig> config) : CommandQueuedHandler(dispatcher)
 {
     private static readonly MediaTypeHeaderValue JsonContentType = new("application/json");
     private readonly HttpClient _httpClient = new()
     {
-        BaseAddress = new Uri(config.Endpoint),
+        BaseAddress = new Uri(config.Current.Endpoint),
     };
     
     protected override async ValueTask<bool> PredicateAsync(Event<IncomingMessage> message,
