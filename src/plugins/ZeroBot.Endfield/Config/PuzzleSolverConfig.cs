@@ -1,4 +1,4 @@
-namespace ZeroBot.TestPlugin.Config;
+namespace ZeroBot.Endfield.Config;
 
 public record PuzzleSolverConfig(string Endpoint)
 {

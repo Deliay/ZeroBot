@@ -9,6 +9,7 @@ using ZeroBot.Abstraction.Service;
 using ZeroBot.Bilibili;
 using ZeroBot.ComfyUI;
 using ZeroBot.Core.Services;
+using ZeroBot.Endfield;
 using ZeroBot.Milky;
 using ZeroBot.PermissionCommandPlugin;
 using ZeroBot.Repository.Mongo;
@@ -21,6 +22,7 @@ TypedPluginLoader.Register<MongoRepositoryPlugin>();
 TypedPluginLoader.Register<ZeroBotComfyUiPlugin>();
 TypedPluginLoader.Register<ZeroBotPermissionCommandPlugin>();
 TypedPluginLoader.Register<BiliBiliPlugin>();
+TypedPluginLoader.Register<EndfieldPlugin>();
 
 Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
 var root = RootBuilder

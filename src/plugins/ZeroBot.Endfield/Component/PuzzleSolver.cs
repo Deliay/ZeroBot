@@ -8,11 +8,11 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
-using ZeroBot.TestPlugin.Config;
+using ZeroBot.Endfield.Config;
 using ZeroBot.Utility;
 using ZeroBot.Utility.FileWatcher;
 
-namespace ZeroBot.TestPlugin.Components;
+namespace ZeroBot.Endfield.Component;
 
 public readonly record struct Puzzle(
     [property: JsonPropertyName("rows")]int Rows,
