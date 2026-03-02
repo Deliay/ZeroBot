@@ -10,13 +10,13 @@ public class LoginHelper
     private static readonly HttpContent LoginBody = new StringContent("{\"appCode\":\"4ca99fa6b56cc2ba\"}",
         new MediaTypeHeaderValue("application/json"));
 
-    private static async ValueTask<LoginQrCode> RequestLoginQrCode(CancellationToken cancellationToken = default)
+    private static async ValueTask<LoginQrCodeResponse> RequestLoginQrCode(CancellationToken cancellationToken = default)
     {
         var res = await Client.PostAsync("https://as.hypergryph.com/general/v1/gen_scan/login", LoginBody,
             cancellationToken);
 
         res.EnsureSuccessStatusCode();
-        var result = await res.Content.ReadFromJsonAsync<Response<LoginQrCode>>(cancellationToken);
+        var result = await res.Content.ReadFromJsonAsync<Response<LoginQrCodeResponse>>(cancellationToken);
         result.EnsureSuccessStatusCode();
         return result.data;
     }

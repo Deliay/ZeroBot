@@ -5,7 +5,7 @@ namespace ZeroBot.Endfield.Extension;
 
 public static class LoginQrCodeExtension
 {
-    extension(LoginQrCode code)
+    extension(LoginQrCodeResponse codeResponse)
     {
         public byte[] ToPngByteArray(string text)
         {
