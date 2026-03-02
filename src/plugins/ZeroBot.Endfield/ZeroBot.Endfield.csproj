@@ -9,5 +9,10 @@
     <ItemGroup>
         <ProjectReference Include="..\..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
         <ProjectReference Include="..\..\ZeroBot.Utility\ZeroBot.Utility.csproj" />
+        <ProjectReference Include="..\ZeroBot.Endfield.Api\ZeroBot.Endfield.Api.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="QRCoder" />
     </ItemGroup>
 </Project>
