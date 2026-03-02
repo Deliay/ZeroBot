@@ -1,4 +1,4 @@
-namespace ZeroBot.Endfield.Api.Skland.Sign;
+namespace ZeroBot.Endfield.Api.Skland.Authorize;
 
 public class SignInResult
 {
