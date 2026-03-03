@@ -1,8 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using ZeroBot.Endfield.Api.Skland.Authorize;
 
-namespace ZeroBot.Endfield.Api.Skland.Login;
+namespace ZeroBot.Endfield.Api.Skland.Authorize;
 
 public static class LoginClientExtension
 {
@@ -55,12 +54,11 @@ public static class LoginClientExtension
             return result.data.code;
         }
 
-        private async Task<Credential> GenerateCredentialAsync(string authorization,
+        public async Task<Credential> GenerateZonCredentialAsync(string authorization,
             CancellationToken cancellationToken = default)
         {
             var did = await DeviceIdGenerator.GetDeviceId();
-            var result = await client.PostCallAsync<CredentialResponse>(
-                "https://zonai.skland.com/web/v1/user/auth/generate_cred_by_code",
+            var result = await client.PostCallZonAsync<CredentialResponse>("https://zonai.skland.com/web/v1/user/auth/generate_cred_by_code",
                 new CredentialRequest(authorization),
                 did,
                 cancellationToken
@@ -69,10 +67,20 @@ public static class LoginClientExtension
             result.EnsureSuccessStatusCode();
             return new Credential
             {
+                TokenExpiredAt = DateTimeOffset.Now + TimeSpan.FromHours(1),
                 Token = result.data.token,
                 Cred = result.data.cred,
                 DeviceId = did,
             };
+        }
+
+        public async Task<ZonAiRefreshTokenResponse> GenerateZonRefreshTokenAsync(Credential credential,
+            CancellationToken cancellationToken)
+        {
+            const string url = "https://zonai.skland.com/api/v1/auth/refresh";
+            var result = await client.GetCallZonAsync<ZonAiRefreshTokenResponse>(url, credential, cancellationToken);
+            result.EnsureSuccessStatusCode();
+            return result.data;
         }
     }
 }

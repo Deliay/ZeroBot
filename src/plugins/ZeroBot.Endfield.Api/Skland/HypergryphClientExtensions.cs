@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using ZeroBot.Endfield.Api.Skland.Authorize;
-using ZeroBot.Endfield.Api.Skland.Login;
 
 namespace ZeroBot.Endfield.Api.Skland;
 
@@ -17,9 +16,9 @@ public static class HypergryphClientExtensions
             return await response.ReadHypergryphResponseAsync<T>(cancellationToken);
         }
         
-        public async ValueTask<Response<T>> PostCallAsync<T>(string url, object data, string did, CancellationToken cancellationToken = default)
+        public async ValueTask<ZonResponse<T>> PostCallZonAsync<T>(string url, object data, string did, CancellationToken cancellationToken = default)
         {
-            return await client.CallAsync<T>((req) =>
+            return await client.CallZonAsync<T>((req) =>
             {
                 var json = JsonSerializer.Serialize(data);
                 req.Content = new StringContent(json, MimeTypeApplicationJson);
@@ -35,34 +34,30 @@ public static class HypergryphClientExtensions
             }, cancellationToken);
         }
 
-        public async ValueTask<Response<T>> GetCallAsync<T>(string url, CancellationToken cancellationToken = default)
+        public async ValueTask<ZonResponse<T>> GetCallZonAsync<T>(string url, Credential credential,
+            CancellationToken cancellationToken = default)
         {
-            var response = await client.GetAsync(url, cancellationToken);
-            return await response.ReadHypergryphResponseAsync<T>(cancellationToken);
-        }
-        
-        public async ValueTask<Response<T>> PostCallAsync<T>(string url, object data, Credential credential, CancellationToken cancellationToken = default)
-        {
-            return await client.CallAsync<T>(request: (req) =>
+            return await client.CallZonAsync<T>(request: (req) =>
             {
-                var json = JsonSerializer.Serialize(data);
-                req.Method = HttpMethod.Post;
-                req.Content = new StringContent(json, MimeTypeApplicationJson);
+                req.Method = HttpMethod.Get;
                 req.RequestUri = new Uri(url);
-                var header = HypergryphClient.GetSignedHeaders(url, req.Method, json, credential);
+                var header = HypergryphClient.GetSignedHeaders(url, req.Method, null, credential);
                 foreach (var (key, value) in header)
                 {
                     req.Headers.TryAddWithoutValidation(key, value);
                 }
             }, cancellationToken);
         }
-        public async ValueTask<Response<T>> GetCallAsync<T>(string url, Credential credential, CancellationToken cancellationToken = default)
+        
+        public async ValueTask<ZonResponse<T>> PostCallZonAsync<T>(string url, object data, Credential credential, CancellationToken cancellationToken = default)
         {
-            return await client.CallAsync<T>(request: (req) =>
+            return await client.CallZonAsync<T>(request: (req) =>
             {
-                req.Method = HttpMethod.Get;
+                var json = JsonSerializer.Serialize(data);
+                req.Method = HttpMethod.Post;
+                req.Content = new StringContent(json, MimeTypeApplicationJson);
                 req.RequestUri = new Uri(url);
-                var header = HypergryphClient.GetSignedHeaders(url, req.Method, null, credential);
+                var header = HypergryphClient.GetSignedHeaders(url, req.Method, json, credential);
                 foreach (var (key, value) in header)
                 {
                     req.Headers.TryAddWithoutValidation(key, value);
@@ -79,6 +74,16 @@ public static class HypergryphClientExtensions
             var response = await client.SendAsync(req, cancellationToken);
             return await response.ReadHypergryphResponseAsync<T>(cancellationToken);
         }
+
+        public async ValueTask<ZonResponse<T>> CallZonAsync<T>(
+            Action<HttpRequestMessage> request,
+            CancellationToken cancellationToken = default)
+        {
+            var req = new HttpRequestMessage();
+            request(req);
+            var response = await client.SendAsync(req, cancellationToken);
+            return await response.ReadZonResponseAsync<T>(cancellationToken);
+        }
     }
 
     extension(HttpResponseMessage message)
@@ -87,6 +92,11 @@ public static class HypergryphClientExtensions
         {
             message.EnsureSuccessStatusCode();
             return (await message.Content.ReadFromJsonAsync<Response<T>>(cancellationToken))!;
+        }
+        public async ValueTask<ZonResponse<T>> ReadZonResponseAsync<T>(CancellationToken cancellationToken = default)
+        {
+            message.EnsureSuccessStatusCode();
+            return (await message.Content.ReadFromJsonAsync<ZonResponse<T>>(cancellationToken))!;
         }
     }
 }

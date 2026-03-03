@@ -10,7 +10,7 @@ public static class PlayerClientExtension
             CancellationToken cancellationToken = default)
         {
             const string url = "https://zonai.skland.com/api/v1/game/player/binding";
-            var result = await client.GetCallAsync<UserAllBindings>(
+            var result = await client.GetCallZonAsync<UserAllBindings>(
                 url, credential, cancellationToken);
 
             result.EnsureSuccessStatusCode();

@@ -6,7 +6,6 @@ using System.Text.Json;
 using Polly;
 using Polly.Retry;
 using ZeroBot.Endfield.Api.Skland.Authorize;
-using ZeroBot.Endfield.Api.Skland.Login;
 
 namespace ZeroBot.Endfield.Api.Skland;
 

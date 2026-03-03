@@ -12,6 +12,7 @@ public class DesRuleEntry
 
 public class Credential
 {
+    public required DateTimeOffset TokenExpiredAt { get; set; }
     public required string Token { get; set; }
     public required string Cred { get; set; }
     public required string DeviceId { get; set; }

@@ -1,5 +1,5 @@
 using QRCoder;
-using ZeroBot.Endfield.Api.Skland.Login;
+using ZeroBot.Endfield.Api.Skland.Authorize;
 
 namespace ZeroBot.Endfield.Extension;
 
