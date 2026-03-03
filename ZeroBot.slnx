@@ -19,5 +19,6 @@
     <Project Path="src\plugins\ZeroBot.ComfyUI\ZeroBot.ComfyUI.csproj" />
     <Project Path="src\plugins\ZeroBot.Endfield.Api\ZeroBot.Endfield.Api.csproj" Type="Classic C#" />
     <Project Path="src\plugins\ZeroBot.Endfield.Playground\ZeroBot.Endfield.Playground.csproj" Type="Classic C#" />
+    <Project Path="src\ZeroBot.Endfield.Credential.Json\ZeroBot.Endfield.Credential.Json.csproj" Type="Classic C#" />
   </Folder>
 </Solution>

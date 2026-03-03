@@ -8,7 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\ZeroBot.Endfield.Credential.Json\ZeroBot.Endfield.Credential.Json.csproj" />
       <ProjectReference Include="..\ZeroBot.Endfield.Api\ZeroBot.Endfield.Api.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Net.Codecrete.QrCodeGenerator" />
     </ItemGroup>
 
 </Project>

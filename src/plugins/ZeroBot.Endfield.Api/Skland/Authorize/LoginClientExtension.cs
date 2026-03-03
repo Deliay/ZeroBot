@@ -49,12 +49,12 @@ public static class LoginClientExtension
                 "https://as.hypergryph.com/user/oauth2/v2/grant",
                 new OAuthGrantRequest(oAuthToken),
                 cancellationToken);
-
+            
             result.EnsureSuccessStatusCode();
             return result.data.code;
         }
 
-        public async Task<Credential> GenerateZonCredentialAsync(string authorization,
+        public async Task<UserCredential> GenerateZonCredentialAsync(string authorization,
             CancellationToken cancellationToken = default)
         {
             var did = await DeviceIdGenerator.GetDeviceId();
@@ -65,20 +65,20 @@ public static class LoginClientExtension
             );
 
             result.EnsureSuccessStatusCode();
-            return new Credential
+            return new UserCredential
             {
                 TokenExpiredAt = DateTimeOffset.Now + TimeSpan.FromHours(1),
-                Token = result.data.token,
+                RefreshToken = result.data.token,
                 Cred = result.data.cred,
                 DeviceId = did,
             };
         }
 
-        public async Task<ZonAiRefreshTokenResponse> GenerateZonRefreshTokenAsync(Credential credential,
+        public async Task<ZonAiRefreshTokenResponse> GenerateZonRefreshTokenAsync(UserCredential userCredential,
             CancellationToken cancellationToken)
         {
             const string url = "https://zonai.skland.com/api/v1/auth/refresh";
-            var result = await client.GetCallZonAsync<ZonAiRefreshTokenResponse>(url, credential, cancellationToken);
+            var result = await client.GetCallZonAsync<ZonAiRefreshTokenResponse>(url, userCredential, cancellationToken);
             result.EnsureSuccessStatusCode();
             return result.data;
         }

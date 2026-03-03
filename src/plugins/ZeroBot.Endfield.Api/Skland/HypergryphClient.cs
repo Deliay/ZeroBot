@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using Polly;
 using Polly.Retry;
@@ -9,19 +10,9 @@ using ZeroBot.Endfield.Api.Skland.Authorize;
 
 namespace ZeroBot.Endfield.Api.Skland;
 
-public class HypergryphClient(CredentialManager credentialManager, int maxRetries = 3) : HttpClient
+public class HypergryphClient : HttpClient
 {
     public const string UserAgent = "Mozilla/5.0 (Linux; Android 12; SM-A5560 Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36; SKLand/1.52.1";
-
-    public override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        foreach (var header in BaseHeaders)
-        {
-            request.Headers.TryAddWithoutValidation(header.Key, header.Value);
-        }
-        
-        return await base.SendAsync(request, cancellationToken);
-    }
 
     public static readonly IReadOnlyDictionary<string, string> BaseHeaders = new Dictionary<string, string>
     {
@@ -41,7 +32,7 @@ public class HypergryphClient(CredentialManager credentialManager, int maxRetrie
             {"dId", did},
             {"vName", "1.0.0"},
         };
-        var headerCaStr = JsonSerializer.Serialize(headerCa, new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+        var headerCaStr = JsonSerializer.Serialize(headerCa, new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
 
         var s = $"{path}{bodyOrQuery}{timestamp}{headerCaStr}";
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(token));
@@ -54,7 +45,7 @@ public class HypergryphClient(CredentialManager credentialManager, int maxRetrie
         return (sign, headerCa);
     }
     
-    public static Dictionary<string, string> GetSignedHeaders(string url, HttpMethod method, string? body, Credential cred)
+    public static Dictionary<string, string> GetSignedHeaders(string url, HttpMethod method, string? body, UserCredential cred)
     {
         var uri = new Uri(url);
         var path = uri.AbsolutePath;
@@ -66,11 +57,11 @@ public class HypergryphClient(CredentialManager credentialManager, int maxRetrie
 
         if (method == HttpMethod.Get)
         {
-            (sign, headerCa) = GenerateSignature(cred.Token, path, query, did);
+            (sign, headerCa) = GenerateSignature(cred.RefreshToken, path, query, did);
         }
         else
         {
-            (sign, headerCa) = GenerateSignature(cred.Token, path, body ?? "", did);
+            (sign, headerCa) = GenerateSignature(cred.RefreshToken, path, body ?? "", did);
         }
 
         var headers = new Dictionary<string, string>(BaseHeaders)
