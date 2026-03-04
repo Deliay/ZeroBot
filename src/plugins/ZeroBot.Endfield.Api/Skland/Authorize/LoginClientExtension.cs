@@ -71,6 +71,7 @@ public static class LoginClientExtension
                 RefreshToken = result.data.token,
                 Cred = result.data.cred,
                 DeviceId = did,
+                Id = Guid.NewGuid().ToString(),
             };
         }
 

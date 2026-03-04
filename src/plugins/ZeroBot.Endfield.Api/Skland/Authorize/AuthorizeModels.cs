@@ -16,6 +16,7 @@ public class UserCredential : IEquatable<UserCredential>
     public required string RefreshToken { get; set; }
     public required string Cred { get; set; }
     public required string DeviceId { get; set; }
+    public required string Id { get; set; }
 
     public bool Equals(UserCredential? other)
     {
