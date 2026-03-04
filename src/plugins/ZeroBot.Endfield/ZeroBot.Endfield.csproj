@@ -10,6 +10,7 @@
         <ProjectReference Include="..\..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
         <ProjectReference Include="..\..\ZeroBot.Utility\ZeroBot.Utility.csproj" />
         <ProjectReference Include="..\ZeroBot.Endfield.Api\ZeroBot.Endfield.Api.csproj" />
+        <ProjectReference Include="..\ZeroBot.Endfield.Credential.Json\ZeroBot.Endfield.Credential.Json.csproj" />
     </ItemGroup>
 
     <ItemGroup>

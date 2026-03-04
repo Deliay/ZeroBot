@@ -57,12 +57,25 @@ public static class EventExtensions
             await bot.WriteManyGroupMessageAsync(message.SelfId, [message.Data.PeerId], cancellationToken,
                 segments);
         }
+
+        public async ValueTask SendAsPrivate(IBotContext bot, CancellationToken cancellationToken = default,
+            params OutgoingSegment[] segments)
+        {
+            await bot.WritePrivateMessageAsync(message.SelfId, message.Data.SenderId, cancellationToken, segments);
+        }
         
         public async ValueTask ReplyAsGroup(IBotContext bot,
             CancellationToken cancellationToken = default,
             params OutgoingSegment[] segments)
         {
             await message.SendAsGroup(bot, cancellationToken, [message.Data.Reply(), ..segments]);
+        }
+        
+        public async ValueTask ReplyAsPrivate(IBotContext bot,
+            CancellationToken cancellationToken = default,
+            params OutgoingSegment[] segments)
+        {
+            await message.SendAsPrivate(bot, cancellationToken, [message.Data.Reply(), ..segments]);
         }
         
         public MessageScene Scene => message.Data switch

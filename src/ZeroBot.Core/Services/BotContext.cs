@@ -56,6 +56,14 @@ public class BotContext(ILogger<BotContext> logger) : IBotContext
         return await botService.SendGroupMessageAsync(groupIds, cancellationToken, messageSegments);
     }
 
+    public ValueTask<SendPrivateMessageOutput> WritePrivateMessageAsync(long accountId, long userId, CancellationToken cancellationToken = default,
+        params OutgoingSegment[] messageSegments)
+    {
+        return !_services.TryGetValue(accountId, out var botService)
+            ? throw new InvalidOperationException("Missing service for account id.")
+            : botService.SendPrivateMessageAsync(userId, cancellationToken, messageSegments);
+    }
+
     public async ValueTask<GetGroupInfoOutput?> GetGroupInformationAsync(long accountId, long groupId,
         CancellationToken cancellationToken = default)
     {

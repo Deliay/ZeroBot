@@ -4,6 +4,7 @@ using ZeroBot.Endfield.Api.Skland;
 using ZeroBot.Endfield.Api.Skland.Authorize;
 using ZeroBot.Endfield.Component;
 using ZeroBot.Endfield.Config;
+using ZeroBot.Endfield.Credential.Json;
 using ZeroBot.Utility;
 using ZeroBot.Utility.FileWatcher;
 
@@ -17,6 +18,8 @@ public class EndfieldPlugin : IPlugin
         services.ConfigureJsonConfig("puzzle.json", PuzzleSolverConfig.Default, cancellationToken);
         services.AddSingletonComponent<PuzzleSolver>();
 
+        services.ConfigureJsonConfig("sign_settings.json", SklandDailySignConfig.Empty, cancellationToken);
+        services.AddSingleton(new JsonCredentialRepository("sign_credentials.json"));
         services.AddSingleton<HypergryphClient>();
         services.AddSingleton<CredentialManager>();
 

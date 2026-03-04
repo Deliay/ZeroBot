@@ -33,6 +33,12 @@ internal class TestBotService : IBotService
         return ValueTask.FromResult(FakeSendResult);
     }
 
+    public ValueTask<SendPrivateMessageOutput> SendPrivateMessageAsync(long userId, CancellationToken cancellationToken = default,
+        params OutgoingSegment[] messageSegments)
+    {
+        throw new NotImplementedException();
+    }
+
     public ValueTask<Event<IncomingMessage>> GetGroupMessageAsync(MessageScene scene, long peerId, long messageId,
         CancellationToken cancellationToken = default)
     {

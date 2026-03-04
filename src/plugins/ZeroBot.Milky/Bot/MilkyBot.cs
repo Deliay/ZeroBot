@@ -49,6 +49,14 @@ public class MilkyBot(
         return await botInfos.GetAccountInfoAsync(cancellationToken);
     }
 
+    public async ValueTask<SendPrivateMessageOutput> SendPrivateMessageAsync(long userId,
+        CancellationToken cancellationToken = default,
+        params OutgoingSegment[] messageSegments)
+    {
+        return await milky.Message.SendPrivateMessageAsync(new SendPrivateMessageInput(userId, messageSegments),
+            cancellationToken);
+    }
+
     public async ValueTask<Event<IncomingMessage>> GetGroupMessageAsync(MessageScene scene, long peerId, long messageId,
         CancellationToken cancellationToken = default)
     {

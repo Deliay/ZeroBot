@@ -11,6 +11,9 @@ public interface IBotContext
     ValueTask<MultiGroupSendResult> WriteManyGroupMessageAsync(long accountId, HashSet<long> groupIds,
         CancellationToken cancellationToken = default, params OutgoingSegment[] messageSegments);
 
+    ValueTask<SendPrivateMessageOutput> WritePrivateMessageAsync(long accountId, long userId,
+        CancellationToken cancellationToken = default, params OutgoingSegment[] messageSegments);
+    
     ValueTask<Event<IncomingMessage>?> GetHistoryMessageAsync(long accountId, MessageScene scene, long peerId, long messageId,
         CancellationToken cancellationToken = default);
 

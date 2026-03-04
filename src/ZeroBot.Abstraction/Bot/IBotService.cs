@@ -12,6 +12,10 @@ public interface IBotService : IExecutable
         CancellationToken cancellationToken = default,
         params OutgoingSegment[] messageSegments);
 
+    ValueTask<SendPrivateMessageOutput> SendPrivateMessageAsync(long userId,
+        CancellationToken cancellationToken = default,
+        params OutgoingSegment[] messageSegments);
+
     ValueTask<Event<IncomingMessage>> GetGroupMessageAsync(MessageScene scene, long peerId, long messageId,
         CancellationToken cancellationToken = default);
 
