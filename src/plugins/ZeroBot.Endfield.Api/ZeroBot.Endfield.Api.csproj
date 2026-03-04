@@ -9,5 +9,9 @@
     <ItemGroup>
         <PackageReference Include="Polly" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Skland\Sign\" />
+    </ItemGroup>
     
 </Project>

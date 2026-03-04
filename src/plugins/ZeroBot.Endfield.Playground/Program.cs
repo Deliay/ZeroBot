@@ -12,7 +12,7 @@ var credentialManager = new CredentialManager(hypergryphClient, credentialReposi
 using var cts = new CancellationTokenSource();
 var cancellationToken = cts.Token;
 
-var user = "644676751";
+var user = "test";
 
 Console.WriteLine($"Current working directory: {Directory.GetCurrentDirectory()}");
 
@@ -34,18 +34,11 @@ credentials = await credentialManager.GetCurrentCredentialAsync(user, cancellati
 
 foreach (var credential in credentials)
 {
-        var bindings = await hypergryphClient.GetPlayerBindings(credential, cancellationToken);
-
-    foreach (var binding in bindings.list)
+    var bindings = await hypergryphClient.GetPlayerBindings(credential, cancellationToken);
+    foreach (var userAppRole in bindings.Flat())
     {
-        foreach (var userAppBinding in binding.bindingList)
-        {
-            foreach (var userRole in userAppBinding.roles)
-            {
-                Console.WriteLine($"{binding.appCode}: {userAppBinding.channelName}" +
-                                  $" - {userAppBinding.gameName} - uid:{userAppBinding.uid}" +
-                                  $" - {userRole.nickname}/{userAppBinding.nickName} - roleId:{userRole.roleId}");
-            }
-        }
+        Console.WriteLine($"{userAppRole.appCode}: {userAppRole.channelName}" +
+                          $" - {userAppRole.gameName} - uid:{userAppRole.uid}" +
+                          $" - {userAppRole.nickname}/{userAppRole.nickName} - roleId:{userAppRole.roleId}");
     }
 }

@@ -27,9 +27,10 @@ public class JsonCredentialRepository(string path) : ICredentialRepository
     private async ValueTask WriteRepository(Repository repository, CancellationToken cancellationToken = default)
     {
         var tempFile = $"{path}.1";
-        await using var stream = File.Exists(path) ? File.OpenWrite(tempFile) : File.Create(path);
+        var exists = File.Exists(path);
+        await using var stream = exists ? File.OpenWrite(tempFile) : File.Create(path);
         await JsonSerializer.SerializeAsync(stream, repository, cancellationToken: cancellationToken);
-        File.Replace(tempFile, path, $"{path}.bak");
+        if (exists) File.Replace(tempFile, path, $"{path}.bak");
     }
     
     private async ValueTask BeginManipulation(Func<Repository, ValueTask<Repository>> operation,
