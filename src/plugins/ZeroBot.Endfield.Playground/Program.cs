@@ -24,17 +24,17 @@ if (credentials.Count == 0)
     Console.WriteLine(QrCode.EnhancedEncodeText(scanUrl));
 
     var credential = await credentialManager.WaitScanAsync(user, cancellationToken);
-
-    credentials = await credentialManager.GetCurrentCredentialAsync(user, cancellationToken);
 }
 else
 {
     await credentialManager.RenewalRefreshTokenAsync(user, cancellationToken);
 }
 
+credentials = await credentialManager.GetCurrentCredentialAsync(user, cancellationToken);
+
 foreach (var credential in credentials)
 {
-    var bindings = await hypergryphClient.GetPlayerBindings(credential, cancellationToken);
+        var bindings = await hypergryphClient.GetPlayerBindings(credential, cancellationToken);
 
     foreach (var binding in bindings.list)
     {

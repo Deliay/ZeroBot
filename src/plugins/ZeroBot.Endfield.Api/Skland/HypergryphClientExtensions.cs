@@ -32,8 +32,8 @@ public static class HypergryphClientExtensions
     private static IReadOnlyDictionary<string, string> GenerateSignature(
         UserCredential credential, string path, string bodyOrQuery)
     {
-        var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-        var headerCa = new Dictionary<string, object>
+        var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+        var headerCa = new Dictionary<string, string>
         {
             { "platform", "3" },
             { "timestamp", timestamp },
@@ -53,13 +53,12 @@ public static class HypergryphClientExtensions
 
         return new Dictionary<string, string>(BaseHeaders)
         {
-            { "Content-Type", "application/json" },
-            { "cred", credential.RefreshToken },
-            { "timestamp", $"{timestamp}" },
+            { "cred", credential.Cred },
             { "sign", sign },
-            { "vName", "1.0.0" },
+            { "platform", "3" },
+            { "timestamp", $"{timestamp}" },
             { "dId", credential.DeviceId },
-            { "platform", "3" }
+            { "vName", "1.0.0" },
         };
     }
 
@@ -89,8 +88,8 @@ public static class HypergryphClientExtensions
                 req.RequestUri = new Uri(url);
                 req.Content = JsonContent.Create(data);
 
-                req.FillBaseHeaders();
                 req.FillUserAgentApp();
+                req.FillBaseHeaders();
             }, cancellationToken);
 
             response.EnsureSuccessStatusCode();
@@ -120,7 +119,7 @@ public static class HypergryphClientExtensions
             {
                 req.Method = HttpMethod.Get;
                 req.RequestUri = new Uri(url);
-                req.FillUserAgentWeb();
+                req.FillUserAgentApp();
                 await req.FillSignedRequestAsync(userCredential, cancellationToken);
             }, cancellationToken);
         }
