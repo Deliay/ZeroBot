@@ -125,7 +125,9 @@ public static class HypergryphClientExtensions
         }
 
         public async ValueTask<ZonResponse<T>> PostCallZonAsync<T>(string url, object data,
-            UserCredential userCredential, CancellationToken cancellationToken = default)
+            UserCredential userCredential,
+            Action<HttpRequestMessage>? inspector = null,
+            CancellationToken cancellationToken = default)
         {
             return await client.CallZonAsync<T>(request: async (req) =>
             {
@@ -135,6 +137,7 @@ public static class HypergryphClientExtensions
                 req.RequestUri = new Uri(url);
                 req.FillUserAgentWeb();
                 await req.FillSignedRequestAsync(userCredential, cancellationToken);
+                inspector?.Invoke(req);
             }, cancellationToken);
         }
 

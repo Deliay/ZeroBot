@@ -40,3 +40,13 @@ public readonly record struct UserAllBindings(List<UserAppBindings> list)
             userRole.nickname, userRole.roleId, userRole.serverId);
     }
 }
+
+public readonly record struct DailySignResource(string name);
+public readonly record struct DailySignReward(DailySignResource resource, int count);
+public readonly record struct DailySignResponse(DailySignReward awards);
+
+public readonly record struct DailySignV2Resource(string name, int count);
+public readonly record struct DailySignV2Reward(string id);
+public readonly record struct DailySignV2Response(
+    DailySignV2Reward awardIds,
+    Dictionary<string, DailySignV2Resource> resourceInfoMap);
