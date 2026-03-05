@@ -22,28 +22,38 @@ public readonly record struct UserAppRole(
 public readonly record struct UserRole(
     string nickname,
     string roleId,
-    string serverId);
+    string serverId = "1",
+    int level = 0,
+    bool isDefault = false,
+    bool isBanned = false,
+    string serverType = "domestic",
+    string serverName = "China");
 
 public readonly record struct UserAppBinding(
+    bool isOfficial,
+    bool isDefault,
+    bool isDelete,
     List<UserRole> roles,
     int gameId = 1,
     string uid = "",
     string channelName = "Unknown",
+    string channelMasterId = "Unknown",
     string gameName = "Unknown",
     string nickName = "Unknown");
 
-public readonly record struct UserAppBindings(string appCode, List<UserAppBinding> bindingList);
+public readonly record struct UserAppBindings(string appCode, string appName, List<UserAppBinding> bindingList);
 
 public readonly record struct UserAllBindings(List<UserAppBindings> list)
 {
     public IEnumerable<UserAppRole> Flat()
     {
-        return from userAppBindings in list
-            from userAppBinding in userAppBindings.bindingList
-            from userRole in userAppBinding.roles
-            select new UserAppRole(userAppBindings.appCode, userAppBinding.gameId, userAppBinding.uid,
-            userAppBinding.channelName, userAppBinding.gameName, userAppBinding.nickName,
-            userRole.nickname, userRole.roleId, userRole.serverId);
+        return list.SelectMany(userAppBindings => userAppBindings.bindingList.SelectMany(userAppBinding =>
+            (userAppBinding.roles.Count > 0
+                ? userAppBinding.roles
+                : [new UserRole(userAppBinding.nickName, userAppBinding.uid)])
+            .Select(userRole => new UserAppRole(userAppBindings.appCode, userAppBinding.gameId, userAppBinding.uid,
+                userAppBinding.channelName, userAppBinding.gameName, userAppBinding.nickName,
+                userRole.nickname, userRole.roleId, userRole.serverId))));
     }
 }
 

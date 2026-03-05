@@ -73,8 +73,8 @@ public class DailySignPeriodicTask(
         await config.BeginConfigMutationScopeAsync((newly, token) =>
         {
             if (!newly.LastSignedAt.ContainsKey(task.credentialId))
-                newly.LastSignedAt[task.credentialId] = DateTimeOffset.Now;
-            else newly.LastSignedAt.Add(task.credentialId, DateTimeOffset.Now);
+                newly.LastSignedAt.Add(task.credentialId, DateTimeOffset.Now);
+            else newly.LastSignedAt[task.credentialId] = DateTimeOffset.Now;;
 
             return config.SaveAsync(newly, token);
         }, cancellationToken);

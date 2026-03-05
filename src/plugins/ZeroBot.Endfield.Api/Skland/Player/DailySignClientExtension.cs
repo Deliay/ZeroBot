@@ -32,8 +32,7 @@ public static class DailySignClientExtension
             const string url = "https://zonai.skland.com/api/v1/game/attendance";
             var result = await client.PostCallZonAsync<DailySignResponse>(url, new
             {
-                gameId = role.gameId,
-                uid = role.uid,
+                role.gameId, role.uid,
             }, credential, cancellationToken: cancellationToken);
             result.EnsureSuccessStatusCode();
             return result.data;
