@@ -123,7 +123,9 @@ public class DailySignPeriodicTask(
 
     public async ValueTask WaitUntilNextDayAsync(CancellationToken cancellationToken = default)
     {
-        await Task.Delay(TimeSpan.FromHours(24) - DateTimeOffset.Now.TimeOfDay + TimeSpan.FromMinutes(1), cancellationToken);
+        var waitTime = TimeSpan.FromHours(24) - DateTimeOffset.Now.TimeOfDay + TimeSpan.FromMinutes(1);
+        logger.LogInformation("下次唤醒时间: {}", $"{DateTimeOffset.Now + waitTime:yyyy-MM-dd hh:mm:ss}");
+        await Task.Delay(waitTime, cancellationToken);
     }
     
     public async ValueTask RunAsync(CancellationToken cancellationToken = default)
