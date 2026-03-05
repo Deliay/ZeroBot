@@ -40,11 +40,10 @@ public class CredentialManager(HypergryphClient client, ICredentialRepository re
         var (oAuthToken, _ ) = await client.GetOAuthTokenByScanCode(scanResult.data.scanCode, cancellationToken);
         await repository.SaveOAuthTokenAsync(user, oAuthToken, cancellationToken);
 
-        var authorization = await client.GrantAuthorizationCodeAsync(oAuthToken, cancellationToken);
-        var credential = await client.GenerateZonCredentialAsync(authorization, cancellationToken);
+        var credential = await client.GenerateZonCredentialAsync(oAuthToken, cancellationToken);
 
         await repository.SaveCredentialAsync(user, credential, cancellationToken);
-
+        await repository.RemoveUserScanIdAsync(user, cancellationToken);
         return credential;
     }
 
@@ -56,12 +55,24 @@ public class CredentialManager(HypergryphClient client, ICredentialRepository re
     public async ValueTask RenewalRefreshTokenAsync(string user, CancellationToken cancellationToken = default)
     {
         var credentials = await repository.GetCredentialAsync(user, cancellationToken);
-        foreach (var userCredential in credentials)
+        var expiredCredentials =
+            credentials.Where(userCredential => userCredential.TokenExpiredAt <= DateTimeOffset.Now);
+        foreach (var userCredential in expiredCredentials)
         {
-            var result = await client.GenerateZonRefreshTokenAsync(userCredential, cancellationToken);
-            userCredential.RefreshToken = result.token;
-            userCredential.TokenExpiredAt = DateTimeOffset.Now + TimeSpan.FromHours(1);
-            await repository.SaveCredentialAsync(user, userCredential, cancellationToken);
+            var newCredential = await client.GenerateZonCredentialAsync(userCredential.OAuthToken, cancellationToken);
+            await repository.SaveCredentialAsync(user, newCredential, cancellationToken);
+        }
+
+        var allCredentials = (await repository.GetCredentialAsync(user, cancellationToken))
+            .ToDictionary((c) => c.OAuthToken, c => c);
+
+        var allOAuthTokens = (await repository.GetOAuthTokenAsync(user, cancellationToken))
+            .Where(token => !allCredentials.ContainsKey(token));
+
+        foreach (var oAuthToken in allOAuthTokens)
+        {
+            var newCredential = await client.GenerateZonCredentialAsync(oAuthToken, cancellationToken);
+            await repository.SaveCredentialAsync(user, newCredential, cancellationToken);
         }
     }
 }

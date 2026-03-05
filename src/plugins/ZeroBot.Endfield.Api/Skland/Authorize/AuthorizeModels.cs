@@ -17,12 +17,15 @@ public class UserCredential : IEquatable<UserCredential>
     public required string Cred { get; set; }
     public required string DeviceId { get; set; }
     public required string Id { get; set; }
+    
+    public required string AuthToken { get; set; }
+    public required string OAuthToken { get; set; }
 
     public bool Equals(UserCredential? other)
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Cred == other.Cred;
+        return OAuthToken == other.OAuthToken;
     }
 
     public override bool Equals(object? obj)
@@ -35,6 +38,6 @@ public class UserCredential : IEquatable<UserCredential>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Cred);
+        return HashCode.Combine(OAuthToken);
     }
 }

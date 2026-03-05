@@ -54,9 +54,12 @@ public static class LoginClientExtension
             return result.data.code;
         }
 
-        public async Task<UserCredential> GenerateZonCredentialAsync(string authorization,
+        public async Task<UserCredential> GenerateZonCredentialAsync(
+            string oAuthToken,
             CancellationToken cancellationToken = default)
         {
+            
+            var authorization = await client.GrantAuthorizationCodeAsync(oAuthToken, cancellationToken);
             var did = await DeviceIdGenerator.GetDeviceId();
             var result = await client.PostCallZonAsync<CredentialResponse>("https://zonai.skland.com/web/v1/user/auth/generate_cred_by_code",
                 new CredentialRequest(authorization),
@@ -72,6 +75,8 @@ public static class LoginClientExtension
                 Cred = result.data.cred,
                 DeviceId = did,
                 Id = Guid.NewGuid().ToString(),
+                AuthToken = authorization,
+                OAuthToken = oAuthToken,
             };
         }
 
