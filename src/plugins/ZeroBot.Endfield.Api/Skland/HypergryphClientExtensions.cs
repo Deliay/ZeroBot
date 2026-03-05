@@ -21,7 +21,6 @@ public static class HypergryphClientExtensions
 
     private static readonly IReadOnlyDictionary<string, string> BaseHeaders = new Dictionary<string, string>
     {
-        { "Accept-Encoding", "gzip" },
         { "Connection", "close" },
         { "X-Requested-With", "com.hypergryph.skland" },
     };

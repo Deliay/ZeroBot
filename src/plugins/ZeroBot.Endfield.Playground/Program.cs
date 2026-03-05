@@ -16,6 +16,7 @@ const string user = "test";
 
 Console.WriteLine($"Current working directory: {Directory.GetCurrentDirectory()}");
 
+await credentialManager.RenewalRefreshTokenAsync(user, cancellationToken);
 var credentials = await credentialManager.GetCurrentCredentialAsync(user, cancellationToken);
 
 if (credentials.Count == 0)
@@ -24,10 +25,6 @@ if (credentials.Count == 0)
     Console.WriteLine(QrCode.EnhancedEncodeText(scanUrl));
 
     var credential = await credentialManager.WaitScanAsync(user, cancellationToken);
-}
-else
-{
-    await credentialManager.RenewalRefreshTokenAsync(user, cancellationToken);
 }
 
 credentials = await credentialManager.GetCurrentCredentialAsync(user, cancellationToken);
