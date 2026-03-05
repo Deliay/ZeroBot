@@ -44,6 +44,12 @@ public class MilkyBot(
         return result.Url;
     }
 
+    public async ValueTask AcceptFriendRequestAsync(string uid, CancellationToken cancellationToken = default)
+    {
+        var param = new AcceptFriendRequestInput(uid, false);
+        await milky.Friend.AcceptFriendRequestAsync(param, cancellationToken);
+    }
+
     public async ValueTask<GetLoginInfoOutput> GetCurrentAccountAsync(CancellationToken cancellationToken = default)
     {
         return await botInfos.GetAccountInfoAsync(cancellationToken);

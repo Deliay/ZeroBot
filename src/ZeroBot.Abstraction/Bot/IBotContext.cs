@@ -17,6 +17,8 @@ public interface IBotContext
     ValueTask<Event<IncomingMessage>?> GetHistoryMessageAsync(long accountId, MessageScene scene, long peerId, long messageId,
         CancellationToken cancellationToken = default);
 
+    ValueTask AcceptFriendRequestAsync(long accountId, string uid, CancellationToken cancellationToken = default);
+    
     ValueTask UpdateGroupReactionAsync(long accountId, long groupId, long messageId, string reactionId, bool add,
         CancellationToken cancellationToken = default);
 

@@ -65,4 +65,9 @@ internal class TestBotService : IBotService
     {
         throw new NotImplementedException();
     }
+
+    public ValueTask AcceptFriendRequestAsync(string uid, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

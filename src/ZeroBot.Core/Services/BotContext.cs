@@ -94,6 +94,13 @@ public class BotContext(ILogger<BotContext> logger) : IBotContext
         return await botService.GetGroupMessageAsync(scene, peerId, messageId, cancellationToken);
     }
 
+    public async ValueTask AcceptFriendRequestAsync(long accountId, string uid, CancellationToken cancellationToken = default)
+    {
+        if (!_services.TryGetValue(accountId, out var botService)) return;
+
+        await botService.AcceptFriendRequestAsync(uid, cancellationToken);
+    }
+
     public async IAsyncEnumerable<GetLoginInfoOutput> GetAccountInfoAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {

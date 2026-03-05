@@ -29,4 +29,6 @@ public interface IBotService : IExecutable
         CancellationToken cancellationToken = default);
 
     ValueTask<string> GetTempResourceUrlAsync(string id, CancellationToken cancellationToken = default);
+    
+    ValueTask AcceptFriendRequestAsync(string uid, CancellationToken cancellationToken = default);
 }
