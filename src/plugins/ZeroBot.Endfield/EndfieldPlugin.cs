@@ -19,9 +19,11 @@ public class EndfieldPlugin : IPlugin
         services.AddSingletonComponent<PuzzleSolver>();
 
         services.ConfigureJsonConfig("sign_settings.json", SklandDailySignConfig.Empty, cancellationToken);
-        services.AddSingleton(new JsonCredentialRepository("sign_credentials.json"));
+        services.AddSingleton<ICredentialRepository>(new JsonCredentialRepository("sign_credentials.json"));
         services.AddSingleton<HypergryphClient>();
         services.AddSingleton<CredentialManager>();
+        services.AddSingletonComponent<ScanQrCodeTaskManager>();
+        services.AddSingletonExecutable<DailySignPeriodicTask>();
 
         return ValueTask.FromResult(services);
     }

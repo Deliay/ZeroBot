@@ -5,12 +5,12 @@ namespace ZeroBot.Endfield.Extension;
 
 public static class LoginQrCodeExtension
 {
-    extension(LoginQrCodeResponse codeResponse)
+    extension(LoginQrCodeResponse response)
     {
-        public byte[] ToPngByteArray(string text)
-        {
+        public byte[] ToPngQrCodeByteArray()
+        {   
             using var generator = new QRCodeGenerator();
-            using var data = generator.CreateQrCode(new PayloadGenerator.Url(text), QRCodeGenerator.ECCLevel.Q);
+            using var data = generator.CreateQrCode(response.scanUrl, QRCodeGenerator.ECCLevel.Q);
             var pngEncoder = new PngByteQRCode(data);
             return pngEncoder.GetGraphic(20);
         }

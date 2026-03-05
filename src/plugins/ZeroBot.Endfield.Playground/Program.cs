@@ -12,7 +12,7 @@ var credentialManager = new CredentialManager(hypergryphClient, credentialReposi
 using var cts = new CancellationTokenSource();
 var cancellationToken = cts.Token;
 
-var user = "test";
+const string user = "test";
 
 Console.WriteLine($"Current working directory: {Directory.GetCurrentDirectory()}");
 
@@ -20,7 +20,7 @@ var credentials = await credentialManager.GetCurrentCredentialAsync(user, cancel
 
 if (credentials.Count == 0)
 {
-    var scanUrl = await credentialManager.GenerateLoginQrCodePayload(user, cancellationToken);
+    var (_, scanUrl) = await credentialManager.GenerateLoginQrCodePayload(user, cancellationToken);
     Console.WriteLine(QrCode.EnhancedEncodeText(scanUrl));
 
     var credential = await credentialManager.WaitScanAsync(user, cancellationToken);
@@ -39,6 +39,6 @@ foreach (var credential in credentials)
     {
         Console.WriteLine($"{userAppRole.appCode}: {userAppRole.channelName}" +
                           $" - {userAppRole.gameName} - uid:{userAppRole.uid}" +
-                          $" - {userAppRole.nickname}/{userAppRole.nickName} - roleId:{userAppRole.roleId}");
+                          $" - {userAppRole.roleNickname}/{userAppRole.nickName} - roleId:{userAppRole.roleId}");
     }
 }

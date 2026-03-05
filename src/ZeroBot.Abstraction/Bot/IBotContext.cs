@@ -6,7 +6,7 @@ public interface IBotContext
 {
     IAsyncEnumerable<Event> ReadEvents(CancellationToken cancellationToken = default);
 
-    ValueTask WriteEvent(Event @event, CancellationToken cancellationToken = default);
+    ValueTask WriteEventToRepository(Event @event, CancellationToken cancellationToken = default);
     
     ValueTask<MultiGroupSendResult> WriteManyGroupMessageAsync(long accountId, HashSet<long> groupIds,
         CancellationToken cancellationToken = default, params OutgoingSegment[] messageSegments);

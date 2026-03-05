@@ -77,6 +77,16 @@ public static class EventExtensions
         {
             await message.SendAsPrivate(bot, cancellationToken, [message.Data.Reply(), ..segments]);
         }
+
+        public void EnsureIsGroupMessage()
+        {
+            if (message.Scene != MessageScene.Group) throw new InvalidOperationException("The message is not a group message");
+        }
+        
+        public void EnsureIsPrivateMessage()
+        {
+            if (message.Scene == MessageScene.Group) throw new InvalidOperationException("The message is not a private message");
+        }
         
         public MessageScene Scene => message.Data switch
         {

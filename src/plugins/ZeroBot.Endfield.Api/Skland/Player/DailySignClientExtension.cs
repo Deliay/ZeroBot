@@ -17,12 +17,12 @@ public static class DailySignClientExtension
                 req.Content = new StringContent("", MediaTypeHeaderValue.Parse("application/json"));
                 req.FillHeaders(new Dictionary<string, string>()
                 {
-                    {"sk-game-role", $"3_{role.roleId}_{role.serverId}"},
-                    {"referer", "https://game.skland.com/"},
-                    {"origin", "https://game.skland.com"},
+                    { "sk-game-role", $"3_{role.roleId}_{role.serverId}" },
+                    { "referer", "https://game.skland.com/" },
+                    { "origin", "https://game.skland.com" },
                 });
             }, cancellationToken);
-            
+
             response.EnsureSuccessStatusCode();
             return response.data;
         }
@@ -39,5 +39,34 @@ public static class DailySignClientExtension
             result.EnsureSuccessStatusCode();
             return result.data;
         }
+
+        public async ValueTask<DailySignResponse> DailySignAsync(UserCredential credential, UserAppRole role,
+            CancellationToken cancellationToken = default)
+        {
+            switch (role.appCode)
+            {
+                case "endfield":
+                {
+                    var result = await client.DailySignEndfieldAsync(credential, role, cancellationToken);
+                
+                    return new DailySignResponse(result.awardIds
+                        .Where(award => result.resourceInfoMap.ContainsKey(award.id))
+                        .Select(award =>
+                        {
+                            var resource = result.resourceInfoMap[award.id];
+                            return new DailySignReward(new DailySignResource(resource.name), resource.count);
+                        }).ToList());
+                }
+                case "arknights":
+                    return await client.DailySignArknightsAsync(credential, role, cancellationToken);
+                default:
+                    throw new InvalidOperationException("support only arknights & endfield");
+            }
+        }
+    }
+
+    extension(UserAppRole role)
+    {
+        public bool IsSupportSign => role.appCode is "endfield" or "arknights";
     }
 }

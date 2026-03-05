@@ -78,6 +78,15 @@ public class JsonCredentialRepository(string path) : ICredentialRepository
         }, cancellationToken);
     }
 
+    public ValueTask FlushUserScanIdAsync(CancellationToken cancellationToken = default)
+    {
+        return BeginManipulation((repo) =>
+        {
+            repo.userScanId.Clear();
+            return ValueTask.FromResult(repo);
+        }, cancellationToken);
+    }
+
     public ValueTask SaveOAuthTokenAsync(string user, string oauthToken, CancellationToken cancellationToken = default)
     {
         return BeginManipulation((repo) =>
@@ -116,8 +125,32 @@ public class JsonCredentialRepository(string path) : ICredentialRepository
         }, cancellationToken);
     }
 
+    public async ValueTask<UserCredential?> GetCredentialAsync(string user, string credentialId, CancellationToken cancellationToken = default)
+    {
+        return ((await ReadRepository(cancellationToken))
+                .userCredentials.GetValueOrDefault(user) ?? [])
+            .FirstOrDefault(credential => credential.Id == credentialId);
+    }
+
     public async ValueTask<HashSet<UserCredential>> GetCredentialAsync(string user, CancellationToken cancellationToken = default)
     {
         return (await ReadRepository(cancellationToken)).userCredentials.GetValueOrDefault(user) ?? [];
+    }
+
+    public ValueTask RemoveCredentialAsync(string user, string id, CancellationToken cancellationToken = default)
+    {
+        return BeginManipulation((repo) =>
+        {
+            if (repo.userCredentials.TryGetValue(user, out var credentials))
+            {
+                var target = credentials.FirstOrDefault(credential => credential.Id == id);
+                if (target is not null)
+                {
+                    credentials.Remove(target);
+                    repo.userOAuthTokens[user].Remove(target.OAuthToken);
+                }
+            }
+            return ValueTask.FromResult(repo);
+        }, cancellationToken);
     }
 }

@@ -9,9 +9,15 @@ public readonly record struct UserAppRole(
     string channelName,
     string gameName,
     string nickName,
-    string nickname,
+    string roleNickname,
     string roleId,
-    string serverId);
+    string serverId)
+{
+    public override string ToString()
+    {
+        return $"{channelName}/{gameName} {roleNickname}(UID:{roleId})";
+    }
+}
 
 public readonly record struct UserRole(
     string nickname,
@@ -42,11 +48,25 @@ public readonly record struct UserAllBindings(List<UserAppBindings> list)
 }
 
 public readonly record struct DailySignResource(string name);
-public readonly record struct DailySignReward(DailySignResource resource, int count);
-public readonly record struct DailySignResponse(DailySignReward awards);
+
+public readonly record struct DailySignReward(DailySignResource resource, int count)
+{
+    public override string ToString()
+    {
+        return $"{resource.name} * {count}";
+    }
+}
+
+public readonly record struct DailySignResponse(List<DailySignReward> awards)
+{
+    public override string ToString()
+    {
+        return string.Join('\n', awards.Select(x => x.ToString()));
+    }
+}
 
 public readonly record struct DailySignV2Resource(string name, int count);
 public readonly record struct DailySignV2Reward(string id);
 public readonly record struct DailySignV2Response(
-    DailySignV2Reward awardIds,
+    List<DailySignV2Reward> awardIds,
     Dictionary<string, DailySignV2Resource> resourceInfoMap);

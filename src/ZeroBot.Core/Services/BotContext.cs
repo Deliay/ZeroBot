@@ -27,7 +27,7 @@ public class BotContext(ILogger<BotContext> logger) : IBotContext
         _subscribers.Remove(id);
     }
 
-    public async ValueTask WriteEvent(Event @event, CancellationToken cancellationToken = default)
+    public async ValueTask WriteEventToRepository(Event @event, CancellationToken cancellationToken = default)
     {
         if (EventRepository is not null)
         {
