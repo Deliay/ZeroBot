@@ -12,14 +12,14 @@ public class DesRuleEntry
 
 public class UserCredential : IEquatable<UserCredential>
 {
-    public required DateTimeOffset TokenExpiredAt { get; set; }
-    public required string RefreshToken { get; set; }
-    public required string Cred { get; set; }
-    public required string DeviceId { get; set; }
-    public required string Id { get; set; }
+    public required DateTimeOffset TokenExpiredAt { get; init; }
+    public required string RefreshToken { get; init; }
+    public required string Cred { get; init; }
+    public required string DeviceId { get; init; }
+    public required string Id { get; init; }
     
-    public required string AuthToken { get; set; }
-    public required string OAuthToken { get; set; }
+    public required string AuthToken { get; init; }
+    public required string OAuthToken { get; init; }
 
     public bool Equals(UserCredential? other)
     {
