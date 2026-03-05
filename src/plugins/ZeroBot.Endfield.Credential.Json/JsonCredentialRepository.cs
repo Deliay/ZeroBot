@@ -3,13 +3,16 @@ using ZeroBot.Endfield.Api.Skland.Authorize;
 
 namespace ZeroBot.Endfield.Credential.Json;
 
+public record ScanQrCode(string scanId, DateTimeOffset expiredAt);
+
 public record Repository(
-    Dictionary<string, string> userScanId,
+    Dictionary<string, ScanQrCode> userScanId,
     Dictionary<string, HashSet<string>> userOAuthTokens,
     Dictionary<string, HashSet<UserCredential>> userCredentials)
 {
     public static Repository Empty => new([], [], []);
 }
+
 
 public class JsonCredentialRepository(string path) : ICredentialRepository
 {
@@ -55,14 +58,15 @@ public class JsonCredentialRepository(string path) : ICredentialRepository
         return BeginManipulation((repo) =>
         {
             repo.userScanId.Remove(user);
-            repo.userScanId.Add(user, scanId);
+            repo.userScanId.Add(user, new ScanQrCode(scanId, DateTimeOffset.Now.AddMinutes(15)));
             return ValueTask.FromResult(repo);
         }, cancellationToken);
     }
 
     public async ValueTask<string?> GetUserScanIdAsync(string user, CancellationToken cancellationToken = default)
     {
-        return (await ReadRepository(cancellationToken)).userScanId.GetValueOrDefault(user);
+        var scanQrCode = (await ReadRepository(cancellationToken)).userScanId.GetValueOrDefault(user);
+        return scanQrCode?.expiredAt > DateTimeOffset.Now ? scanQrCode.scanId : null;
     }
 
     public ValueTask RemoveUserScanIdAsync(string user, CancellationToken cancellationToken = default)
