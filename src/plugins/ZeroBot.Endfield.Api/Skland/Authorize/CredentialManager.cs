@@ -21,6 +21,9 @@ public class CredentialManager(HypergryphClient client, ICredentialRepository re
     public ValueTask FlushUserScanIdAsync(CancellationToken cancellationToken = default)
         => repository.FlushUserScanIdAsync(cancellationToken);
     
+    public ValueTask RemoveUserScanIdAsync(string user, CancellationToken cancellationToken = default)
+        => repository.RemoveUserScanIdAsync(user, cancellationToken);
+    
     private static readonly ResiliencePipeline<Response<LoginScanStatusResponse>> WaitScanPipeline
         = new ResiliencePipelineBuilder<Response<LoginScanStatusResponse>>()
         .AddRetry(new RetryStrategyOptions<Response<LoginScanStatusResponse>>
@@ -76,24 +79,26 @@ public class CredentialManager(HypergryphClient client, ICredentialRepository re
         return RenewalRefreshTokenCoreAsync(
             user, 
             (credential) => credential.Id == credentialId,
-            false,
-            cancellationToken);
+            refreshNoCredentialOAuthToken: false,
+            ignoreTokenCache: true,
+            cancellationToken: cancellationToken);
     }
 
     public ValueTask RenewalRefreshTokenAsync(string user, CancellationToken cancellationToken = default)
     {
-        return RenewalRefreshTokenCoreAsync(user, (_) => true, true, cancellationToken);
+        return RenewalRefreshTokenCoreAsync(user, (_) => true, true, false, cancellationToken);
     }
 
     private async ValueTask RenewalRefreshTokenCoreAsync(string user,
         Func<UserCredential, bool> predictor,
         bool refreshNoCredentialOAuthToken = true,
+        bool ignoreTokenCache = false,
         CancellationToken cancellationToken = default)
     {
         var credentials = await repository.GetCredentialAsync(user, cancellationToken);
         var expiredCredentials =
             credentials
-                .Where(userCredential => userCredential.TokenExpiredAt <= DateTimeOffset.Now)
+                .Where(userCredential => ignoreTokenCache || userCredential.TokenExpiredAt <= DateTimeOffset.Now)
                 .Where(predictor);
 
         foreach (var userCredential in expiredCredentials)

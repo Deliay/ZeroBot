@@ -24,7 +24,7 @@ public class EndfieldPlugin : IPlugin
         services.AddSingleton<CredentialManager>();
         services.AddSingletonComponent<ScanQrCodeTaskManager>();
         services.AddSingletonExecutable<DailySignPeriodicTask>();
-
+        services.AddSingletonComponent<HypergraphyCommand>();
         return ValueTask.FromResult(services);
     }
 }

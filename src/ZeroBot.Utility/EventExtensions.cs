@@ -63,6 +63,22 @@ public static class EventExtensions
         {
             await bot.WritePrivateMessageAsync(message.SelfId, message.Data.SenderId, cancellationToken, segments);
         }
+
+        public ValueTask Send(IBotContext bot, CancellationToken cancellationToken,
+            params OutgoingSegment[] segments)
+        {
+            return message.Scene == MessageScene.Group 
+                ? message.SendAsGroup(bot, cancellationToken, segments)
+                : message.SendAsPrivate(bot, cancellationToken, segments);
+        }
+
+        public ValueTask Reply(IBotContext bot, CancellationToken cancellationToken,
+            params OutgoingSegment[] segments)
+        {
+            return message.Scene == MessageScene.Group 
+                ? message.ReplyAsGroup(bot, cancellationToken, segments)
+                : message.ReplyAsPrivate(bot, cancellationToken, segments);
+        }
         
         public async ValueTask ReplyAsGroup(IBotContext bot,
             CancellationToken cancellationToken = default,
@@ -80,12 +96,12 @@ public static class EventExtensions
 
         public void EnsureIsGroupMessage()
         {
-            if (message.Scene != MessageScene.Group) throw new InvalidOperationException("The message is not a group message");
+            if (message.Scene != MessageScene.Group) throw new InvalidOperationException("这个功能只能在群聊中使用");
         }
         
         public void EnsureIsPrivateMessage()
         {
-            if (message.Scene == MessageScene.Group) throw new InvalidOperationException("The message is not a private message");
+            if (message.Scene == MessageScene.Group) throw new InvalidOperationException("这个功能只能在私聊中使用");
         }
         
         public MessageScene Scene => message.Data switch

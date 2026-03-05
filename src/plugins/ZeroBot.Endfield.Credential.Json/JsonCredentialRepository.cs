@@ -65,7 +65,8 @@ public class JsonCredentialRepository(string path) : ICredentialRepository
 
     public async ValueTask<string?> GetUserScanIdAsync(string user, CancellationToken cancellationToken = default)
     {
-        var scanQrCode = (await ReadRepository(cancellationToken)).userScanId.GetValueOrDefault(user);
+        var repo = await ReadRepository(cancellationToken);
+        var scanQrCode = repo.userScanId.GetValueOrDefault(user);
         return scanQrCode?.expiredAt > DateTimeOffset.Now ? scanQrCode.scanId : null;
     }
 

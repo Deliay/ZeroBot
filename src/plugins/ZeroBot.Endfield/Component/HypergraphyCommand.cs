@@ -1,6 +1,5 @@
 using System.Buffers;
 using Milky.Net.Model;
-using QRCoder;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.Endfield.Api.Skland;
 using ZeroBot.Endfield.Api.Skland.Authorize;
@@ -8,7 +7,6 @@ using ZeroBot.Endfield.Api.Skland.Player;
 using ZeroBot.Endfield.Config;
 using ZeroBot.Endfield.Extension;
 using ZeroBot.Utility;
-using ZeroBot.Utility.Commands;
 
 namespace ZeroBot.Endfield.Component;
 
@@ -21,13 +19,13 @@ public class HypergraphyCommand(
     IBotContext bot) : CommandQueuedHandler(dispatcher)
 {
     private static readonly TextOutgoingSegment HelpStrings = ("鹰角小助手\n" +
-                                       "===私聊指令===" +
+                                       "===私聊指令===\n" +
                                        "/鹰角:绑定\n" +
                                        "/鹰角:已绑\n" +
                                        "/鹰角:解绑:本地ID\n" +
                                        "/鹰角:自动签到:本地ID (添加时会自动进行签到)\n" +
                                        "/鹰角:关闭自动签到:本地ID\n" +
-                                       "===全局指令===" +
+                                       "\n===全局指令===\n" +
                                        "以后会有我的信息，我的体力一类的，我的抽卡记录等信息，群聊可用，但现在暂时还没有").ToMilkyTextSegment();
 
     private static readonly TextOutgoingSegment QrCodeGeneratedStrings = "已生成登录二维码，请扫描或等待5分钟后再试".ToMilkyTextSegment();
@@ -55,7 +53,7 @@ public class HypergraphyCommand(
             qrCode.ToPngQrCodeByteArray().ToMilkyImageSegment(),
             QrCodeGeneratedStrings]);
         
-        taskManager.Enqueue(qrCode.scanId, async (credential) =>
+        taskManager.Enqueue(senderId, async (credential) =>
         {
             var bindings = (await client.GetPlayerBindings(credential, cancellationToken))
                 .Flat()
@@ -114,12 +112,12 @@ public class HypergraphyCommand(
 
     private ValueTask HelpAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
-        return message.SendAsPrivate(bot, cancellationToken, [HelpStrings]);
+        return message.Reply(bot, cancellationToken, [HelpStrings]);
     }
     
-    protected override ValueTask DequeueAsync(Event<IncomingMessage> @event, CancellationToken cancellationToken = default)
+    protected ValueTask DequeueCoreAsync(Event<IncomingMessage> @event, CancellationToken cancellationToken = default)
     {
-        var cmd = @event.ToTextCommands().First();
+        var cmd = @event.ToTextCommands(argumentSplitters: ":：").First();
         if (cmd.Arguments.Length == 0) return HelpAsync(@event, cancellationToken);
 
         return cmd.Arguments[0] switch
@@ -132,5 +130,17 @@ public class HypergraphyCommand(
             "关闭自动签到" when (cmd.Arguments.Length == 2) => DisableDailySignAsync(cmd.Arguments[1], @event, cancellationToken),
             _ => HelpAsync(@event, cancellationToken)
         };
+    }
+
+    protected override async ValueTask DequeueAsync(Event<IncomingMessage> @event, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await DequeueCoreAsync(@event, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            await @event.Reply(bot, cancellationToken, [e.Message.ToMilkyTextSegment()]);
+        }
     }
 }

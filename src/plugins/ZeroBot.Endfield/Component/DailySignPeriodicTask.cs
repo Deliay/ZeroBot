@@ -67,12 +67,12 @@ public class DailySignPeriodicTask(
         var signResult = string.Join('\n', roleSignResultList);
         
         await bot.WritePrivateMessageAsync(task.selfId, task.userId, cancellationToken, [
-            $"{task.credentialId} 签到成功：{signResult}".ToMilkyTextSegment()
+            $"{task.credentialId} 签到完成：\n{signResult}".ToMilkyTextSegment()
         ]);
         
         await config.BeginConfigMutationScopeAsync((newly, token) =>
         {
-            if (!newly.LastSignedAt.TryAdd(task.credentialId, DateTimeOffset.Now))
+            if (!newly.LastSignedAt.ContainsKey(task.credentialId))
                 newly.LastSignedAt[task.credentialId] = DateTimeOffset.Now;
             else newly.LastSignedAt.Add(task.credentialId, DateTimeOffset.Now);
 
@@ -120,6 +120,11 @@ public class DailySignPeriodicTask(
             }
         }
     }
+
+    public async ValueTask WaitUntilNextDayAsync(CancellationToken cancellationToken = default)
+    {
+        await Task.Delay(TimeSpan.FromHours(24) - DateTimeOffset.Now.TimeOfDay + TimeSpan.FromMinutes(1), cancellationToken);
+    }
     
     public async ValueTask RunAsync(CancellationToken cancellationToken = default)
     {
@@ -128,6 +133,7 @@ public class DailySignPeriodicTask(
             try
             {
                 await RunCoreAsync(cancellationToken);
+                await WaitUntilNextDayAsync(cancellationToken);
             }
             catch (Exception ex)
             {
