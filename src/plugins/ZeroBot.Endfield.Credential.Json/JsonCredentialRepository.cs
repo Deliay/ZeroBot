@@ -115,7 +115,16 @@ public class JsonCredentialRepository(string path) : ICredentialRepository
         {
             if (repo.userCredentials.TryGetValue(user, out var userCredentials))
             {
-                userCredentials.Add(userCredential);
+                if (userCredentials.TryGetValue(userCredential, out var oldCredential))
+                {
+                    userCredentials.Remove(oldCredential);
+                    userCredential.Id = oldCredential.Id;
+                    userCredentials.Add(userCredential);
+                }
+                else
+                {
+                    userCredentials.Add(userCredential);
+                }
             }
             else
             {

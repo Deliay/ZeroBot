@@ -16,7 +16,7 @@ public class UserCredential : IEquatable<UserCredential>
     public required string RefreshToken { get; init; }
     public required string Cred { get; init; }
     public required string DeviceId { get; init; }
-    public required string Id { get; init; }
+    public required string Id { get; set; }
     
     public required string AuthToken { get; init; }
     public required string OAuthToken { get; init; }

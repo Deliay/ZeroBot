@@ -12,9 +12,8 @@ public static class DailySignClientExtension
         {
             if (role.appCode != "endfield") throw new InvalidOperationException("support only endfield roles");
             const string url = "https://zonai.skland.com/web/v1/game/endfield/attendance";
-            var response = await client.PostCallZonAsync<DailySignV2Response>(url, "", credential, (req) =>
+            var response = await client.PostCallZonAsync<DailySignV2Response>(url, null, credential, (req) =>
             {
-                req.Content = new StringContent("", MediaTypeHeaderValue.Parse("application/json"));
                 req.FillHeaders(new Dictionary<string, string>()
                 {
                     { "sk-game-role", $"3_{role.roleId}_{role.serverId}" },

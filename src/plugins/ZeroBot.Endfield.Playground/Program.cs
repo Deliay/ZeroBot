@@ -40,5 +40,14 @@ foreach (var credential in credentials)
         Console.WriteLine($"{userAppRole.appCode}: {userAppRole.channelName}" +
                           $" - {userAppRole.gameName} - uid:{userAppRole.uid}" +
                           $" - {userAppRole.roleNickname}/{userAppRole.nickName} - roleId:{userAppRole.roleId}");
+
+        try
+        {
+            await hypergryphClient.DailySignAsync(credential, userAppRole, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
 }

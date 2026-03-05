@@ -124,16 +124,23 @@ public static class HypergryphClientExtensions
             }, cancellationToken);
         }
 
-        public async ValueTask<ZonResponse<T>> PostCallZonAsync<T>(string url, object data,
+        public async ValueTask<ZonResponse<T>> PostCallZonAsync<T>(string url, object? data,
             UserCredential userCredential,
             Action<HttpRequestMessage>? inspector = null,
             CancellationToken cancellationToken = default)
         {
             return await client.CallZonAsync<T>(request: async (req) =>
             {
-                var json = JsonSerializer.Serialize(data);
+                if (data is not null)
+                {
+                    var json = JsonSerializer.Serialize(data);
+                    req.Content = new StringContent(json, MimeTypeApplicationJson);
+                }
+                else
+                {
+                    req.Content = new StringContent("", MimeTypeApplicationJson);
+                }
                 req.Method = HttpMethod.Post;
-                req.Content = new StringContent(json, MimeTypeApplicationJson);
                 req.RequestUri = new Uri(url);
                 req.FillUserAgentWeb();
                 await req.FillSignedRequestAsync(userCredential, cancellationToken);
