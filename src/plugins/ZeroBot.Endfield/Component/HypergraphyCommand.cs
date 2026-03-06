@@ -19,7 +19,7 @@ public class HypergraphyCommand(
 {
     private static readonly TextOutgoingSegment HelpStrings = ("鹰角小助手\n" +
                                        "===私聊指令===\n" +
-                                       "/鹰角:绑定 (添加时会自动进行签到)\n" +
+                                       "/鹰角:绑定 (添加时会默认开启自动签到)\n" +
                                        "/鹰角:已绑\n" +
                                        "/鹰角:解绑:本地ID\n" +
                                        "/鹰角:自动签到:本地ID \n" +

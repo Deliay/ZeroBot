@@ -36,10 +36,8 @@ public class DailySignPeriodicTask(
         var credential = await credentialManager.GetCredentialAsync(userId, task.credentialId, cancellationToken);
         if (credential is null)
         {
-            logger.LogInformation("帐号 {account} 登录失败，本次跳过", cancellationToken);
-            await bot.WritePrivateMessageAsync(task.selfId, task.userId, cancellationToken, [
-                $"帐号 {task.credentialId} 登录失败，已自动从帐号列表中移除".ToMilkyTextSegment()
-            ]);
+            logger.LogInformation("帐号 {account} 登录失败，自动登录已禁用", cancellationToken);
+            await RemoveTaskAsync(task, cancellationToken);
             return;
         }
         logger.LogInformation("帐号 {} 登录成功", task.credentialId);

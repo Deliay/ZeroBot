@@ -44,8 +44,12 @@ public class BindingCommandHandlers(
                 .Flat()
                 .Select((binding) => $"- {binding}");
             await message.SendAsPrivate(bot, cancellationToken, [
-                $"帐号(本地ID: {credential.Id})中的下列角色绑定成功:\n{string.Join("\n", bindings)}".ToMilkyTextSegment()
+                ($"帐号(本地ID: {credential.Id})中的下列角色绑定成功:\n" +
+                 $"{string.Join("\n", bindings)}\n\n" +
+                 $"自动签到已自动开启，如果无需自动签到，请手动关闭").ToMilkyTextSegment()
             ]);
+            var task = new SignTask(message.SelfId, message.Data.SenderId, credential.Id);
+            await periodicTask.AddTaskAsync(task, cancellationToken);
         }, cancellationToken);
     }
 
