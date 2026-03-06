@@ -20,6 +20,8 @@ public class UserCredential : IEquatable<UserCredential>
     
     public required string AuthToken { get; init; }
     public required string OAuthToken { get; init; }
+    
+    public string? SklandUserId { get; set; }
 
     public bool Equals(UserCredential? other)
     {

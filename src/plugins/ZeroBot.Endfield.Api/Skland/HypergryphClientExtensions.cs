@@ -23,6 +23,8 @@ public static class HypergryphClientExtensions
     {
         { "Connection", "close" },
         { "X-Requested-With", "com.hypergryph.skland" },
+        { "Referer", "https://game.skland.com/" },
+        { "Origin", "https://game.skland.com" },
     };
 
     private static readonly JsonSerializerOptions SignSerializerOptions =

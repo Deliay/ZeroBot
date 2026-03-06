@@ -1,7 +1,9 @@
 ﻿using System.Globalization;
+using System.Text.Json;
 using Net.Codecrete.QrCodeGenerator;
 using ZeroBot.Endfield.Api.Skland;
 using ZeroBot.Endfield.Api.Skland.Authorize;
+using ZeroBot.Endfield.Api.Skland.Endfield;
 using ZeroBot.Endfield.Api.Skland.Player;
 using ZeroBot.Endfield.Credential.Json;
 using ZeroBot.Endfield.Playground;
@@ -31,16 +33,19 @@ credentials = await credentialManager.GetCurrentCredentialAsync(user, cancellati
 
 foreach (var credential in credentials)
 {
+    var sklandUser = await hypergryphClient.GetCurrentUserAsync(credential, cancellationToken);
+
     var bindings = await hypergryphClient.GetPlayerBindings(credential, cancellationToken);
     foreach (var userAppRole in bindings.Flat())
     {
         Console.WriteLine($"{userAppRole.appCode}: {userAppRole.channelName}" +
                           $" - {userAppRole.gameName} - uid:{userAppRole.uid}" +
                           $" - {userAppRole.roleNickname}/{userAppRole.nickName} - roleId:{userAppRole.roleId}");
-
+        if (userAppRole.appCode != "endfield") continue;
         try
         {
-            await hypergryphClient.DailySignAsync(credential, userAppRole, cancellationToken);
+            var result = await hypergryphClient.GetEndfieldInfoAsync(sklandUser, userAppRole, credential, cancellationToken);
+            Console.WriteLine($"角色数量:{result.@base.charNum}");
         }
         catch (Exception e)
         {

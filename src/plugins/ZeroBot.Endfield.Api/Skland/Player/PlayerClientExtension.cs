@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ZeroBot.Endfield.Api.Skland.Authorize;
 
 namespace ZeroBot.Endfield.Api.Skland.Player;
@@ -16,5 +17,6 @@ public static class PlayerClientExtension
             result.EnsureSuccessStatusCode();
             return result.data;
         }
+
     }
 }
