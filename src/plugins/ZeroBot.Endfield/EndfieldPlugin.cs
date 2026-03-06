@@ -1,5 +1,6 @@
 ﻿using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.DependencyInjection;
+using ZeroBot.Endfield.Api.Extension;
 using ZeroBot.Endfield.Api.Skland;
 using ZeroBot.Endfield.Api.Skland.Authorize;
 using ZeroBot.Endfield.Component;
@@ -19,9 +20,8 @@ public class EndfieldPlugin : IPlugin
         services.AddSingletonComponent<PuzzleSolver>();
 
         services.ConfigureJsonConfig("sign_settings.json", SklandDailySignConfig.Empty, cancellationToken);
-        services.AddSingleton<ICredentialRepository>(new JsonCredentialRepository("sign_credentials.json"));
-        services.AddSingleton<HypergryphClient>();
-        services.AddSingleton<CredentialManager>();
+        services.AddEndfieldApi(_ => new JsonCredentialRepository("sign_credentials.json"));
+
         services.AddSingletonComponent<ScanQrCodeTaskManager>();
         services.AddSingletonExecutable<DailySignPeriodicTask>();
         services.AddSingletonComponent<HypergraphyCommand>();
