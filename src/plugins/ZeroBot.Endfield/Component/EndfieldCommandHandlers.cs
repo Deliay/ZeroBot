@@ -66,7 +66,7 @@ public class EndfieldCommandHandlers(
         if (msgList.Count == 0)
         {
             await message.Reply(bot, cancellationToken,
-                ["没有找到可以查询的终末地角色，请使用「/鹰角:绑定」进行绑定（使用森空岛App扫码）".ToMilkyTextSegment()]);
+                ["没有找到可以查询的终末地角色，请私聊我使用「/鹰角:绑定」进行绑定（使用森空岛App扫码）".ToMilkyTextSegment()]);
             return;
         }
         
