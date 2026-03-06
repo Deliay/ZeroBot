@@ -88,6 +88,15 @@ public class BindingCommandHandlers(
     {
         message.EnsureIsPrivateMessage();
         var task = new SignTask(message.SelfId, message.Data.SenderId, id);
+        var userId = $"{message.Data.SenderId}";
+        var credential = await credentialManager.GetCredentialAsync(userId, id, cancellationToken);
+        if (credential is null)
+        {
+            await message.Reply(bot, cancellationToken, [
+                $"本地ID：「{id}」不存在，请输入类似于 00000000000-0000-000-0000000 格式的本地ID".ToMilkyTextSegment()
+            ]);
+            return;
+        }
         await periodicTask.AddTaskAsync(task, cancellationToken);
     }
 
