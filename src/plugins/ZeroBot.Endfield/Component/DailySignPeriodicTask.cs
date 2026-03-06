@@ -111,6 +111,7 @@ public class DailySignPeriodicTask(
             try
             {
                 await SignAsync(account, cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
             }
             catch (Exception e)
             {
