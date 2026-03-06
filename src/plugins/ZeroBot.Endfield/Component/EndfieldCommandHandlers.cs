@@ -48,7 +48,7 @@ public class EndfieldCommandHandlers(
                     async _ => await client.GetEndfieldInfoAsync(role, credential, cancellationToken),
                     _defaultExpireOptions);
 
-                yield return $"{info.@base.name}(UID:{role.uid}) Lv.{info.@base.level} ({info.@base.worldLevel})\n" +
+                yield return $"{info.@base.name}(UID:{role.roleId}) Lv.{info.@base.level} (世界等级 {info.@base.worldLevel})\n" +
                              $"理智:{info.dungeon.curStamina}/{info.dungeon.maxStamina}(回满: {DateTimeOffset.FromUnixTimeSeconds(long.Parse(info.dungeon.maxTs)):yyyy-MM-dd hh:mm:ss})\n" +
                              $"日常进度:{info.dailyMission.dailyActivation}/{info.dailyMission.maxDailyActivation}, 通行证进度:{info.bpSystem.curLevel}/{info.bpSystem.maxLevel}\n" +
                              $"主线进度:{info.@base.mainMission.description}";
@@ -60,9 +60,18 @@ public class EndfieldCommandHandlers(
         CancellationToken cancellationToken = default)
     {
         var userId = $"{message.Data.SenderId}";
-        var msg = await GenerateInfoAsync(userId, cancellationToken)
-            .AggregateAsync((a, b) => $"{a}\n\n{b}", cancellationToken);
+        var msgList = await GenerateInfoAsync(userId, cancellationToken)
+            .ToListAsync(cancellationToken);
 
+        if (msgList.Count == 0)
+        {
+            await message.Reply(bot, cancellationToken,
+                ["没有找到可以查询的终末地角色，请使用「/鹰角:绑定」进行绑定（使用森空岛App扫码）".ToMilkyTextSegment()]);
+            return;
+        }
+        
+        var msg = string.Join("\n\n", msgList);
+        
         await message.Reply(bot, cancellationToken, [msg.ToMilkyTextSegment()]);
     }
 }
