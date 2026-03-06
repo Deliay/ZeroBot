@@ -50,7 +50,7 @@ public readonly record struct UserAllBindings(List<UserAppBindings> list)
         return list.SelectMany(userAppBindings => userAppBindings.bindingList.SelectMany(userAppBinding =>
             (userAppBinding.roles.Count > 0
                 ? userAppBinding.roles
-                : [new UserRole(userAppBinding.nickName, userAppBinding.uid)])
+                : userAppBinding.gameId == 3 ? [] : [new UserRole(userAppBinding.nickName, userAppBinding.uid)])
             .Select(userRole => new UserAppRole(userAppBindings.appCode, userAppBinding.gameId, userAppBinding.uid,
                 userAppBinding.channelName, userAppBinding.gameName, userAppBinding.nickName,
                 userRole.nickname, userRole.roleId, userRole.serverId))));
