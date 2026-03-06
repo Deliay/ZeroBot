@@ -21,10 +21,14 @@ public class EndfieldPlugin : IPlugin
 
         services.ConfigureJsonConfig("sign_settings.json", SklandDailySignConfig.Empty, cancellationToken);
         services.AddEndfieldApi(_ => new JsonCredentialRepository("sign_credentials.json"));
-
         services.AddSingletonComponent<ScanQrCodeTaskManager>();
         services.AddSingletonExecutable<DailySignPeriodicTask>();
+        
         services.AddSingletonComponent<HypergraphyCommand>();
+        services.AddSingleton<BindingCommandHandlers>();
+        services.AddSingleton<EndfieldCommandHandlers>();
+
+        services.AddMemoryCache();
         return ValueTask.FromResult(services);
     }
 }

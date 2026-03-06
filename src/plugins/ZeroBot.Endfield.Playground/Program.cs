@@ -33,8 +33,6 @@ credentials = await credentialManager.GetCurrentCredentialAsync(user, cancellati
 
 foreach (var credential in credentials)
 {
-    var sklandUser = await hypergryphClient.GetCurrentUserAsync(credential, cancellationToken);
-
     var bindings = await hypergryphClient.GetPlayerBindings(credential, cancellationToken);
     foreach (var userAppRole in bindings.Flat())
     {
@@ -44,7 +42,7 @@ foreach (var credential in credentials)
         if (userAppRole.appCode != "endfield") continue;
         try
         {
-            var result = await hypergryphClient.GetEndfieldInfoAsync(sklandUser, userAppRole, credential, cancellationToken);
+            var result = await hypergryphClient.GetEndfieldInfoAsync(userAppRole, credential, cancellationToken);
             Console.WriteLine($"角色数量:{result.@base.charNum}");
         }
         catch (Exception e)

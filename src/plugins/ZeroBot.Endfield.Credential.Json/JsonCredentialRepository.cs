@@ -119,6 +119,7 @@ public class JsonCredentialRepository(string path) : ICredentialRepository
                 {
                     userCredentials.Remove(oldCredential);
                     userCredential.Id = oldCredential.Id;
+                    userCredential.SklandUserId ??= oldCredential.SklandUserId;
                     userCredentials.Add(userCredential);
                 }
                 else

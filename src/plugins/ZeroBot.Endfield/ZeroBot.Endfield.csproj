@@ -15,5 +15,6 @@
 
     <ItemGroup>
       <PackageReference Include="QRCoder" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
     </ItemGroup>
 </Project>

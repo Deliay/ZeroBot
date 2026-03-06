@@ -96,14 +96,18 @@ public class CredentialManager(HypergryphClient client, ICredentialRepository re
         CancellationToken cancellationToken = default)
     {
         var credentials = await repository.GetCredentialAsync(user, cancellationToken);
-        var expiredCredentials =
-            credentials
+        var expiredCredentials = credentials
                 .Where(userCredential => ignoreTokenCache || userCredential.TokenExpiredAt <= DateTimeOffset.Now)
                 .Where(predictor);
 
         foreach (var userCredential in expiredCredentials)
         {
             var newCredential = await client.GenerateZonCredentialAsync(userCredential.OAuthToken, cancellationToken);
+            if (userCredential.SklandUserId is null)
+            {
+                var skUser = await client.GetCurrentUserAsync(newCredential, cancellationToken);
+                newCredential.SklandUserId = skUser.id;
+            }
             await repository.SaveCredentialAsync(user, newCredential, cancellationToken);
         }
 
@@ -118,6 +122,11 @@ public class CredentialManager(HypergryphClient client, ICredentialRepository re
         foreach (var oAuthToken in allOAuthTokens)
         {
             var newCredential = await client.GenerateZonCredentialAsync(oAuthToken, cancellationToken);
+            if (newCredential.SklandUserId is null)
+            {
+                var skUser = await client.GetCurrentUserAsync(newCredential, cancellationToken);
+                newCredential.SklandUserId = skUser.id;
+            }
             await repository.SaveCredentialAsync(user, newCredential, cancellationToken);
         }
     }
