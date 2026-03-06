@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RequiresAspNetWebAssets>true</RequiresAspNetWebAssets>
+        <RequiresAspNetAppAssets>true</RequiresAspNetAppAssets>
+        <IncludeRazorContentInPack>true</IncludeRazorContentInPack>
+        <EmbedRazorGenerateSources>true</EmbedRazorGenerateSources>
+        <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ZeroBot.Utility\ZeroBot.Utility.csproj" />
+      <ProjectReference Include="..\ZeroBot.Endfield.Api\ZeroBot.Endfield.Api.csproj" />
+      <ProjectReference Include="..\ZeroBot.Endfield.Card.BrowserRender.Abstraction\ZeroBot.Endfield.Card.BrowserRender.Abstraction.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <FrameworkReference Include="Microsoft.AspNetCore.App" />
+      <PackageReference Include="EmberFramework.Abstraction" />
+      <PackageReference Include="EmberSimpleHttpServer" />
+      <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+      <PackageReference Include="Microsoft.Extensions.Logging" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Components\App.razor" />
+      <AdditionalFiles Include="Components\Html.razor" />
+      <AdditionalFiles Include="Components\Test.razor" />
+    </ItemGroup>
+
+</Project>

@@ -131,6 +131,8 @@ public class DailySignPeriodicTask(
     
     public async ValueTask RunAsync(CancellationToken cancellationToken = default)
     {
+        if (!config.Current.SignEnabled.GetValueOrDefault(true)) return;
+        
         while (!cancellationToken.IsCancellationRequested)
         {
             try

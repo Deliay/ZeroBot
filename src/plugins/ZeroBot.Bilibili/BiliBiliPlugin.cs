@@ -1,6 +1,7 @@
 ﻿using EmberFramework.Abstraction;
 using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.DependencyInjection;
+using Mikibot.Crawler;
 using Mikibot.Crawler.Http.Bilibili;
 using ZeroBot.Bilibili.Live;
 using ZeroBot.Bilibili.Video;
@@ -15,8 +16,8 @@ public class BiliBiliPlugin : IPlugin
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton<HttpClient>();
+        services.AddBilibiliCrawlers(addHttpClient: false);
         services.AddSingleton<BiliVideoCrawler>();
-        services.AddSingleton<BiliLiveCrawler>();
         services.ConfigureJsonConfig("bilibili-config.json", BilibiliOptions.Default, cancellationToken);
         services.AddSingletonComponent<LiveStatutCommandHandler>();
         services.AddSingletonExecutable<VideoLinkParser>();

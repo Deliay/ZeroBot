@@ -19,6 +19,8 @@
     <Project Path="src/plugins/ZeroBot.ComfyUI/ZeroBot.ComfyUI.csproj" />
     <Project Path="src/plugins/ZeroBot.Endfield.Api/ZeroBot.Endfield.Api.csproj" />
     <Project Path="src/plugins/ZeroBot.Endfield.Playground/ZeroBot.Endfield.Playground.csproj" />
+    <Project Path="src/plugins/ZeroBot.Endfield.Card.BrowserRender.Abstraction/ZeroBot.Endfield.Card.BrowserRender.Abstraction.csproj" />
+    <Project Path="src/plugins/ZeroBot.Endfield.Card.BrowserRender/ZeroBot.Endfield.Card.BrowserRender.csproj" />
     <Project Path="src/plugins/ZeroBot.Endfield.Credential.Json/ZeroBot.Endfield.Credential.Json.csproj" />
   </Folder>
 </Solution>

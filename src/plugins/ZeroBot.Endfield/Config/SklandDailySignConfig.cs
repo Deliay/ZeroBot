@@ -4,7 +4,8 @@ public readonly record struct SignTask(long selfId, long userId, string credenti
 
 public record SklandDailySignConfig(
     HashSet<SignTask> AutoSignTasks,
-    Dictionary<string, DateTimeOffset> LastSignedAt)
+    Dictionary<string, DateTimeOffset> LastSignedAt,
+    bool? SignEnabled = true)
 {
     public static SklandDailySignConfig Empty => new([], []);
 }
