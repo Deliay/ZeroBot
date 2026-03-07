@@ -131,11 +131,14 @@ public readonly record struct EndfieldCharacter(
 {
     public string GetEquipmentSetInfo()
     {
-        return new List<string?>([
+        var equips = new List<string?>([
             bodyEquip.equipData.suit?.name,
             armEquip.equipData.suit?.name,
             firstAccessory.equipData.suit?.name,
-            secondAccessory.equipData.suit?.name,])
+            secondAccessory.equipData.suit?.name,
+        ]);
+        if (equips.Count == 0) return "暂无装备";
+        return equips
             .Where(x => x is not null)
             .GroupBy(x => x)
             .Select(x => (Suit: x.Key!, Count: x.Count()))
