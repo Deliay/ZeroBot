@@ -28,6 +28,7 @@ public class EndfieldCommandHandlers(
     {
         await foreach (var (credential, role) in skland.EnumerateUserRolesAsync(userId, cancellationToken))
         {
+            if (role.appCode != "endfield") continue;
             var info = await cache.GetOrCreateAsync($"{userId}-{role.roleId}",
                 async _ => await client.GetEndfieldInfoAsync(role, credential, cancellationToken),
                 _defaultExpireOptions);
@@ -45,6 +46,7 @@ public class EndfieldCommandHandlers(
     {
         await foreach (var (credential, role) in skland.EnumerateUserRolesAsync(userId, cancellationToken))
         {
+            if (role.appCode != "endfield") continue;
             var info = await cache.GetOrCreateAsync($"{userId}-{role.roleId}",
                 async _ => await client.GetEndfieldInfoAsync(role, credential, cancellationToken),
                 _defaultExpireOptions);
