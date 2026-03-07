@@ -73,7 +73,7 @@ public class DailySignPeriodicTask(
             return config.SaveAsync(newly, token);
         }, cancellationToken);
 
-        return new SingResult(true, false, $"{task.credentialId} 签到完成：\n{signResult}");
+        return new SingResult(true, false, signResult);
     }
 
     private async ValueTask<SingResult> SignAsync(SignTask task, CancellationToken cancellationToken = default)
@@ -120,7 +120,7 @@ public class DailySignPeriodicTask(
             var result = await SignAsync(account, cancellationToken);
 
             if (result.alreadySigned) continue;
-            var status = result.success ? "成功" : "失败";
+            var status = result.success ? "完成" : "出错";
             await bot.WritePrivateMessageAsync(account.selfId, account.userId, cancellationToken, [
                 $"帐号 {account.credentialId} 签到{status}:\n\n{result.message}".ToMilkyTextSegment()
             ]);
