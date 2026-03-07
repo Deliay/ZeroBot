@@ -25,7 +25,8 @@ public class HypergraphyCommand(
                                        "/鹰角:自动签到:本地ID \n" +
                                        "/鹰角:关闭自动签到:本地ID\n" +
                                        "\n===通用指令===\n" +
-                                       "/zmd:我的信息").ToMilkyTextSegment();
+                                       "/zmd:我的信息  (也可以直接/zmd)\n" +
+                                       "/zmd:我的干员").ToMilkyTextSegment();
 
     private ValueTask HelpAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
