@@ -58,6 +58,7 @@ public class HypergraphyCommand(
         return cmd.Arguments[0] switch
         {
             "我的信息" => endfield.MyEndfieldInfoAsync(@event, cancellationToken),
+            "我的干员" => endfield.MyEndfieldCharacterInfoAsync(@event, cancellationToken),
             _ => HelpAsync(@event, cancellationToken)
         };
     }

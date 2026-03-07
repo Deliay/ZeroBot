@@ -1,11 +1,10 @@
 ﻿using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.DependencyInjection;
 using ZeroBot.Endfield.Api.Extension;
-using ZeroBot.Endfield.Api.Skland;
-using ZeroBot.Endfield.Api.Skland.Authorize;
 using ZeroBot.Endfield.Component;
 using ZeroBot.Endfield.Config;
 using ZeroBot.Endfield.Credential.Json;
+using ZeroBot.Endfield.Service;
 using ZeroBot.Utility;
 using ZeroBot.Utility.FileWatcher;
 
@@ -23,6 +22,7 @@ public class EndfieldPlugin : IPlugin
         services.AddEndfieldApi(_ => new JsonCredentialRepository("sign_credentials.json"));
         services.AddSingletonComponent<ScanQrCodeTaskManager>();
         services.AddSingletonExecutable<DailySignPeriodicTask>();
+        services.AddSingleton<SklandService>();
         
         services.AddSingletonComponent<HypergraphyCommand>();
         services.AddSingleton<BindingCommandHandlers>();

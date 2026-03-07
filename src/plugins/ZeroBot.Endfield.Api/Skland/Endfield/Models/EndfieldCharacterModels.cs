@@ -36,7 +36,19 @@ public readonly record struct CharData(
     List<string> tags
 );
 
-public readonly record struct UserSkill(string skillId, int level, int maxLevel);
+public readonly record struct UserSkill(string skillId, int level, int maxLevel)
+{
+    public string GetLevelInfo()
+    {
+        return level switch
+        {
+            10 => $"精1",
+            11 => $"精2",
+            12 => $"精3",
+            _ => $"Lv.{level}",
+        };
+    }
+}
 
 public readonly record struct EquipRarity(string key, string value);
 public readonly record struct EquipType(string key, string value);
@@ -115,4 +127,27 @@ public readonly record struct EndfieldCharacter(
     Weapon weapon,
     string gender,
     string ownTs
-);
+)
+{
+    public string GetEquipmentSetInfo()
+    {
+        return new List<string?>([
+            bodyEquip.equipData.suit?.name,
+            armEquip.equipData.suit?.name,
+            firstAccessory.equipData.suit?.name,
+            secondAccessory.equipData.suit?.name,])
+            .Where(x => x is not null)
+            .GroupBy(x => x)
+            .Select(x => (Suit: x.Key!, Count: x.Count()))
+            .OrderByDescending(x => x.Count)
+            .Select(x => $"{x.Suit}*{x.Count}")
+            .Aggregate((a, b) => $"{a} + {b}");
+    }
+
+    public string ToCharacterInfo()
+    {
+        var nameLevel = $"{charData.name}(Lv.{level})";
+        var charWeaponPotential = $"[{potentialLevel}+{weapon.refineLevel + 1} {weapon.weaponData.name}({weapon.level})]";
+        return $"{nameLevel} {charWeaponPotential} {GetEquipmentSetInfo()}";
+    }
+}
