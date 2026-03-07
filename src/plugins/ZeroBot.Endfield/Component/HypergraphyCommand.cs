@@ -1,4 +1,5 @@
 using System.Buffers;
+using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.Endfield.Api.Skland;
@@ -15,6 +16,7 @@ public class HypergraphyCommand(
     ICommandDispatcher dispatcher,
     BindingCommandHandlers binding,
     EndfieldCommandHandlers endfield,
+    ILogger<HypergraphyCommand> logger,
     IBotContext bot) : CommandQueuedHandler(dispatcher)
 {
     private static readonly TextOutgoingSegment HelpStrings = ("鹰角小助手\n" +
@@ -85,6 +87,7 @@ public class HypergraphyCommand(
         catch (Exception e)
         {
             await @event.Reply(bot, cancellationToken, [e.Message.ToMilkyTextSegment()]);
+            logger.LogError(e, "An error occured during executing command!");
         }
     }
     
