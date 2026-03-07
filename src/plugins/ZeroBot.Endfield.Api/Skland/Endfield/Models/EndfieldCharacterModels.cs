@@ -136,7 +136,7 @@ public readonly record struct EndfieldCharacter(
             armEquip.equipData.suit?.name,
             firstAccessory.equipData.suit?.name,
             secondAccessory.equipData.suit?.name,
-        ]);
+        ]).Where(x => x is not null).ToList();
         if (equips.Count == 0) return "暂无装备";
         return equips
             .Where(x => x is not null)
