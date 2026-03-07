@@ -10,6 +10,8 @@ using ZeroBot.Utility.FileWatcher;
 
 namespace ZeroBot.Endfield.Component;
 
+readonly record struct SingResult(bool success, bool alreadySigned, string message);
+
 public class DailySignPeriodicTask(
     ILogger<DailySignPeriodicTask> logger,
     IJsonConfig<SklandDailySignConfig> config,
@@ -17,7 +19,7 @@ public class DailySignPeriodicTask(
     HypergryphClient client,
     IBotContext bot) : IExecutable
 {
-    private async ValueTask<bool> SignAsync(SignTask task, CancellationToken cancellationToken = default)
+    private async ValueTask<SingResult> SignCoreAsync(SignTask task, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("开始进行 Bot {botId} 的用户 {userId} 的 {account} 帐号签到", task.selfId, task.userId,
             task.credentialId);
@@ -27,7 +29,7 @@ public class DailySignPeriodicTask(
             if (lastSignedAt >= DateTimeOffset.Now.Subtract(DateTimeOffset.Now.TimeOfDay))
             {
                 logger.LogInformation("帐号 {account} 今天已经签到过了", task.credentialId);
-                return false;
+                return new SingResult(true, true, "");
             }
         }
 
@@ -37,11 +39,8 @@ public class DailySignPeriodicTask(
         if (credential is null)
         {
             logger.LogInformation("帐号 {account} 登录失败，自动签到已禁用", cancellationToken);
-            await bot.WritePrivateMessageAsync(task.selfId, task.userId, cancellationToken, [
-                $"帐号 {task.credentialId} 登录失败，已自动从自动签到列表中移除".ToMilkyTextSegment()
-            ]);
             await RemoveTaskAsync(task, cancellationToken);
-            return true;
+            return new SingResult(false, false, $"帐号 {task.credentialId} 登录失败，已自动从自动签到列表中移除");
         }
         logger.LogInformation("帐号 {} 登录成功", task.credentialId);
         var bindings = (await client.GetPlayerBindings(credential, cancellationToken)).Flat();
@@ -66,11 +65,7 @@ public class DailySignPeriodicTask(
         }
 
         var signResult = string.Join('\n', roleSignResultList);
-        
-        await bot.WritePrivateMessageAsync(task.selfId, task.userId, cancellationToken, [
-            $"{task.credentialId} 签到完成：\n{signResult}".ToMilkyTextSegment()
-        ]);
-        
+
         await config.BeginConfigMutationScopeAsync((newly, token) =>
         {
             newly.LastSignedAt[task.credentialId] = DateTimeOffset.Now;;
@@ -78,9 +73,22 @@ public class DailySignPeriodicTask(
             return config.SaveAsync(newly, token);
         }, cancellationToken);
 
-        return true;
+        return new SingResult(true, false, $"{task.credentialId} 签到完成：\n{signResult}");
     }
 
+    private async ValueTask<SingResult> SignAsync(SignTask task, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await SignCoreAsync(task, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error in DailySignPeriodicTask");
+            return new SingResult(false, false, $"签到失败！失败原因：{e.Message}");
+        }
+    }
+    
     public async ValueTask AddTaskAsync(SignTask task, CancellationToken cancellationToken = default)
     {
         await config.BeginConfigMutationScopeAsync((newly, token) =>
@@ -109,19 +117,14 @@ public class DailySignPeriodicTask(
 
         foreach (var account in pendingTask)
         {
-            try
-            {
-                if (await SignAsync(account, cancellationToken))
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
-                }
-            }
-            catch (Exception e)
-            {
-                await bot.WritePrivateMessageAsync(account.selfId, account.userId, cancellationToken, [
-                    $"帐号 {account.credentialId} 签到失败！失败原因：{e.Message}".ToMilkyTextSegment()
-                ]);
-            }
+            var result = await SignAsync(account, cancellationToken);
+
+            if (result.alreadySigned) continue;
+            var status = result.success ? "成功" : "失败";
+            await bot.WritePrivateMessageAsync(account.selfId, account.userId, cancellationToken, [
+                $"帐号 {account.credentialId} 签到{status}:\n\n{result.message}".ToMilkyTextSegment()
+            ]);
+            await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
         }
     }
 
