@@ -49,7 +49,7 @@ public class EndfieldCommandHandlers(
                     _defaultExpireOptions);
 
                 yield return $"{info.@base.name}(UID:{role.roleId}) Lv.{info.@base.level} (世界等级 {info.@base.worldLevel})\n" +
-                             $"理智:{info.dungeon.curStamina}/{info.dungeon.maxStamina}(回满: {DateTimeOffset.FromUnixTimeSeconds(long.Parse(info.dungeon.maxTs)):yyyy-MM-dd hh:mm:ss})\n" +
+                             $"理智:{info.dungeon.curStamina}/{info.dungeon.maxStamina}(回满: {DateTimeOffset.FromUnixTimeSeconds(long.Parse(info.dungeon.maxTs)).AddHours(8):yyyy-MM-dd hh:mm:ss})\n" +
                              $"日常进度:{info.dailyMission.dailyActivation}/{info.dailyMission.maxDailyActivation}, 通行证进度:{info.bpSystem.curLevel}/{info.bpSystem.maxLevel}\n" +
                              $"主线进度:{info.@base.mainMission.description}";
             }
