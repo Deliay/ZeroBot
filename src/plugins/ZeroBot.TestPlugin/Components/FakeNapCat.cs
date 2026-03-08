@@ -22,7 +22,7 @@ public partial class FakeNapCat(
         var text = @event.ToText();
         if (!NapCatCommandRegex.IsMatch(text)) return;
         var platform = NapCatCommandRegex.Match(text).Groups[1].Value;
-        var head = platform[0];
+        var head = $"{platform[0]}".ToUpper();
         var tail = platform[1..];
         await @event.Send(_bot, cancellationToken, [
             $"{head}{tail}Cat 信息\n版本: 11.45.14\n平台: linux (64-bit)\n运行时间: 1919天 8小时 10分钟".ToMilkyTextSegment()
