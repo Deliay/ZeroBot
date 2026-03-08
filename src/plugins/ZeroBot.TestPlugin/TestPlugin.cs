@@ -18,7 +18,7 @@ public class TestPlugin : IPlugin
         services.ConfigureJsonConfig("boat.json", BootsConfig.Default, cancellationToken);
         services.AddSingletonExecutable<Boots>();
 
-        services.AddSingletonComponent<FakeNapCat>();
+        services.AddSingletonExecutable<FakeNapCat>();
 
         return ValueTask.FromResult(services);
     }
