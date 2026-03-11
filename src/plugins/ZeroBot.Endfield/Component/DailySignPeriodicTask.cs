@@ -1,5 +1,7 @@
 using EmberFramework.Abstraction;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Retry;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.Endfield.Api.Skland;
 using ZeroBot.Endfield.Api.Skland.Authorize;
@@ -19,6 +21,14 @@ public class DailySignPeriodicTask(
     HypergryphClient client,
     IBotContext bot) : IExecutable
 {
+    private readonly ResiliencePipeline _retryPipeline = new ResiliencePipelineBuilder()
+        .AddRetry(new RetryStrategyOptions
+        {
+            MaxRetryAttempts = 2,
+            ShouldHandle = new PredicateBuilder()
+                .Handle<HttpRequestException>((err) => err.Message.Contains("SSL")),
+        }).Build();
+
     private async ValueTask<SingResult> SignCoreAsync(SignTask task, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("开始进行 Bot {botId} 的用户 {userId} 的 {account} 帐号签到", task.selfId, task.userId,
@@ -80,7 +90,7 @@ public class DailySignPeriodicTask(
     {
         try
         {
-            return await SignCoreAsync(task, cancellationToken);
+            return await _retryPipeline.ExecuteAsync(async (token) => await SignCoreAsync(task, token), cancellationToken);
         }
         catch (Exception e)
         {
