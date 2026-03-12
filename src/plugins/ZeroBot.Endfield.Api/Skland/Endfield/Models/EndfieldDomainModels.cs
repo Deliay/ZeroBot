@@ -20,7 +20,7 @@ public readonly record struct EndfieldDomainData(
     string domainId,
     int level,
     List<EndfieldSettlement> settlements,
-    string moneyMgr,
+    object moneyMgr,
     List<EndfieldCollection> collections,
     object factory, // Can be null, so use object
     string name
