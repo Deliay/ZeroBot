@@ -70,7 +70,7 @@ public static class LoginClientExtension
             result.EnsureSuccessStatusCode();
             return new UserCredential
             {
-                TokenExpiredAt = DateTimeOffset.Now + TimeSpan.FromHours(1),
+                TokenExpiredAt = DateTimeOffset.Now + TimeSpan.FromHours(0.5),
                 RefreshToken = result.data.token,
                 Cred = result.data.cred,
                 DeviceId = did,
