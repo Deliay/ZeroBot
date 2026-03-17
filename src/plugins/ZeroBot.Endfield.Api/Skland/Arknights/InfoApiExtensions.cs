@@ -1,6 +1,5 @@
 using System.Text.Json;
 using ZeroBot.Endfield.Api.Skland.Authorize;
-using ZeroBot.Endfield.Api.Skland.Player;
 
 namespace ZeroBot.Endfield.Api.Skland.Arknights;
 

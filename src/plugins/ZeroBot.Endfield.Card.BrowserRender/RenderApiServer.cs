@@ -1,13 +1,9 @@
-using System.Reflection;
 using EmberFramework.Abstraction;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SimpleHttpServer.Host;
-using SimpleHttpServer.Pipeline.Middlewares;
 using ZeroBot.Endfield.Card.BrowserRender.Abstraction;
 using ZeroBot.Endfield.Card.BrowserRender.Components;
 using ZeroBot.Endfield.Card.BrowserRender.Config;

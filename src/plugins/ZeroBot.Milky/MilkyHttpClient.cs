@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using Microsoft.Extensions.Options;
 using ZeroBot.Milky.Configuration;

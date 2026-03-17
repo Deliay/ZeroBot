@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-
 namespace ZeroBot.TestPlugin.Config;
 
 public record BootsTest(

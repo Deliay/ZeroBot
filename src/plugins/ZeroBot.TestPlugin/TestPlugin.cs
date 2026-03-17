@@ -19,7 +19,10 @@ public class TestPlugin : IPlugin
         services.AddSingletonExecutable<Boots>();
 
         services.AddSingletonExecutable<FakeNapCat>();
-
+        
+        services.ConfigureJsonConfig("emotion_settings.json", EmotionConfig.Default, cancellationToken);
+        services.AddSingletonComponent<Emotions>();
+        
         return ValueTask.FromResult(services);
     }
 }

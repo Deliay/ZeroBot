@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-using System.Text.Json;
-using Net.Codecrete.QrCodeGenerator;
+﻿using Net.Codecrete.QrCodeGenerator;
 using ZeroBot.Endfield.Api.Skland;
 using ZeroBot.Endfield.Api.Skland.Authorize;
 using ZeroBot.Endfield.Api.Skland.Endfield;

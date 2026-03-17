@@ -1,6 +1,4 @@
-﻿using ZeroBot.Abstraction.Bot;
-
-namespace ZeroBot.Utility.Commands;
+﻿namespace ZeroBot.Utility.Commands;
 
 public class TextCommandParser(char prefix, char[] argumentSplitters)
 {

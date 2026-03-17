@@ -1,10 +1,8 @@
 using System.Buffers;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using Milky.Net.Model;
-using ZeroBot.Abstraction;
 
 namespace ZeroBot.Milky.Bot;
 

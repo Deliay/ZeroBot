@@ -1,4 +1,3 @@
-using EmberFramework.Abstraction;
 using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

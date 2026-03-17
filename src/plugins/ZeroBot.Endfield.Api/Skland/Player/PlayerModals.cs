@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace ZeroBot.Endfield.Api.Skland.Player;
 
 public readonly record struct UserAppRole(

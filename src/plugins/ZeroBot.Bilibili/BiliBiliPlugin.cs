@@ -1,5 +1,4 @@
-﻿using EmberFramework.Abstraction;
-using EmberFramework.Abstraction.Layer.Plugin;
+﻿using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.DependencyInjection;
 using Mikibot.Crawler;
 using Mikibot.Crawler.Http.Bilibili;

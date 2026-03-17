@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using ZeroBot.Endfield.Api.Skland.Authorize;
 
 namespace ZeroBot.Endfield.Api.Skland.Player;

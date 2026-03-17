@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.NetworkInformation;
 
 namespace ZeroBot.Endfield.Card.BrowserRender.Config;

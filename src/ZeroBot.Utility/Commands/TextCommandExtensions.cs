@@ -1,8 +1,6 @@
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
-using Milky.Net.Model;
-using ZeroBot.Abstraction.Bot;
 
 namespace ZeroBot.Utility.Commands;
 

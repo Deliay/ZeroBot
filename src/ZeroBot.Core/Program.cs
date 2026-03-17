@@ -1,5 +1,4 @@
 ﻿using EmberFramework;
-using EmberFramework.Abstraction;
 using EmberFramework.Layer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,7 +9,6 @@ using ZeroBot.Bilibili;
 using ZeroBot.ComfyUI;
 using ZeroBot.Core.Services;
 using ZeroBot.Endfield;
-using ZeroBot.Endfield.Card.BrowserRender;
 using ZeroBot.Milky;
 using ZeroBot.PermissionCommandPlugin;
 using ZeroBot.Repository.Mongo;

@@ -2,7 +2,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Milky.Net.Model;
 using MongoDB.Driver;
-using ZeroBot.Abstraction.Bot;
 
 namespace ZeroBot.Repository.Mongo;
 

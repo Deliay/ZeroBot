@@ -1,12 +1,6 @@
-using System.Buffers;
 using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
-using ZeroBot.Endfield.Api.Skland;
-using ZeroBot.Endfield.Api.Skland.Authorize;
-using ZeroBot.Endfield.Api.Skland.Player;
-using ZeroBot.Endfield.Config;
-using ZeroBot.Endfield.Extension;
 using ZeroBot.Utility;
 using ZeroBot.Utility.Commands;
 

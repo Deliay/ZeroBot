@@ -102,7 +102,7 @@ public class CredentialManager(HypergryphClient client, ICredentialRepository re
 
         foreach (var userCredential in expiredCredentials)
         {
-            var newCredential = await client.GenerateZonCredentialAsync(userCredential.OAuthToken, cancellationToken);
+            var newCredenawtial = await client.GenerateZonCredentialAsync(userCredential.OAuthToken, cancellationToken);
             if (userCredential.SklandUserId is null)
             {
                 var skUser = await client.GetCurrentUserAsync(newCredential, cancellationToken);

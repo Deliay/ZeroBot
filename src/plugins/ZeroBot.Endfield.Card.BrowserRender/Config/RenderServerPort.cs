@@ -1,5 +1,3 @@
-using System.ComponentModel.Design;
-using System.Net.NetworkInformation;
 using ZeroBot.Utility.FileWatcher;
 using IComponentInitializer = EmberFramework.Abstraction.Layer.Plugin.IComponentInitializer;
 

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 namespace ZeroBot.Endfield.Api.Skland.Endfield.Models;
 public readonly record struct EndfieldSettlement(
     string id,

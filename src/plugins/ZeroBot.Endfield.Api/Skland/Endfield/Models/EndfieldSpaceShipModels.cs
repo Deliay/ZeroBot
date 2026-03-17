@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 namespace ZeroBot.Endfield.Api.Skland.Endfield.Models;
 public readonly record struct SpaceShipCharacter(string charId, float physicalStrength, int favorability);
 
