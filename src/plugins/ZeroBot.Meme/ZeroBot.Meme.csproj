@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+      <ProjectReference Include="..\..\ZeroBot.Utility\ZeroBot.Utility.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="MemeFactory.Matting.Onnx" />
+    </ItemGroup>
+</Project>

@@ -12,6 +12,7 @@
   <Folder Name="/src/plugins/">
     <Project Path="src/plugins/ZeroBot.Bilibili/ZeroBot.Bilibili.csproj" />
     <Project Path="src/plugins/ZeroBot.Endfield/ZeroBot.Endfield.csproj" />
+    <Project Path="src/plugins/ZeroBot.Meme/ZeroBot.Meme.csproj" />
     <Project Path="src/plugins/ZeroBot.Milky/ZeroBot.Milky.csproj" />
     <Project Path="src/plugins/ZeroBot.PermissionCommandPlugin/ZeroBot.PermissionCommandPlugin.csproj" />
     <Project Path="src/plugins/ZeroBot.Repository.Mongo/ZeroBot.Repository.Mongo.csproj" />
