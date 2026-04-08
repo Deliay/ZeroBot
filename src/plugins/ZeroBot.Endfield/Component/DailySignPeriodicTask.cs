@@ -130,10 +130,13 @@ public class DailySignPeriodicTask(
             var result = await SignAsync(account, cancellationToken);
 
             if (result.alreadySigned) continue;
-            var status = result.success ? "完成" : "出错";
-            await bot.WritePrivateMessageAsync(account.selfId, account.userId, cancellationToken, [
-                $"帐号 {account.credentialId} 签到{status}:\n\n{result.message}".ToMilkyTextSegment()
-            ]);
+            if (!result.success)
+            {
+                var status = result.success ? "完成" : "出错";
+                await bot.WritePrivateMessageAsync(account.selfId, account.userId, cancellationToken, [
+                    $"帐号 {account.credentialId} 签到{status}:\n\n{result.message}".ToMilkyTextSegment()
+                ]);
+            }
             await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
         }
     }
