@@ -22,6 +22,13 @@ public class MongoRepository(IMongoClient mongo) : IBotEventRepository
             .Find(predicate).ToAsyncEnumerable();
     }
 
+    public IQueryable<Event<T>> SearchEventAsync<T>(long accountId, int limit = 50)
+    {
+        return mongo.GetDatabase(MongoRepositoryExtensions.GetEventDatabase(accountId))
+            .GetCollection<Event<T>>(typeof(T).Name)
+            .AsQueryable();
+    }
+
     public async ValueTask SaveEventAsync(long accountId, Event @event, CancellationToken cancellationToken)
     {
         await @event.InsertAsync(mongo, accountId, cancellationToken);

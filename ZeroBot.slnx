@@ -10,6 +10,7 @@
     <Project Path="test/ZeroBot.Core.Test/ZeroBot.Core.Test.csproj" />
   </Folder>
   <Folder Name="/src/plugins/">
+    <Project Path="src/plugins/ZeroBot.AI/ZeroBot.AI.csproj" />
     <Project Path="src/plugins/ZeroBot.Bilibili/ZeroBot.Bilibili.csproj" />
     <Project Path="src/plugins/ZeroBot.Endfield/ZeroBot.Endfield.csproj" />
     <Project Path="src/plugins/ZeroBot.Meme/ZeroBot.Meme.csproj" />

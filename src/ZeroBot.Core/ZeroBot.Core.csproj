@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\plugins\ZeroBot.AI\ZeroBot.AI.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Bilibili\ZeroBot.Bilibili.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.ComfyUI\ZeroBot.ComfyUI.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Endfield.Card.BrowserRender\ZeroBot.Endfield.Card.BrowserRender.csproj" />

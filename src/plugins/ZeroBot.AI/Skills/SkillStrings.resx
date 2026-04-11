@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="TrpgStatusSkillName" xml:space="preserve">
+        <value>trpg-status</value>
+    </data>
+    <data name="TrpgStatusSkillDescription" xml:space="preserve">
+        <value>TRPG (Tabletop RPG) 跑团技能，玩家使用'/跑团', '/角色卡', '/剧本'指令时加载，用于管理玩家状态、位置、背包、行动判定等。使用 write_status/read_status/read_all_status/unset_status 管理玩家状态，处理玩家行动输入并根据状态决定是否允许执行。使用 SendMessage/ReplyMessage 回复玩家。</value>
+    </data>
+    <data name="TrpgStatusInstructions" xml:space="preserve">
+        <value># TRPG Skill
+
+## 状态管理
+
+玩家状态存储在内存中，通过以下脚本管理：
+
+### write_status(player, attribute, value)
+
+写入玩家状态。如果属性已存在则覆盖。
+
+示例：
+- `write_status("阿呆", "current_state", "乘坐交通工具")`
+- `write_status("阿呆", "location", "XX街道")`
+- `write_status("阿呆", "hp", 100)`
+- `write_status("阿呆", "背包", ["长剑", "治疗药水 x3"])`
+- `write_status("阿呆", "is_alive", true)`
+
+### read_status(player, attribute)
+
+读取玩家指定属性的最后一次写入值。
+
+示例：
+- `location = read_status("阿呆", "location")` 返回 `XX街道`
+
+### read_all_status(player)
+
+读取玩家所有状态，返回字典。
+
+示例：
+- `all_status = read_all_status("阿呆")` 返回包含所有属性的字典
+
+### unset_status(player, attribute)
+
+删除玩家指定属性。
+
+示例：
+- `unset_status("阿呆", "current_state")`
+
+### clear_status(player, attribute)
+
+清空玩家所有属性。
+
+示例：
+- `clear_status("阿呆", "current_state")`
+
+## 剧本管理
+玩家在使用'/剧本:设置:[剧本内容]'指令时，其余内容则为剧本内容，按照故事线及其发展作为你的判定和推动标准。
+如果玩家没有给出剧本内容，只是使用了'/剧本'指令，则在你的上下文中思考部分填充剧情内容。
+注意不要给玩家透露未来的剧本内容，只按照玩家的行动给玩家披露剧情。
+            
+### 开始游戏
+在玩家使用'/剧本:开始'指令后，并使用`SendMessage`工具与玩家交互，发送让玩家进入游戏引导。
+
+### 玩家中途参与游戏
+在游戏开始后，玩家创建新的角色时，使用`ReplyMessage`，并发送将玩家安排到当前的游戏进度中的引导文案。
+
+### 游戏结束
+在你认为的剧本目标达成后（你需要严格判定），游戏即为结束，使用`SendMessage`工具发送结束的文案，并生成一段日后谈。
+
+### 玩家交互
+玩家使用'/跑团:[行动]'来进行交互，其中[行动]可以进行合理的剧情推进并触发你的判断逻辑。你会拒绝不合理的行动和行为，并给出解释。
+            
+## 角色卡管理
+### 生成随机角色卡
+玩家的指令是'/角色卡:随机:[名字]'时，为玩家生成随机的TRPG角色卡，将其属性使用`write_status`写入到状态中，名字如果不甜可以随机生成。
+            
+### 改名
+玩家可以用`/角色卡:改名:[名字]`修改自己的名字，在修改时你会在上下文中留有修改的记录，如“「{player}」将名字改为「{new name}」”
+
+## 预定义属性
+
+包括但不限于下列属性，仅供参考
+
+| 属性名 | 说明 | 示例值 |
+|--------|------|--------|
+| `location` | 当前位置 | `XX街道`、`酒馆` |
+| `current_state` | 当前状态 | `乘坐交通工具`、`战斗`、`休息` |
+| `hp` | 生命值 | `100` |
+| `mp` | 魔法值 | `50` |
+| `背包` | 背包物品列表 | `长剑`、`治疗药水` |
+| `装备` | 当前装备 | `武器：长剑`、`护甲：皮甲` |
+| `is_alive` | 是否存活 | `true` / `false` |
+| `金钱` | 持有金钱 | `100` |
+| `level` | 等级 | `1` |
+| `经验` | 当前经验 | `0` |
+| `userId` | 对应发言的uid | `123456` |
+| `groupId` | 对应发言的群聊id | `234567` |
+
+## 行动判定
+
+当玩家输入行动时，根据其当前状态判定是否允许执行。
+
+### 判定流程
+
+1. 解析玩家输入，提取行动意图
+2. 读取玩家当前状态
+3. 根据状态判定：
+   - **允许**：行动符合当前状态，执行并更新状态
+   - **拒绝**：行动与当前状态冲突，返回拒绝原因
+4. 使用 `SendMessage(玩家名, 消息)` 或 `ReplyMessage(消息)` 回复
+
+### 判定规则
+
+示例：玩家输入 `攻击哥布林`
+
+1. 获取玩家状态：
+   - `state = read_status(玩家, "current_state")`
+   - `location = read_status(玩家, "location")`
+
+2. 判定逻辑：
+   - 如果 `state` 是 `乘坐交通工具`，回复：你正在乘坐交通工具，无法攻击。请先下车。
+   - 如果 `state` 是 `休息`，回复：你正在休息，无法进行战斗。
+   - 如果 `state` 是 `死亡`，回复：你已经死亡，无法行动。
+   - 如果 `location` 不是哥布林所在地，回复：这里没有哥布林，你在 {location}。
+   - 否则允许执行，更新状态为 `战斗`，回复：你向哥布林发起攻击！
+
+### 常用行动判定
+
+| 行动 | 必要状态 | 冲突状态 |
+|------|----------|----------|
+| 攻击 | `location` 为敌人所在地点 | `乘坐交通工具`、`休息`、`死亡` |
+| 使用物品 | 非 `死亡` | `死亡` |
+| 移动 | 非 `战斗`、`非死亡` | `战斗`（可能被围攻）、`死亡` |
+| 交易 | 非 `战斗` | `战斗`、`死亡` |
+| 休息 | 非 `战斗`、`非死亡` | `战斗`、`死亡` |
+
+## 状态转换
+
+### 状态转换示例
+
+玩家进入战斗：
+1. 保存当前状态：`previous_state = read_status(玩家, "current_state")`
+2. 更新状态：`write_status(玩家, "current_state", "战斗")`
+3. 回复：你进入了战斗状态！
+
+玩家脱离战斗：
+1. 恢复之前状态：`write_status(玩家, "current_state", previous_state)`
+2. 回复：战斗结束，你回到了正常状态。
+
+玩家死亡：
+1. `write_status(玩家, "is_alive", false)`
+2. `write_status(玩家, "current_state", "死亡")`
+3. 回复：你倒下了...
+
+## 背包管理
+
+添加物品到背包：
+1. 读取背包：`inventory = read_status(玩家, "背包")`
+2. 添加物品：`inventory` 添加 `新的长剑`
+3. 保存背包：`write_status(玩家, "背包", inventory)`
+
+从背包移除物品：
+1. 读取背包：`inventory = read_status(玩家, "背包")`
+2. 移除物品：`inventory` 移除 `旧的盾牌`
+3. 保存背包：`write_status(玩家, "背包", inventory)`
+
+检查物品：
+1. 读取背包：`inventory = read_status(玩家, "背包")`
+2. 如果 `inventory` 包含 `治疗药水`，回复：你有治疗药水可以使用。
+</value>
+    </data>
+</root>

@@ -21,6 +21,16 @@ public static class EventExtensions
                 .OfType<TextIncomingSegment>()
                 .Select((seg) => seg.Data.Text));
         }
+        public string ToAgentText(string separator = "")
+        {
+            return string.Join(separator, message.Segments
+                .Select((seg) => seg switch
+                {
+                    TextIncomingSegment text => text.Data.Text,
+                    ImageIncomingSegment img => "[Image]",
+                    _ => "",
+                }));
+        }
 
         public ReplyOutgoingSegment Reply()
         {

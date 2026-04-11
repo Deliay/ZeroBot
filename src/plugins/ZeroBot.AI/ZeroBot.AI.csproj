@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ZeroBot.Utility\ZeroBot.Utility.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Agents.AI.Foundry" />
+      <PackageReference Include="Microsoft.Agents.AI.OpenAI" />
+      <PackageReference Include="OpenAI" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Skills\SkillStrings.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>SkillStrings.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Skills\SkillStrings.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>SkillStrings.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+</Project>

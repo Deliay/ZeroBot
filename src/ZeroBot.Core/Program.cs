@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using ZeroBot.Abstraction;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.Abstraction.Service;
+using ZeroBot.AI;
 using ZeroBot.Bilibili;
 using ZeroBot.ComfyUI;
 using ZeroBot.Core.Services;
@@ -23,6 +24,7 @@ TypedPluginLoader.Register<ZeroBotPermissionCommandPlugin>();
 TypedPluginLoader.Register<BiliBiliPlugin>();
 TypedPluginLoader.Register<EndfieldPlugin>();
 // TypedPluginLoader.Register<BrowserRenderPlugin>();
+TypedPluginLoader.Register<AIPlugin>();
 
 Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
 var root = RootBuilder
