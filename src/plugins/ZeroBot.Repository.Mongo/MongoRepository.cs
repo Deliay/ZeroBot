@@ -12,6 +12,17 @@ public class MongoRepository(IMongoClient mongo) : IBotEventRepository
     {
         IgnoreIdField.Register();
         BsonClassMap.RegisterClassMap<ImageIncomingSegment>();
+        BsonClassMap.RegisterClassMap<ReplyIncomingSegment>();
+        BsonClassMap.RegisterClassMap<MentionIncomingSegment>();
+        BsonClassMap.RegisterClassMap<MentionAllIncomingSegment>();
+        BsonClassMap.RegisterClassMap<FaceIncomingSegment>();
+        BsonClassMap.RegisterClassMap<RecordIncomingSegment>();
+        BsonClassMap.RegisterClassMap<VideoIncomingSegment>();
+        BsonClassMap.RegisterClassMap<FileIncomingSegment>();
+        BsonClassMap.RegisterClassMap<ForwardIncomingSegment>();
+        BsonClassMap.RegisterClassMap<MarketFaceIncomingSegment>();
+        BsonClassMap.RegisterClassMap<LightAppIncomingSegment>();
+        BsonClassMap.RegisterClassMap<XmlIncomingSegment>();
     }
     
     public IAsyncEnumerable<Event<T>> SearchEventAsync<T>(long accountId, Expression<Func<Event<T>, bool>> predicate,
