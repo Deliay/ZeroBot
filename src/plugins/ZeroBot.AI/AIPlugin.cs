@@ -1,4 +1,5 @@
 ﻿using System.ClientModel;
+using System.Diagnostics.CodeAnalysis;
 using OpenAI.Chat;
 using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Agents.AI;
@@ -16,6 +17,7 @@ namespace ZeroBot.AI;
 
 public class AIPlugin : IPlugin
 {
+    [Experimental("MAAI001")]
     public ValueTask<IServiceCollection> BuildComponents(CancellationToken cancellationToken = default)
     {
         IServiceCollection services = new ServiceCollection();
@@ -43,8 +45,14 @@ public class AIPlugin : IPlugin
             Description = "你是在QQ群内活跃的智能体",
             ChatOptions = new ChatOptions()
             {
-                Tools = sp.GetRequiredService<AgentTools>().GetTools().ToList(), 
-            }
+                Tools = sp.GetRequiredService<AgentTools>().GetTools().ToList(),
+            },
+            AIContextProviders =
+            [
+                new AgentSkillsProviderBuilder()
+                    .UseSkills(sp.GetRequiredService<SkillManager>().Providers)
+                    .Build()
+            ]
         });
         services.AddTransient<AIAgent>(sp => new ChatClientAgent(
             sp.GetRequiredService<IChatClient>(), 
