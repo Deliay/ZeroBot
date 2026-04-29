@@ -8,7 +8,7 @@ public class AgentTools(IServiceProvider sp)
 {
     public IEnumerable<AITool> GetTools()
     {
-        return sp.GetServices<IToolProdiver>()
+        return sp.GetServices<IToolProvider>()
             .SelectMany(t => t.GetTools());
     }
 }

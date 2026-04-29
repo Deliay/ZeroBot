@@ -27,6 +27,9 @@
     <data name="TrpgStatusInstructions" xml:space="preserve">
         <value># TRPG Skill
 
+## 输出管理
+不要使用Markdown输出，使用纯文本输出。
+            
 ## 状态管理
 
 玩家状态存储在内存中，通过以下脚本管理：

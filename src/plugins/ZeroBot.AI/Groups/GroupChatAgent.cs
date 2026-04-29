@@ -2,29 +2,28 @@ using System.Text.Json;
 using System.Threading.Channels;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
-using OpenAI.Chat;
 using ZeroBot.Abstraction.Bot;
+using ZeroBot.AI.Agents;
 using ZeroBot.Utility;
-using ZeroBot.Utility.FileWatcher;
-using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
-namespace ZeroBot.AI.Storage;
+namespace ZeroBot.AI.Groups;
 
-public class AgentSessionManager(
+public class GroupChatAgent(
     IBotContext bot,
-    IJsonConfig<AgentConfig> config, 
-    AIAgent agent,
-    ILogger<AgentSessionManager> logger)
+    ILogger<GroupChatAgent> logger,
+    AgentSessionManager sessionManager)
 {
-    private Dictionary<long, AgentSession> Sessions { get; } = new();
+    private string _sessionId = null!;
+    private AgentSession? Session { get; set; }
     private Dictionary<long, Channel<Event<IncomingMessage>>> EnqueuedMessages { get; } = new();
 
-    public void CleanSession(long groupId)
+    private AIAgent Agent { get; set; }
+
+    public ValueTask ClearSessionAsync(CancellationToken cancellationToken = default)
     {
-        Sessions.Remove(groupId);
+        return sessionManager.ClearSessionAsync(_sessionId, cancellationToken);
     }
     
     private async ValueTask<ChatMessage> Convert(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
@@ -46,53 +45,47 @@ public class AgentSessionManager(
         return new ChatMessage(ChatRole.User, contents);
     }
     
-    private async Task AgentLoop(ChannelReader<Event<IncomingMessage>> queue, AgentSession session, CancellationToken cancellationToken = default)
+    private async Task AgentLoop(ChannelReader<Event<IncomingMessage>> queue, CancellationToken cancellationToken = default)
     {
+        if (Session is null) throw new InvalidOperationException("Agent session not initialized");
         await foreach (var incomingMessage in queue.ReadAllAsync(cancellationToken))
         {
             logger.LogInformation("AI Agent incoming message: {}", incomingMessage.ToText());
             var msg = await Convert(incomingMessage, cancellationToken);
-            var res = await agent.RunAsync(msg, session, cancellationToken: cancellationToken);
+            var res = await Agent.RunAsync(msg, Session, cancellationToken: cancellationToken);
             logger.LogInformation("AI Agent run result {}", res.Text);
-            var data = await agent.SerializeSessionAsync(session, cancellationToken: cancellationToken);
-            await SaveSessionAsync(incomingMessage.Data.PeerId, data, cancellationToken);
+            var data = await Agent.SerializeSessionAsync(Session, cancellationToken: cancellationToken);
+            await sessionManager.SaveSessionAsync(_sessionId, data, cancellationToken);
         }
     }
     
-    private async ValueTask Initialize(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
+    public async ValueTask Initialize(long groupId, AIAgent agent, CancellationToken cancellationToken = default)
     {
-        var groupId = message.Data.PeerId;
-        if (Sessions.ContainsKey(groupId)) return;
+        if (Session is not null) return;
 
-        if (config.Current.Storage.TryGetValue(groupId, out var sessionJson))
+        Agent = agent;
+        
+        _sessionId = $"agent-{Agent.Id}-group-{groupId}";
+
+        var session = await sessionManager.GetSessionAsync(_sessionId, cancellationToken);
+        if (session.HasValue)
         {
-            var session = await agent.DeserializeSessionAsync(sessionJson, cancellationToken: cancellationToken);
-            Sessions.Add(groupId, session);
+            Session = await Agent.DeserializeSessionAsync(session.Value, cancellationToken: cancellationToken);
         }
         else
         {
-            Sessions.Add(groupId, await agent.CreateSessionAsync(cancellationToken));
+            Session = await Agent.CreateSessionAsync(cancellationToken);
         }
 
         if (!EnqueuedMessages.TryGetValue(groupId, out var channel))
         {
             EnqueuedMessages.Add(groupId, channel = Channel.CreateUnbounded<Event<IncomingMessage>>());
         }
-        _ = AgentLoop(channel, Sessions[groupId], cancellationToken);
+        _ = AgentLoop(channel, cancellationToken);
     }
     
     public async ValueTask EnqueueMessage(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
-        await Initialize(message, cancellationToken);
         await EnqueuedMessages[message.Data.PeerId].Writer.WriteAsync(message, cancellationToken);
     }
-    
-    private async ValueTask SaveSessionAsync(long groupId, JsonElement session, CancellationToken cancellationToken = default)
-    {
-        await config.BeginConfigMutationScopeAsync(async (cfg, ct) =>
-        {
-            cfg.Storage[groupId] = session;
-            await config.SaveAsync(cfg, ct);
-        }, cancellationToken);
-    } 
 }

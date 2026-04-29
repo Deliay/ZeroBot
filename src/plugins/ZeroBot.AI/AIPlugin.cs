@@ -6,59 +6,55 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using OpenAI;
+using ZeroBot.AI.Agents;
+using ZeroBot.AI.Chats;
 using ZeroBot.AI.Commands;
+using ZeroBot.AI.Groups;
 using ZeroBot.AI.Skills;
-using ZeroBot.AI.Storage;
 using ZeroBot.AI.Tools;
 using ZeroBot.Utility;
 using ZeroBot.Utility.FileWatcher;
 
 namespace ZeroBot.AI;
 
-public class AIPlugin : IPlugin
+public class AIPlugin : IPlugin.IWithInitializer
 {
     [Experimental("MAAI001")]
     public ValueTask<IServiceCollection> BuildComponents(CancellationToken cancellationToken = default)
     {
         IServiceCollection services = new ServiceCollection();
         
-        services.AddSingleton<IToolProdiver, ChatTools>();
-        services.AddTransient<AgentTools>();
-        services.ConfigureJsonConfig("agents.json", AgentConfig.Default, cancellationToken);
-        services.AddSingleton<AgentSessionManager>();
+        // API providers
+        services.ConfigureJsonConfig("ai-model-provider.json", LlmProviderConfig.Default, cancellationToken);
+        services.AddTransient<GenericOpenAIProvider>();
+        services.AddSingleton<ChatProviderManager>();
+        
+        // tools
+        services.AddSingleton<IToolProvider, ChatTools>();
+        services.AddSingleton<AgentTools>();
+        
+        // skills
         services.AddTransient<ISkillProvider, TrpgSkill>();
         services.AddSingleton<SkillManager>();
+        
+        // agent session
+        services.AddTransient<GroupChatAgent>();
+        services.ConfigureJsonConfig("agents.json", AgentSessionConfig.Default, cancellationToken);
+        
+        // agent
+        services.AddSingleton<IAgentFactory, TrpgAgentFactory>();
+        services.AddSingleton<AgentManager>();
+        services.AddSingleton<AgentSessionManager>();
+
+        // group agent
+        services.AddSingleton<GroupAgentManager>();
 
         services.AddSingletonComponent<TrpgCommandHandler>();
-        
-        var apiEndpoint = Environment.GetEnvironmentVariable("OPENAI_API_ENDPOINT") ?? throw new Exception("OPENAI_API_ENDPOINT not set");
-        var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new Exception("OPENAI_API_KEY not set");
-        var baseClient = new OpenAIClient(new ApiKeyCredential(apiKey), new OpenAIClientOptions()
-        {
-            Endpoint = new Uri(apiEndpoint),
-        });
-        services.AddSingleton(baseClient);
-        services.AddSingleton(baseClient.GetChatClient("MiniMax-M2.7").AsIChatClient());
-        services.AddSingleton(sp => new ChatClientAgentOptions()
-        {
-            Name = "ZeroBot",
-            Description = "你是在QQ群内活跃的智能体",
-            ChatOptions = new ChatOptions()
-            {
-                Tools = sp.GetRequiredService<AgentTools>().GetTools().ToList(),
-            },
-            AIContextProviders =
-            [
-                new AgentSkillsProviderBuilder()
-                    .UseSkills(sp.GetRequiredService<SkillManager>().Providers)
-                    .Build()
-            ]
-        });
-        services.AddTransient<AIAgent>(sp => new ChatClientAgent(
-            sp.GetRequiredService<IChatClient>(), 
-            options: sp.GetRequiredService<ChatClientAgentOptions>(),
-            services: sp));
-
         return ValueTask.FromResult(services);
+    }
+
+    public ValueTask InitializeAsync(IServiceProvider services, CancellationToken cancellationToken = new CancellationToken())
+    {
+        throw new NotImplementedException();
     }
 }

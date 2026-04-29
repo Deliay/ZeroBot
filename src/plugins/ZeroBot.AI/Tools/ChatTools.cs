@@ -9,7 +9,7 @@ using ZeroBot.Utility;
 
 namespace ZeroBot.AI.Tools;
 
-public class ChatTools(IBotContext bot) : IToolProdiver
+public class ChatTools(IBotContext bot) : IToolProvider
 {
     private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
     {

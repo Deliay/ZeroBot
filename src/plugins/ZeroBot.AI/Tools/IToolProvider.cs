@@ -2,7 +2,7 @@ using Microsoft.Extensions.AI;
 
 namespace ZeroBot.AI.Tools;
 
-public interface IToolProdiver
+public interface IToolProvider
 {
     public IEnumerable<AITool> GetTools();
 }
