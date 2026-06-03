@@ -10,6 +10,7 @@ public class HypergraphyCommand(
     ICommandDispatcher dispatcher,
     BindingCommandHandlers binding,
     EndfieldCommandHandlers endfield,
+    EndfieldVersionSubscriptionCommand versionSubscription,
     ILogger<HypergraphyCommand> logger,
     IBotContext bot) : CommandQueuedHandler(dispatcher)
 {
@@ -20,9 +21,10 @@ public class HypergraphyCommand(
                                        "/鹰角:解绑:本地ID\n" +
                                        "/鹰角:自动签到:本地ID \n" +
                                        "/鹰角:关闭自动签到:本地ID\n" +
-                                       "\n===通用指令===\n" +
-                                       "/zmd:我的信息  (也可以直接/zmd)\n" +
-                                       "/zmd:我的干员").ToMilkyTextSegment();
+                                        "\n===通用指令===\n" +
+                                        "/zmd:我的信息  (也可以直接/zmd)\n" +
+                                        "/zmd:我的干员\n" +
+                                        "/zmd:更新订阅  (订阅/取消订阅终末地版本更新通知)").ToMilkyTextSegment();
 
     private ValueTask HelpAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
@@ -56,6 +58,7 @@ public class HypergraphyCommand(
         {
             "我的信息" => endfield.MyEndfieldInfoAsync(@event, cancellationToken),
             "我的干员" => endfield.MyEndfieldCharacterInfoAsync(@event, cancellationToken),
+            "更新订阅" => versionSubscription.ToggleSubscriptionAsync(@event, cancellationToken),
             _ => HelpAsync(@event, cancellationToken)
         };
     }

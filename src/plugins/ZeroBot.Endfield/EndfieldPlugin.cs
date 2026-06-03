@@ -28,6 +28,12 @@ public class EndfieldPlugin : IPlugin
         services.AddSingleton<BindingCommandHandlers>();
         services.AddSingleton<EndfieldCommandHandlers>();
 
+        services.ConfigureJsonConfig("endfield_version_subscription.json",
+            EndfieldVersionSubscriptionConfig.Empty, cancellationToken);
+        services.AddSingletonExecutable<EndfieldVersionPollingTask>();
+        services.AddSingleton<HttpClient>();
+        services.AddSingleton<EndfieldVersionSubscriptionCommand>();
+
         services.AddMemoryCache();
         return ValueTask.FromResult(services);
     }
