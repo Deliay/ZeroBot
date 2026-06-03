@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "find-endfield-data": {
+      "source": "deliay/endfield-development-skills",
+      "sourceType": "github",
+      "skillPath": "find-endfield-data/SKILL.md",
+      "computedHash": "9432d175d81af3118a0d1156e52d96a0e5d26d2449f1cda6964086df3f82ba0f"
+    }
+  }
+}
