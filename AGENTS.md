@@ -41,7 +41,7 @@ pm2 restart ZeroBot --update-env
 
 ### 配置
 
-- pm2 生态文件: `~/Projects/Bot/pm2/zero-bot.json`
+- pm2 生态文件: `pm2/zero-bot.json`（位于 `~/Projects/Bot/`）
 - 应用工作目录: `~/Projects/Bot/ZeroBot`（配置文件目录）
 - **不得修改任何配置文件**（pm2 生态文件、JSON 配置等），除非用户明确指示
 
