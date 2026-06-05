@@ -24,7 +24,8 @@ public class HypergraphyCommand(
                                         "\n===通用指令===\n" +
                                         "/zmd:我的信息  (也可以直接/zmd)\n" +
                                         "/zmd:我的干员\n" +
-                                        "/zmd:更新订阅  (订阅/取消订阅终末地版本更新通知)").ToMilkyTextSegment();
+                                        "/zmd:更新订阅  (订阅/取消订阅终末地版本更新通知)\n" +
+                                        "/zmd:当前版本  (查看终末地当前游戏版本)").ToMilkyTextSegment();
 
     private ValueTask HelpAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
@@ -59,6 +60,7 @@ public class HypergraphyCommand(
             "我的信息" => endfield.MyEndfieldInfoAsync(@event, cancellationToken),
             "我的干员" => endfield.MyEndfieldCharacterInfoAsync(@event, cancellationToken),
             "更新订阅" => versionSubscription.ToggleSubscriptionAsync(@event, cancellationToken),
+            "当前版本" => versionSubscription.GetCurrentVersionAsync(@event, cancellationToken),
             _ => HelpAsync(@event, cancellationToken)
         };
     }

@@ -8,8 +8,21 @@ namespace ZeroBot.Endfield.Component;
 
 public class EndfieldVersionSubscriptionCommand(
     IJsonConfig<EndfieldVersionSubscriptionConfig> config,
+    HttpClient httpClient,
     IBotContext bot)
 {
+    private const string VersionEndpoint = "https://endfield-assets.fffdan.com/version";
+
+    public async ValueTask GetCurrentVersionAsync(Event<IncomingMessage> message,
+        CancellationToken cancellationToken = default)
+    {
+        var version = await httpClient.GetStringAsync(VersionEndpoint, cancellationToken);
+        version = version.Trim();
+        var cached = config.Current.LastKnownVersion;
+        var suffix = cached is not null && cached != version ? $"\n上次缓存的版本: {cached}" : "";
+        await message.Reply(bot, cancellationToken,
+            [$"当前终末地版本: {version}{suffix}".ToMilkyTextSegment()]);
+    }
     public async ValueTask ToggleSubscriptionAsync(Event<IncomingMessage> message,
         CancellationToken cancellationToken = default)
     {
