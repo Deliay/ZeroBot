@@ -34,6 +34,11 @@ public class EndfieldPlugin : IPlugin
         services.AddSingleton<HttpClient>();
         services.AddSingleton<EndfieldVersionSubscriptionCommand>();
 
+        services.ConfigureJsonConfig("endfield_server_status_subscription.json",
+            EndfieldServerStatusSubscriptionConfig.Empty, cancellationToken);
+        services.AddSingletonExecutable<EndfieldServerStatusPollingTask>();
+        services.AddSingleton<EndfieldServerStatusSubscriptionCommand>();
+
         services.AddMemoryCache();
         return ValueTask.FromResult(services);
     }
