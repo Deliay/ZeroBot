@@ -56,11 +56,12 @@ public static class LoginClientExtension
 
         public async Task<UserCredential> GenerateZonCredentialAsync(
             string oAuthToken,
+            string? did = null,
             CancellationToken cancellationToken = default)
         {
-            
+
             var authorization = await client.GrantAuthorizationCodeAsync(oAuthToken, cancellationToken);
-            var did = await DeviceIdGenerator.GetDeviceId();
+            did ??= await DeviceIdGenerator.GetDeviceId();
             var result = await client.PostCallZonAsync<CredentialResponse>("https://zonai.skland.com/web/v1/user/auth/generate_cred_by_code",
                 new CredentialRequest(authorization),
                 did,

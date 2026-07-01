@@ -12,6 +12,7 @@ public static class PluginInjectionExtensions
         {
             return services
                 .AddSingleton<HypergryphClient>()
+                .AddSingleton<IDeviceIdProvider, DeviceIdService>()
                 .AddSingleton<CredentialManager>();
         }
         public IServiceCollection AddEndfieldApi<TCredential>() where TCredential : class, ICredentialRepository
