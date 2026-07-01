@@ -3,7 +3,10 @@ using Polly.Retry;
 
 namespace ZeroBot.Endfield.Api.Skland.Authorize;
 
-public class CredentialManager(HypergryphClient client, ICredentialRepository repository)
+public class CredentialManager(
+    HypergryphClient client,
+    ICredentialRepository repository,
+    DeviceIdService deviceIdService)
 {
     public async ValueTask<LoginQrCodeResponse> GenerateLoginQrCodePayload(string user, CancellationToken cancellationToken = default)
     {
@@ -50,7 +53,8 @@ public class CredentialManager(HypergryphClient client, ICredentialRepository re
         var (oAuthToken, _ ) = await client.GetOAuthTokenByScanCode(scanResult.data.scanCode, cancellationToken);
         await repository.SaveOAuthTokenAsync(user, oAuthToken, cancellationToken);
 
-        var credential = await client.GenerateZonCredentialAsync(oAuthToken, cancellationToken);
+        var did = await deviceIdService.GetOrGenerateAsync(oAuthToken, cancellationToken);
+        var credential = await client.GenerateZonCredentialAsync(oAuthToken, did, cancellationToken);
 
         await repository.SaveCredentialAsync(user, credential, cancellationToken);
         await repository.RemoveUserScanIdAsync(user, cancellationToken);
@@ -102,7 +106,8 @@ public class CredentialManager(HypergryphClient client, ICredentialRepository re
 
         foreach (var userCredential in expiredCredentials)
         {
-            var newCredential = await client.GenerateZonCredentialAsync(userCredential.OAuthToken, cancellationToken);
+            var did = await deviceIdService.GetOrGenerateAsync(userCredential.OAuthToken, cancellationToken);
+            var newCredential = await client.GenerateZonCredentialAsync(userCredential.OAuthToken, did, cancellationToken);
             if (userCredential.SklandUserId is null)
             {
                 var skUser = await client.GetCurrentUserAsync(newCredential, cancellationToken);
@@ -121,7 +126,8 @@ public class CredentialManager(HypergryphClient client, ICredentialRepository re
 
         foreach (var oAuthToken in allOAuthTokens)
         {
-            var newCredential = await client.GenerateZonCredentialAsync(oAuthToken, cancellationToken);
+            var did = await deviceIdService.GetOrGenerateAsync(oAuthToken, cancellationToken);
+            var newCredential = await client.GenerateZonCredentialAsync(oAuthToken, did, cancellationToken);
             if (newCredential.SklandUserId is null)
             {
                 var skUser = await client.GetCurrentUserAsync(newCredential, cancellationToken);
