@@ -73,7 +73,7 @@ public class VideoLinkParser(
             .Select(s => s.Attributes["content"].Value)
             .ToList();
 
-        var image = "https:" + infoList[0];
+        var image = infoList[0].StartsWith("http://") ? "https" + infoList[0][4..] : infoList[0].StartsWith("//") ? "https:" + infoList[0] : infoList[0];
         var bvUrl = infoList[1];
         var title = infoList[2];
         var author = infoList[3];
