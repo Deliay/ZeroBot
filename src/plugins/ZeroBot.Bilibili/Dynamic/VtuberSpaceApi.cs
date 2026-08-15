@@ -74,6 +74,33 @@ public class ModuleDynamic
 public class DynamicMajor
 {
     [JsonPropertyName("opus")] public DynamicOpus? Opus { get; set; }
+
+    [JsonPropertyName("live_rcmd")] public DynamicLiveRcmd? LiveRcmd { get; set; }
+}
+
+public class DynamicLiveRcmd
+{
+    [JsonPropertyName("content")] public string? Content { get; set; }
+}
+
+public class LiveRcmdContent
+{
+    [JsonPropertyName("live_play_info")] public LivePlayInfo? LivePlayInfo { get; set; }
+}
+
+public class LivePlayInfo
+{
+    [JsonPropertyName("title")] public string? Title { get; set; }
+
+    [JsonPropertyName("cover")] public string? Cover { get; set; }
+
+    [JsonPropertyName("link")] public string? Link { get; set; }
+
+    [JsonPropertyName("room_id")] public long RoomId { get; set; }
+
+    [JsonPropertyName("online")] public int Online { get; set; }
+
+    [JsonPropertyName("area_name")] public string? AreaName { get; set; }
 }
 
 public class DynamicOpus

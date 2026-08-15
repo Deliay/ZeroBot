@@ -5,26 +5,25 @@ using ZeroBot.Utility;
 using ZeroBot.Utility.Commands;
 using ZeroBot.Utility.FileWatcher;
 
-namespace ZeroBot.Bilibili.Dynamic;
+namespace ZeroBot.Bilibili.Live;
 
-public class DynamicCommandHandler(
+public class LiveScCommandHandler(
     ICommandDispatcher dispatcher,
     IPermission permission,
     IBotContext bot,
-    IJsonConfig<BilibiliOptions> config,
-    VtuberSpaceApi api) : CommandHandler(dispatcher)
+    IJsonConfig<BilibiliOptions> config) : CommandHandler(dispatcher)
 {
     protected override async ValueTask<bool> PredicateAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {
         var text = message.ToText().Trim();
-        return text.StartsWith("/B站动态")
-               && await permission.IsSudoerOrGroupAdminOrHasPermissionAsync(bot, message, "bilibili-dynamic.subscribe",
+        return text.StartsWith("/直播SC")
+               && await permission.IsSudoerOrGroupAdminOrHasPermissionAsync(bot, message, "bilibili-sc.subscribe",
                    cancellationToken);
     }
 
     private Func<string, string, CancellationToken, Task> HandleCommandAsync(Event<IncomingMessage> message)
     {
-        return async (op, mid, cancellationToken) =>
+        return async (op, roomId, cancellationToken) =>
         {
             var groupId = message.Data.PeerId;
             await config.BeginConfigMutationScopeAsync(async (value, token) =>
@@ -32,28 +31,20 @@ public class DynamicCommandHandler(
                 switch (op)
                 {
                     case "订阅":
-                        await api.SubscribeAsync(mid, token);
-                        if (!value.MidToGroupSubscriptions.TryGetValue(mid, out var subscriptions))
-                            value.MidToGroupSubscriptions.Add(mid, subscriptions = []);
+                        if (!value.ScRoomIdToGroupSubscriptions.TryGetValue(roomId, out var subscriptions))
+                            value.ScRoomIdToGroupSubscriptions.Add(roomId, subscriptions = []);
                         subscriptions.Add(groupId);
                         await config.SaveAsync(value, token);
                         await message.ReplyAsGroup(bot, token,
-                            [$"已订阅用户{mid}的B站动态，更新时将会发送动态通知！".ToMilkyTextSegment()]);
+                            [$"已订阅直播间{roomId}的醒目留言，有新SC时将会转发到本群！".ToMilkyTextSegment()]);
                         break;
                     case "取消":
-                        if (value.MidToGroupSubscriptions.TryGetValue(mid, out subscriptions))
-                        {
-                            subscriptions.Remove(groupId);
-                            if (subscriptions.Count == 0)
-                            {
-                                value.MidToGroupSubscriptions.Remove(mid);
-                                value.LastDynamicIds.Remove(mid);
-                                await api.UnsubscribeAsync(mid, token);
-                            }
-                        }
+                        if (!value.ScRoomIdToGroupSubscriptions.TryGetValue(roomId, out subscriptions)) break;
+                        subscriptions.Remove(groupId);
+                        if (subscriptions.Count == 0) value.ScRoomIdToGroupSubscriptions.Remove(roomId);
                         await config.SaveAsync(value, token);
                         await message.ReplyAsGroup(bot, token,
-                            [$"已取消订阅用户{mid}的B站动态通知！".ToMilkyTextSegment()]);
+                            [$"已取消订阅直播间{roomId}的醒目留言转发！".ToMilkyTextSegment()]);
                         break;
                     default:
                         await message.ReplyAsGroup(bot, token, [HelpStrings]);
@@ -65,8 +56,8 @@ public class DynamicCommandHandler(
     }
 
     private static readonly OutgoingSegment HelpStrings =
-        ("/B站动态:订阅:B站用户UID\n" +
-         "/B站动态:取消:B站用户UID").ToMilkyTextSegment();
+        ("/直播SC:订阅:B站直播间ID\n" +
+         "/直播SC:取消:B站直播间ID").ToMilkyTextSegment();
 
     protected override async ValueTask HandleAsync(Event<IncomingMessage> message, CancellationToken cancellationToken = default)
     {

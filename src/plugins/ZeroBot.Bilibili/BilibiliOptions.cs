@@ -8,5 +8,7 @@ public record BilibiliOptions(
 
     public Dictionary<string, string> LastDynamicIds { get; init; } = [];
 
+    public Dictionary<string, HashSet<long>> ScRoomIdToGroupSubscriptions { get; init; } = [];
+
     public static BilibiliOptions Default => new BilibiliOptions([], []);
 }
