@@ -25,9 +25,12 @@ public class BiliBiliPlugin : IPlugin
         services.ConfigureJsonConfig("bilibili-config.json", BilibiliOptions.Default, cancellationToken);
         services.AddSingletonComponent<LiveStatutCommandHandler>();
         services.AddSingletonComponent<DynamicCommandHandler>();
+        services.AddSingletonComponent<LiveScCommandHandler>();
+        services.AddSingleton<LiveScApi>();
         services.AddSingletonExecutable<VideoLinkParser>();
         services.AddSingletonExecutable<LiveStatusSubscriber>();
         services.AddSingletonExecutable<DynamicSubscriber>();
+        services.AddSingletonExecutable<LiveScSubscriber>();
         
         return ValueTask.FromResult(services);
     }

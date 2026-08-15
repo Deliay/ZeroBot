@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Milky.Net.Model;
 using ZeroBot.Utility;
 
@@ -7,6 +8,7 @@ namespace ZeroBot.Bilibili.Dynamic;
 public static class DynamicMessageBuilder
 {
     private const string ForwardType = "DYNAMIC_TYPE_FORWARD";
+    private const string LiveRcmdType = "DYNAMIC_TYPE_LIVE_RCMD";
 
     public static OutgoingSegment[] Build(DynamicData data)
     {
@@ -17,6 +19,12 @@ public static class DynamicMessageBuilder
 
     private static void AppendDynamic(DynamicData data, List<OutgoingSegment> segments)
     {
+        if (data.Type == LiveRcmdType)
+        {
+            AppendLiveRcmd(data, segments);
+            return;
+        }
+
         var moduleDynamic = data.Modules?.ModuleDynamic;
         var opus = moduleDynamic?.Major?.Opus;
         var text = new StringBuilder();
@@ -57,6 +65,34 @@ public static class DynamicMessageBuilder
             segments.Add("\n---- 转发 ----\n".ToMilkyTextSegment());
             AppendDynamic(data.Orig, segments);
         }
+    }
+
+    private static void AppendLiveRcmd(DynamicData data, List<OutgoingSegment> segments)
+    {
+        var text = new StringBuilder("[正在直播]");
+        string? cover = null;
+        var content = data.Modules?.ModuleDynamic?.Major?.LiveRcmd?.Content;
+        if (!string.IsNullOrWhiteSpace(content))
+        {
+            try
+            {
+                var liveContent = JsonSerializer.Deserialize<LiveRcmdContent>(content);
+                var info = liveContent?.LivePlayInfo;
+                if (info != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(info.Title)) text.Append(' ').Append(info.Title.Trim());
+                    cover = NormalizeUrl(info.Cover);
+                    var link = NormalizeUrl(info.Link);
+                    if (link != null) text.Append('\n').Append(link);
+                }
+            }
+            catch (JsonException)
+            {
+                // ignore malformed live_rcmd content, fall through to placeholder text
+            }
+        }
+        segments.Add(text.ToString().ToMilkyTextSegment());
+        if (cover != null) segments.Add(cover.ToMilkyImageSegment());
     }
 
     private static string RenderRichText(DynamicRichText? richText)
