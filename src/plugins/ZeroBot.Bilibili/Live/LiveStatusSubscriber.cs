@@ -48,7 +48,7 @@ public class LiveStatusSubscriber(
                         foreach (var targetGroup in targetGroups)
                         {
                             var atAll = streaming ? await bot.TryAtAllMembers(accountId, targetGroup, cancellationToken) : [];
-                            await bot.WriteManyGroupMessageAsync(accountId, targetGroups, cancellationToken,
+                            await bot.WriteManyGroupMessageAsync(accountId, [targetGroup], cancellationToken,
                             [
                                 ..atAll,
                                 $"{status}啦~\n{info.Title} {url}".ToMilkyTextSegment(),
