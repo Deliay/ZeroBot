@@ -38,6 +38,9 @@ public class DynamicSubscriber(
                 // only send notification when the last id was recorded and changed
                 if (!string.IsNullOrEmpty(lastDynamicId))
                 {
+                    // skip live recommend dynamics, don't forward to QQ groups
+                    if (item.Data?.Type == "DYNAMIC_TYPE_LIVE_RCMD") continue;
+
                     var segments = DynamicMessageBuilder.Build(item.Data);
                     await foreach (var (accountId, _) in bot.GetAccountInfoAsync(cancellationToken))
                     {
