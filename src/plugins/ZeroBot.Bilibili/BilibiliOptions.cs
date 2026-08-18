@@ -7,6 +7,8 @@ public record BilibiliOptions(
     public Dictionary<string, HashSet<long>> MidToGroupSubscriptions { get; init; } = [];
 
     public Dictionary<string, string> LastDynamicIds { get; init; } = [];
+    
+    public Dictionary<string, DateTimeOffset> StartLiveAt { get; init; } = [];
 
     public Dictionary<string, HashSet<long>> ScRoomIdToGroupSubscriptions { get; init; } = [];
 

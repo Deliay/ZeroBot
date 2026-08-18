@@ -33,6 +33,11 @@ public class LiveStatusSubscriber(
                 // update current live status
                 await config.BeginConfigMutationScopeAsync(async (value, token) =>
                 {
+                    if (streaming)
+                    {
+                        value.StartLiveAt.Remove(strRoomId);
+                        value.StartLiveAt.TryAdd(strRoomId, DateTimeOffset.Now);
+                    }
                     value.LastLiveStatus.Remove(strRoomId);
                     value.LastLiveStatus.TryAdd(strRoomId, streaming);
                     await config.SaveAsync(value, token);
@@ -42,6 +47,12 @@ public class LiveStatusSubscriber(
                 if (initialized)
                 {
                     var status = streaming ? "开" : "下";
+                    var duration = !streaming && config.Current.StartLiveAt.TryGetValue(strRoomId, out var startAt)
+                        ? $"本场直播时长: {DateTimeOffset.Now - startAt:g}"
+                        : "";
+                    var image = info.UserCover is { Length: > 0 }
+                        ? Enumerable.Repeat(await info.UserCover.ToMilkyNonLocalImageSegmentAsync(cancellationToken), 0)
+                        : [];
                     var url = streaming ? $"https://live.bilibili.com/{info.RoomId}" : "";
                     await foreach (var (accountId, _) in bot.GetAccountInfoAsync(cancellationToken))
                     {
@@ -51,7 +62,7 @@ public class LiveStatusSubscriber(
                             await bot.WriteManyGroupMessageAsync(accountId, [targetGroup], cancellationToken,
                             [
                                 ..atAll,
-                                $"{status}啦~\n{info.Title} {url}".ToMilkyTextSegment(),
+                                $"{status}啦~\n{info.Title} {url}\n{duration}".ToMilkyTextSegment(),
                             ]);
                         }
                     }
