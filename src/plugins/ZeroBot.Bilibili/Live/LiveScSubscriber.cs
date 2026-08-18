@@ -64,23 +64,13 @@ public class LiveScSubscriber(
             {
                 await api.ReceiveSuperChatEventsAsync(roomId,
                     (sc, ct) => ForwardSuperChatAsync(roomId, sc, ct), cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                break;
+                
+                if (cancellationToken.IsCancellationRequested) break;
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
             }
             catch (Exception e)
             {
                 logger.LogError(e, "LiveScSubscriber receive exception, roomId: {RoomId}", roomId);
-            }
-            if (cancellationToken.IsCancellationRequested) break;
-            try
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                break;
             }
         }
     }
