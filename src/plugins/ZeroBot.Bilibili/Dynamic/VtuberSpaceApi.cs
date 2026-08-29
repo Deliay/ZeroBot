@@ -12,13 +12,13 @@ public class VtuberSpaceApi(HttpClient http, VtuberServerOptions options, ILogge
 
     public async Task SubscribeAsync(string mid, CancellationToken cancellationToken = default)
     {
-        var response = await http.PostAsJsonAsync($"{BaseUrl}/api/b/subscription", new { mid }, cancellationToken);
+        var response = await http.PostAsJsonAsync($"{BaseUrl}/api/b/subscription", new { mid, type = "dynamic" }, cancellationToken);
         response.EnsureSuccessStatusCode();
     }
 
     public async Task UnsubscribeAsync(string mid, CancellationToken cancellationToken = default)
     {
-        var response = await http.DeleteAsync($"{BaseUrl}/api/b/subscription/{mid}", cancellationToken);
+        var response = await http.DeleteAsync($"{BaseUrl}/api/b/subscription/{mid}?type=dynamic", cancellationToken);
         response.EnsureSuccessStatusCode();
     }
 
