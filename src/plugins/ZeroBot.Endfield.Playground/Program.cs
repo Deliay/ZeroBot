@@ -8,7 +8,8 @@ using ZeroBot.Endfield.Playground;
 
 var credentialRepository = new JsonCredentialRepository("credentials.json");
 var hypergryphClient = new HypergryphClient();
-var credentialManager = new CredentialManager(hypergryphClient, credentialRepository);
+var deviceIdService = new DeviceIdService(new MemoryDeviceIdRepository());
+var credentialManager = new CredentialManager(hypergryphClient, credentialRepository, deviceIdService);
 using var cts = new CancellationTokenSource();
 var cancellationToken = cts.Token;
 
