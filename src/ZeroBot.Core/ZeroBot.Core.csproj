@@ -1,23 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
-    
-    <ItemGroup>
-      <Content Include="..\..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\plugins\ZeroBot.AI\ZeroBot.AI.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Bilibili\ZeroBot.Bilibili.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.ComfyUI\ZeroBot.ComfyUI.csproj" />
-      <ProjectReference Include="..\plugins\ZeroBot.Endfield.Card.BrowserRender\ZeroBot.Endfield.Card.BrowserRender.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Endfield\ZeroBot.Endfield.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.PermissionCommandPlugin\ZeroBot.PermissionCommandPlugin.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.TestPlugin\ZeroBot.TestPlugin.csproj" />
@@ -29,5 +18,11 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.Logging.Console" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 </Project>

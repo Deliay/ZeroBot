@@ -22,7 +22,6 @@ TypedPluginLoader.Register<ZeroBotComfyUiPlugin>();
 TypedPluginLoader.Register<ZeroBotPermissionCommandPlugin>();
 TypedPluginLoader.Register<BiliBiliPlugin>();
 TypedPluginLoader.Register<EndfieldPlugin>();
-// TypedPluginLoader.Register<BrowserRenderPlugin>();
 
 Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
 var root = RootBuilder
