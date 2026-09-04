@@ -73,9 +73,6 @@ public class AnchorEventSubscriber(
             {
                 await api.ReceiveDanmakuEventsAsync(roomId,
                     (msg, ct) => ForwardDanmakuAsync(roomId, msg, ct), cancellationToken);
-
-                if (cancellationToken.IsCancellationRequested) break;
-                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -84,6 +81,16 @@ public class AnchorEventSubscriber(
             catch (Exception e)
             {
                 logger.LogError(e, "AnchorEventSubscriber receive danmaku exception, roomId: {RoomId}", roomId);
+            }
+
+            if (cancellationToken.IsCancellationRequested) break;
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
             }
         }
     }
@@ -96,9 +103,6 @@ public class AnchorEventSubscriber(
             {
                 await api.ReceiveInteractEventsAsync(roomId,
                     (enter, ct) => ForwardInteractAsync(roomId, enter, ct), cancellationToken);
-
-                if (cancellationToken.IsCancellationRequested) break;
-                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -107,6 +111,16 @@ public class AnchorEventSubscriber(
             catch (Exception e)
             {
                 logger.LogError(e, "AnchorEventSubscriber receive interact exception, roomId: {RoomId}", roomId);
+            }
+
+            if (cancellationToken.IsCancellationRequested) break;
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
             }
         }
     }

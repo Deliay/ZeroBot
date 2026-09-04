@@ -126,6 +126,18 @@ public class AnchorEventApi(HttpClient http, VtuberServerOptions options, ILogge
         {
             logger.LogWarning(e, "Failed to parse interact event data: {Json}", json);
         }
+        catch (FormatException e)
+        {
+            logger.LogWarning(e, "Failed to parse interact event protobuf (invalid base64): {Json}", json);
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            logger.LogWarning(e, "Failed to parse interact event protobuf (invalid wireType): {Json}", json);
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning(e, "Failed to process interact event: {Json}", json);
+        }
     }
 }
 
