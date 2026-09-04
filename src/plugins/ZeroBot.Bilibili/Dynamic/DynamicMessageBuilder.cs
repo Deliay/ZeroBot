@@ -50,10 +50,16 @@ public static class DynamicMessageBuilder
         {
             if (!string.IsNullOrWhiteSpace(opus.Title)) text.AppendLine(opus.Title.Trim());
             text.Append(RenderRichText(opus.Summary));
-            var link = isOrig
-                ? $"原动态：{NormalizeUrl(opus.JumpUrl)}"
-                : NormalizeUrl(opus.JumpUrl);
-            if (link != null) text.Append('\n').Append(link);
+            if (isOrig)
+            {
+                var origLink = GetDynamicUrl(data);
+                if (origLink != null) text.Append('\n').Append($"原动态：{origLink}");
+            }
+            else if (data.Type != ForwardType || data.Orig == null)
+            {
+                var link = NormalizeUrl(opus.JumpUrl);
+                if (link != null) text.Append('\n').Append(link);
+            }
         }
 
         // fallback to desc for non-forward dynamics without opus

@@ -51,7 +51,7 @@ public class LiveStatusSubscriber(
                     var duration = !streaming && config.Current.StartLiveAt.TryGetValue(strRoomId, out var startAt)
                         ? $"本场直播时长: {DateTimeOffset.Now - startAt:g}"
                         : "";
-                    OutgoingSegment[] image = info.UserCover is { Length: > 0 }
+                    OutgoingSegment[] image = !string.IsNullOrWhiteSpace(info.UserCover)
                         ? [await info.UserCover.ToMilkyNonLocalImageSegmentAsync(cancellationToken)]
                         : [];
                     var url = streaming ? $"https://live.bilibili.com/{info.RoomId}" : "";
