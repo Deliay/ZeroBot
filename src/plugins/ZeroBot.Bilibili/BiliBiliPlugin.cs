@@ -27,10 +27,13 @@ public class BiliBiliPlugin : IPlugin
         services.AddSingletonComponent<DynamicCommandHandler>();
         services.AddSingletonComponent<LiveScCommandHandler>();
         services.AddSingleton<LiveScApi>();
+        services.AddSingletonComponent<AnchorEventCommandHandler>();
+        services.AddSingleton<AnchorEventApi>();
         services.AddSingletonExecutable<VideoLinkParser>();
         services.AddSingletonExecutable<LiveStatusSubscriber>();
         services.AddSingletonExecutable<DynamicSubscriber>();
         services.AddSingletonExecutable<LiveScSubscriber>();
+        services.AddSingletonExecutable<AnchorEventSubscriber>();
         
         return ValueTask.FromResult(services);
     }

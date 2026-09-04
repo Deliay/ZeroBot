@@ -1,4 +1,5 @@
 ﻿using EmberFramework.Abstraction.Layer.Plugin;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -6,13 +7,15 @@ using ZeroBot.Abstraction.Bot;
 
 namespace ZeroBot.Repository.Mongo;
 
-public class MongoRepositoryPlugin(IOptions<MongoRepositoryOptions> options, IBotContext botContext) : IPlugin.IWithInitializer
+public class MongoRepositoryPlugin(IConfiguration config, IBotContext botContext) : IPlugin.IWithInitializer
 {
     public ValueTask<IServiceCollection> BuildComponents(CancellationToken cancellationToken = default)
     {
         IServiceCollection services = new ServiceCollection();
-        services.AddSingleton(_ =>
+        services.Configure<MongoRepositoryOptions>(config.GetSection(nameof(MongoRepositoryOptions)));
+        services.AddSingleton(container =>
         {
+            var options = container.GetRequiredService<IOptions<MongoRepositoryOptions>>();
             var mongoSettings = MongoClientSettings.FromConnectionString(options.Value.ConnectionString);
             mongoSettings.MaxConnectionPoolSize = options.Value.PoolSize;
             return mongoSettings;

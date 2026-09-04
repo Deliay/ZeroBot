@@ -10,14 +10,27 @@ public static class DynamicMessageBuilder
     private const string ForwardType = "DYNAMIC_TYPE_FORWARD";
     private const string LiveRcmdType = "DYNAMIC_TYPE_LIVE_RCMD";
 
-    public static OutgoingSegment[] Build(DynamicData data)
+    public static OutgoingSegment[] Build(DynamicData data, string? fallbackAuthor = null)
     {
-        var segments = new List<OutgoingSegment>();
+        var author = data.Modules?.ModuleAuthor?.Name;
+        if (string.IsNullOrWhiteSpace(author)) author = fallbackAuthor ?? "神秘人";
+        var segments = new List<OutgoingSegment>
+        {
+            $"{author} 发布了新动态".ToMilkyTextSegment(),
+        };
         AppendDynamic(data, segments);
         return [.. segments];
     }
 
-    private static void AppendDynamic(DynamicData data, List<OutgoingSegment> segments)
+    private static string? GetDynamicUrl(DynamicData data)
+    {
+        var opus = data.Modules?.ModuleDynamic?.Major?.Opus;
+        var link = NormalizeUrl(opus?.JumpUrl);
+        if (link != null) return link;
+        return data.IdStr is { Length: > 0 } ? $"https://www.bilibili.com/opus/{data.IdStr}" : null;
+    }
+
+    private static void AppendDynamic(DynamicData data, List<OutgoingSegment> segments, bool isOrig = false)
     {
         if (data.Type == LiveRcmdType)
         {
@@ -37,8 +50,16 @@ public static class DynamicMessageBuilder
         {
             if (!string.IsNullOrWhiteSpace(opus.Title)) text.AppendLine(opus.Title.Trim());
             text.Append(RenderRichText(opus.Summary));
-            var link = NormalizeUrl(opus.JumpUrl);
-            if (link != null) text.Append('\n').Append(link);
+            if (isOrig)
+            {
+                var origLink = GetDynamicUrl(data);
+                if (origLink != null) text.Append('\n').Append($"原动态：{origLink}");
+            }
+            else if (data.Type != ForwardType || data.Orig == null)
+            {
+                var link = NormalizeUrl(opus.JumpUrl);
+                if (link != null) text.Append('\n').Append(link);
+            }
         }
 
         // fallback to desc for non-forward dynamics without opus
@@ -46,6 +67,28 @@ public static class DynamicMessageBuilder
             text.Append(RenderRichText(moduleDynamic.Desc));
         if (text.Length == 0)
             text.Append($"[{data.Type}] 暂无可用文本内容");
+
+        if (data.Type == ForwardType && data.Orig != null)
+        {
+            var forwardUrl = GetDynamicUrl(data);
+            if (forwardUrl != null) text.Append('\n').Append(forwardUrl);
+
+            if (opus is { Pics.Count: > 0 }) text.Append('\n');
+            segments.Add(text.ToString().ToMilkyTextSegment());
+
+            if (opus != null)
+            {
+                foreach (var pic in opus.Pics)
+                {
+                    var picUrl = NormalizeUrl(pic.Url);
+                    if (picUrl != null) segments.Add(picUrl.ToMilkyImageSegment());
+                }
+            }
+
+            segments.Add("\n---- 转发 ----\n".ToMilkyTextSegment());
+            AppendDynamic(data.Orig, segments, isOrig: true);
+            return;
+        }
 
         // pics are shown after the text, separated by a newline
         if (opus is { Pics.Count: > 0 }) text.Append('\n');
@@ -58,12 +101,6 @@ public static class DynamicMessageBuilder
                 var url = NormalizeUrl(pic.Url);
                 if (url != null) segments.Add(url.ToMilkyImageSegment());
             }
-        }
-
-        if (data.Type == ForwardType && data.Orig != null)
-        {
-            segments.Add("\n---- 转发 ----\n".ToMilkyTextSegment());
-            AppendDynamic(data.Orig, segments);
         }
     }
 
