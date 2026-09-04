@@ -52,6 +52,8 @@ public class VtuberSpaceItem
 
 public class DynamicData
 {
+    [JsonPropertyName("id_str")] public string IdStr { get; set; } = "";
+
     [JsonPropertyName("type")] public string Type { get; set; } = "";
 
     [JsonPropertyName("modules")] public DynamicModules? Modules { get; set; }
@@ -61,7 +63,14 @@ public class DynamicData
 
 public class DynamicModules
 {
+    [JsonPropertyName("module_author")] public ModuleAuthor? ModuleAuthor { get; set; }
+
     [JsonPropertyName("module_dynamic")] public ModuleDynamic? ModuleDynamic { get; set; }
+}
+
+public class ModuleAuthor
+{
+    [JsonPropertyName("name")] public string Name { get; set; } = "";
 }
 
 public class ModuleDynamic

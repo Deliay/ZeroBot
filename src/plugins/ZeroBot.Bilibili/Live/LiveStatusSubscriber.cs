@@ -1,6 +1,7 @@
 using EmberFramework.Abstraction;
 using Microsoft.Extensions.Logging;
 using Mikibot.Crawler.Http.Bilibili;
+using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.Utility;
 using ZeroBot.Utility.FileWatcher;
@@ -50,8 +51,8 @@ public class LiveStatusSubscriber(
                     var duration = !streaming && config.Current.StartLiveAt.TryGetValue(strRoomId, out var startAt)
                         ? $"本场直播时长: {DateTimeOffset.Now - startAt:g}"
                         : "";
-                    var image = info.UserCover is { Length: > 0 }
-                        ? Enumerable.Repeat(await info.UserCover.ToMilkyNonLocalImageSegmentAsync(cancellationToken), 0)
+                    OutgoingSegment[] image = info.UserCover is { Length: > 0 }
+                        ? [await info.UserCover.ToMilkyNonLocalImageSegmentAsync(cancellationToken)]
                         : [];
                     var url = streaming ? $"https://live.bilibili.com/{info.RoomId}" : "";
                     await foreach (var (accountId, _) in bot.GetAccountInfoAsync(cancellationToken))
@@ -63,6 +64,7 @@ public class LiveStatusSubscriber(
                             [
                                 ..atAll,
                                 $"{status}啦~\n{info.Title} {url}\n{duration}".ToMilkyTextSegment(),
+                                ..image,
                             ]);
                         }
                     }
