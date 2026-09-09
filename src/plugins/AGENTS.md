@@ -269,6 +269,29 @@ TypedPluginLoader.Register<MyPlugin>();
 
 ---
 
+### ZeroBot.Weibo
+
+| 属性 | 值 |
+|------|-----|
+| 路径 | `src/plugins/ZeroBot.Weibo/` |
+| 命名空间 | `ZeroBot.Weibo` |
+
+**功能:** 微博订阅推送，监控用户微博动态并自动通知订阅群组。
+
+**组件:**
+- `WeiboCommandHandler` - 微博订阅/取消命令处理器
+- `WeiboSubscriber` - 后台轮询任务，定时检查微博更新
+- `WeiboMessageBuilder` - 微博内容消息构建器
+- `WeiboApi` - 微博 API 客户端
+
+**命令:**
+- `/微博:订阅:微博用户UID` - 订阅用户微博
+- `/微博:取消:微博用户UID` - 取消订阅
+
+**配置文件:** `weibo-config.json`
+
+---
+
 ### ZeroBot.Endfield
 
 | 属性 | 值 |
