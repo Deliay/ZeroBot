@@ -52,7 +52,7 @@ public class WeiboSubscriber(
 
             await Task.Delay(TimeSpan.FromSeconds(_random.Next(1, 3)), cancellationToken);
         }
-        await Task.Delay(TimeSpan.FromSeconds(20), cancellationToken);
+        await Task.Delay(TimeSpan.FromSeconds(11), cancellationToken);
     }
 
     public async ValueTask RunAsync(CancellationToken cancellationToken = default)
