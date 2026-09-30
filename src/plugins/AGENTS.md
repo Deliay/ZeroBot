@@ -292,6 +292,29 @@ TypedPluginLoader.Register<MyPlugin>();
 
 ---
 
+### ZeroBot.Synthesize
+
+| 属性 | 值 |
+|------|-----|
+| 路径 | `src/plugins/ZeroBot.Synthesize/` |
+| 命名空间 | `ZeroBot.Synthesize` |
+
+**功能:** 语音合成，管理数据集别名并调用后台语音训练服务生成群聊语音。
+
+**组件:**
+- `DatasetAliasCommandHandler` - 数据集别名管理 (`/synthesize:...`)
+- `SynthesizeCommandHandler` - 语音合成 (`/学:...`)
+- `SynthesizeApi` - 合成接口 HTTP 客户端
+- `SynthesizeQuota` - UTC+8 每日额度工具
+
+**命令:**
+- `/synthesize:dataset:{dataset-id}:{alias}` - 绑定数据集别名（高权限用户，兼容 `/synthesize:{dataset-id}:{alias}`）
+- `/学:{alias}:{text}` - 通过别名合成语音并发送到群聊（仅群聊，同群同人每天 3 条）
+
+**配置文件:** `synthesize-config.json`（`endpoint` 支持热加载，默认可用环境变量 `Z_VTUBER_TRAINING_ENDPOINT`）
+
+---
+
 ### ZeroBot.Endfield
 
 | 属性 | 值 |
