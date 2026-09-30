@@ -63,7 +63,7 @@ public class SynthesizeCommandHandler(
 
         var record = new RecordOutgoingSegment(
             new RecordOutgoingSegmentData(new MilkyUri($"base64://{Convert.ToBase64String(bytes)}")));
-        await message.ReplyAsGroup(bot, cancellationToken, [record]);
+        await message.SendAsGroup(bot, cancellationToken, [record]);
     }
 
     /// <summary>
