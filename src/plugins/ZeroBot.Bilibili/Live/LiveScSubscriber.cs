@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using EmberFramework.Abstraction;
 using Microsoft.Extensions.Logging;
 using ZeroBot.Abstraction.Bot;
+using ZeroBot.Synthesize.Abstraction;
 using ZeroBot.Utility.FileWatcher;
 
 namespace ZeroBot.Bilibili.Live;
@@ -10,7 +11,8 @@ public class LiveScSubscriber(
     IJsonConfig<BilibiliOptions> config,
     LiveScApi api,
     ILogger<LiveScSubscriber> logger,
-    IBotContext bot) : IExecutable
+    IBotContext bot,
+    IEnumerable<IVoiceBroadcaster> broadcasters) : IExecutable
 {
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activeRooms = new();
 
@@ -83,6 +85,28 @@ public class LiveScSubscriber(
         await foreach (var (accountId, _) in bot.GetAccountInfoAsync(cancellationToken))
         {
             await bot.WriteManyGroupMessageAsync(accountId, groups, cancellationToken, segments);
+        }
+
+        // 文字通知之后追加独立语音
+        var name = sc.UserInfo?.Uname;
+        if (string.IsNullOrWhiteSpace(name)) name = "未知用户";
+        await BroadcastVoiceAsync(groups, $"感谢{name}发送的{sc.Price}元醒目留言，{sc.Message}", cancellationToken);
+    }
+
+    private async Task BroadcastVoiceAsync(IReadOnlyCollection<long> groupIds, string? text,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        foreach (var broadcaster in broadcasters)
+        {
+            try
+            {
+                await broadcaster.BroadcastAsync(groupIds, text, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Voice broadcast failed");
+            }
         }
     }
 }

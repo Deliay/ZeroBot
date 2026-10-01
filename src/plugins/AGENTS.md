@@ -306,13 +306,31 @@ TypedPluginLoader.Register<MyPlugin>();
 - `SynthesizeCommandHandler` - 语音合成 (`/学:...`)
 - `SynthesizeApi` - 合成接口 HTTP 客户端
 - `SynthesizeQuota` - UTC+8 每日额度工具
+- `VoiceBroadcastService` - 通知语音播报实现（`IVoiceBroadcaster`）
+- `VoiceBroadcastCommandHandler` - 通知语音播报开关 (`/动态语音播报:...`)
 
 **命令:**
 - `/synthesize:dataset:{dataset-id}:{alias}` - 绑定数据集别名（高权限用户，兼容 `/synthesize:{dataset-id}:{alias}`）
 - `/synthesize:limit:{number}` - 设置本群每人每日生成上限（高权限用户；-1 不限制，0 禁止，>0 为上限；未设置默认 3）
 - `/学:{alias}:{text}` - 通过别名合成语音并发送到群聊（仅群聊，同群同人每天受该群上限限制，默认 3 条）
+- `/动态语音播报:启用:{alias}` / `/动态语音播报:禁用` - 开启/关闭本群通知语音播报（仅群聊，高权限用户，权限 `synthesize.voice-broadcast`）
 
-**配置文件:** `synthesize-config.json`（`endpoint` 支持热加载，默认可用环境变量 `Z_VTUBER_TRAINING_ENDPOINT`）
+**配置文件:** `synthesize-config.json`（`endpoint` 支持热加载，默认可用环境变量 `Z_VTUBER_TRAINING_ENDPOINT`；`voiceBroadcastGroups` 为群聊 → 播报音色别名映射，`voiceBroadcastMaxTextLength` 为播报文本最大长度，默认 200）
+
+---
+
+### ZeroBot.Synthesize.Abstraction
+
+| 属性 | 值 |
+|------|-----|
+| 路径 | `src/plugins/ZeroBot.Synthesize.Abstraction/` |
+| 命名空间 | `ZeroBot.Synthesize.Abstraction` |
+| 状态 | **非插件**（无依赖库工程，仅 BCL 类型） |
+
+**功能:** 语音播报等 Synthesize 域共用契约库，被 ZeroBot.Synthesize（实现方）与 ZeroBot.Bilibili / ZeroBot.Weibo（消费方）共同引用。
+
+**核心类型:**
+- `IVoiceBroadcaster` - 通知语音播报契约；消费方以 `IEnumerable<IVoiceBroadcaster>` 可选注入，未注册时静默降级
 
 ---
 

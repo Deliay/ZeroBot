@@ -19,6 +19,7 @@
     <Project Path="src/plugins/ZeroBot.PermissionCommandPlugin/ZeroBot.PermissionCommandPlugin.csproj" />
     <Project Path="src/plugins/ZeroBot.Repository.Mongo/ZeroBot.Repository.Mongo.csproj" />
     <Project Path="src/plugins/ZeroBot.Synthesize/ZeroBot.Synthesize.csproj" />
+    <Project Path="src/plugins/ZeroBot.Synthesize.Abstraction/ZeroBot.Synthesize.Abstraction.csproj" />
     <Project Path="src/plugins/ZeroBot.TestPlugin/ZeroBot.TestPlugin.csproj" />
     <Project Path="src/plugins/ZeroBot.ComfyUI/ZeroBot.ComfyUI.csproj" />
     <Project Path="src/plugins/ZeroBot.Endfield.Api/ZeroBot.Endfield.Api.csproj" />

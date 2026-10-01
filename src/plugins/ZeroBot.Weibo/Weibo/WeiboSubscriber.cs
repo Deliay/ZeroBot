@@ -1,6 +1,7 @@
 using EmberFramework.Abstraction;
 using Microsoft.Extensions.Logging;
 using ZeroBot.Abstraction.Bot;
+using ZeroBot.Synthesize.Abstraction;
 using ZeroBot.Utility.FileWatcher;
 
 namespace ZeroBot.Weibo.Weibo;
@@ -9,7 +10,8 @@ public class WeiboSubscriber(
     IJsonConfig<WeiboOptions> config,
     WeiboApi api,
     ILogger<WeiboSubscriber> logger,
-    IBotContext bot) : IExecutable
+    IBotContext bot,
+    IEnumerable<IVoiceBroadcaster> broadcasters) : IExecutable
 {
     private readonly Random _random = new();
 
@@ -43,6 +45,10 @@ public class WeiboSubscriber(
                     {
                         await bot.WriteManyGroupMessageAsync(accountId, targetGroups, cancellationToken, segments);
                     }
+
+                    // 文字通知之后追加独立语音
+                    await BroadcastVoiceAsync(targetGroups, WeiboMessageBuilder.BuildVoiceText(item),
+                        cancellationToken);
                 }
             }
             catch (Exception e)
@@ -66,6 +72,23 @@ public class WeiboSubscriber(
             catch (Exception e)
             {
                 logger.LogError(e, "WeiboSubscriber Exception");
+            }
+        }
+    }
+
+    private async Task BroadcastVoiceAsync(IReadOnlyCollection<long> groupIds, string? text,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        foreach (var broadcaster in broadcasters)
+        {
+            try
+            {
+                await broadcaster.BroadcastAsync(groupIds, text, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Voice broadcast failed");
             }
         }
     }

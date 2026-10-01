@@ -142,6 +142,68 @@ public static class DynamicMessageBuilder
         return builder.ToString();
     }
 
+    /// <summary>提取动态纯文本（供语音播报）：标题 + 富文本正文，转发链递归拼接，剔除图片、表情占位与链接。</summary>
+    public static string BuildVoiceText(DynamicData data)
+    {
+        var builder = new StringBuilder();
+        AppendVoiceText(data, builder);
+        return builder.ToString().Trim();
+    }
+
+    private static void AppendVoiceText(DynamicData data, StringBuilder target)
+    {
+        if (data.Type == LiveRcmdType)
+        {
+            var liveText = BuildLiveRcmdVoiceText(data);
+            if (!string.IsNullOrWhiteSpace(liveText)) target.Append(liveText);
+            return;
+        }
+
+        var moduleDynamic = data.Modules?.ModuleDynamic;
+        var opus = moduleDynamic?.Major?.Opus;
+
+        // 每层用局部 builder 收集本层文本，避免父层已有内容影响「本层无文本则回退 desc」的判断
+        var local = new StringBuilder();
+
+        // 转发动态用自己的话写在 desc
+        if (data.Type == ForwardType && moduleDynamic?.Desc != null)
+            local.Append(RenderRichText(moduleDynamic.Desc));
+
+        if (opus != null)
+        {
+            if (!string.IsNullOrWhiteSpace(opus.Title)) local.Append(opus.Title.Trim()).Append('\n');
+            local.Append(RenderRichText(opus.Summary));
+        }
+
+        // 回退 desc（对齐 AppendDynamic 的 fallback）；不追加图片、链接与占位展示文案
+        if (local.Length == 0 && moduleDynamic?.Desc != null)
+            local.Append(RenderRichText(moduleDynamic.Desc));
+
+        if (local.Length > 0) target.Append(local);
+
+        if (data.Type == ForwardType && data.Orig != null)
+        {
+            if (target.Length > 0) target.Append('\n');
+            AppendVoiceText(data.Orig, target);
+        }
+    }
+
+    private static string? BuildLiveRcmdVoiceText(DynamicData data)
+    {
+        var content = data.Modules?.ModuleDynamic?.Major?.LiveRcmd?.Content;
+        if (string.IsNullOrWhiteSpace(content)) return null;
+        try
+        {
+            var info = JsonSerializer.Deserialize<LiveRcmdContent>(content)?.LivePlayInfo;
+            if (info == null || string.IsNullOrWhiteSpace(info.Title)) return null;
+            return $"[正在直播] {info.Title.Trim()}";
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
     private static string? NormalizeUrl(string? url)
     {
         if (string.IsNullOrWhiteSpace(url)) return null;
