@@ -51,6 +51,12 @@ public record SynthesizeOptions
     /// </summary>
     public Dictionary<string, DailyQuota> DailyQuotas { get; init; } = [];
 
+    /// <summary>群 PeerId → 播报音色别名；由 /动态语音播报 指令维护。</summary>
+    public Dictionary<long, string> VoiceBroadcastGroups { get; init; } = [];
+
+    /// <summary>播报文本最大长度（超出截断），默认 200；&lt;= 0 表示不截断。</summary>
+    public int VoiceBroadcastMaxTextLength { get; init; } = 200;
+
     public static SynthesizeOptions Default => new()
     {
         Endpoint = Environment.GetEnvironmentVariable("Z_VTUBER_TRAINING_ENDPOINT") ?? DefaultEndpoint

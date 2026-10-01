@@ -1,6 +1,7 @@
 using EmberFramework.Abstraction;
 using Microsoft.Extensions.Logging;
 using ZeroBot.Abstraction.Bot;
+using ZeroBot.Synthesize.Abstraction;
 using ZeroBot.Utility.FileWatcher;
 
 namespace ZeroBot.Bilibili.Dynamic;
@@ -9,7 +10,8 @@ public class DynamicSubscriber(
     IJsonConfig<BilibiliOptions> config,
     VtuberSpaceApi api,
     ILogger<DynamicSubscriber> logger,
-    IBotContext bot) : IExecutable
+    IBotContext bot,
+    IEnumerable<IVoiceBroadcaster> broadcasters) : IExecutable
 {
     private readonly Random _random = new();
 
@@ -24,6 +26,7 @@ public class DynamicSubscriber(
                 var item = await api.GetLatestDynamicAsync(mid, cancellationToken);
                 // fetch failure or empty space: keep polling in the next round
                 if (item?.Data == null) continue;
+                var data = item.Data;
                 config.Current.LastDynamicIds.TryGetValue(mid, out var lastDynamicId);
                 // same dynamic as last time, skip
                 if (lastDynamicId == item.DynamicId) continue;
@@ -39,13 +42,17 @@ public class DynamicSubscriber(
                 if (!string.IsNullOrEmpty(lastDynamicId))
                 {
                     // skip live recommend dynamics, don't forward to QQ groups
-                    if (item.Data?.Type == "DYNAMIC_TYPE_LIVE_RCMD") continue;
+                    if (data.Type == "DYNAMIC_TYPE_LIVE_RCMD") continue;
 
-                    var segments = DynamicMessageBuilder.Build(item.Data, mid);
+                    var segments = DynamicMessageBuilder.Build(data, mid);
                     await foreach (var (accountId, _) in bot.GetAccountInfoAsync(cancellationToken))
                     {
                         await bot.WriteManyGroupMessageAsync(accountId, targetGroups, cancellationToken, segments);
                     }
+
+                    // 文字通知之后追加独立语音
+                    await BroadcastVoiceAsync(targetGroups, DynamicMessageBuilder.BuildVoiceText(data),
+                        cancellationToken);
                 }
             }
             catch (Exception e)
@@ -69,6 +76,23 @@ public class DynamicSubscriber(
             catch (Exception e)
             {
                 logger.LogError(e, "DynamicSubscriber Exception");
+            }
+        }
+    }
+
+    private async Task BroadcastVoiceAsync(IReadOnlyCollection<long> groupIds, string? text,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        foreach (var broadcaster in broadcasters)
+        {
+            try
+            {
+                await broadcaster.BroadcastAsync(groupIds, text, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Voice broadcast failed");
             }
         }
     }

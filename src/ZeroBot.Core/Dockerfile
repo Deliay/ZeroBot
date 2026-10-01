@@ -17,6 +17,7 @@ COPY ["src/plugins/ZeroBot.Endfield/ZeroBot.Endfield.csproj", "src/plugins/ZeroB
 COPY ["src/plugins/ZeroBot.Endfield.Credential.Json/ZeroBot.Endfield.Credential.Json.csproj", "src/plugins/ZeroBot.Endfield.Credential.Json/"]
 COPY ["src/plugins/ZeroBot.PermissionCommandPlugin/ZeroBot.PermissionCommandPlugin.csproj", "src/plugins/ZeroBot.PermissionCommandPlugin/"]
 COPY ["src/plugins/ZeroBot.Synthesize/ZeroBot.Synthesize.csproj", "src/plugins/ZeroBot.Synthesize/"]
+COPY ["src/plugins/ZeroBot.Synthesize.Abstraction/ZeroBot.Synthesize.Abstraction.csproj", "src/plugins/ZeroBot.Synthesize.Abstraction/"]
 COPY ["src/plugins/ZeroBot.TestPlugin/ZeroBot.TestPlugin.csproj", "src/plugins/ZeroBot.TestPlugin/"]
 COPY ["src/plugins/ZeroBot.Milky/ZeroBot.Milky.csproj", "src/plugins/ZeroBot.Milky/"]
 COPY ["src/plugins/ZeroBot.Repository.Mongo/ZeroBot.Repository.Mongo.csproj", "src/plugins/ZeroBot.Repository.Mongo/"]

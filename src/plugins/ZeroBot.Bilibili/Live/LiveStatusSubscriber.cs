@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Mikibot.Crawler.Http.Bilibili;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
+using ZeroBot.Synthesize.Abstraction;
 using ZeroBot.Utility;
 using ZeroBot.Utility.FileWatcher;
 
@@ -12,7 +13,8 @@ public class LiveStatusSubscriber(
     IJsonConfig<BilibiliOptions> config,
     BiliLiveCrawler crawler,
     ILogger<LiveStatusSubscriber> logger,
-    IBotContext bot) : IExecutable
+    IBotContext bot,
+    IEnumerable<IVoiceBroadcaster> broadcasters) : IExecutable
 {
     private readonly Random _random = new();
     
@@ -68,6 +70,11 @@ public class LiveStatusSubscriber(
                             ]);
                         }
                     }
+
+                    // 文字通知之后追加独立语音，仅开播播报（下播不播报）
+                    if (streaming)
+                        await BroadcastVoiceAsync(targetGroups,
+                            $"噔噔咚，开始直播了哦。今天播「{info.Title}」。", cancellationToken);
                 }
             }
             catch (Exception e)
@@ -91,6 +98,23 @@ public class LiveStatusSubscriber(
             catch (Exception e)
             {
                 logger.LogError(e, "LiveStatusSubscriber Exception");
+            }
+        }
+    }
+
+    private async Task BroadcastVoiceAsync(IReadOnlyCollection<long> groupIds, string? text,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        foreach (var broadcaster in broadcasters)
+        {
+            try
+            {
+                await broadcaster.BroadcastAsync(groupIds, text, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Voice broadcast failed");
             }
         }
     }

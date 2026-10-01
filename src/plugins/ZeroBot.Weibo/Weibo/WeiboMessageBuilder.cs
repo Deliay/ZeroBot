@@ -103,6 +103,36 @@ public static class WeiboMessageBuilder
         return pic.Large?.Url ?? pic.Url;
     }
 
+    /// <summary>提取微博纯文本（供语音播报）：转发含转发人文本与「@原作者: 正文」，剔除图片与链接。</summary>
+    public static string BuildVoiceText(WeiboTimelineItem item)
+    {
+        var data = item.Data;
+        if (data == null) return "";
+
+        if (data.RetweetedStatus != null)
+        {
+            // 转发人自己的话，截掉 //@... 尾巴
+            var forwardText = HtmlToPlainText(data.Text ?? "");
+            var atIndex = forwardText.LastIndexOf("//@", StringComparison.Ordinal);
+            if (atIndex > 0) forwardText = forwardText[..atIndex];
+            forwardText = forwardText.Trim();
+
+            // 原微博不可见 / 已删除：只播报转发人文本，跳过 [原微博不可见] 占位
+            var origText = HtmlToPlainText(data.RetweetedStatus.Text ?? "");
+            var origAuthor = data.RetweetedStatus.User?.ScreenName;
+            if (data.RetweetedStatus.User == null
+                || string.IsNullOrEmpty(origText)
+                || origText.Contains("微博已被删除"))
+            {
+                return forwardText;
+            }
+
+            return $"{forwardText}\n@{origAuthor}: {origText}".Trim();
+        }
+
+        return HtmlToPlainText(data.Text ?? "").Trim();
+    }
+
     private static string HtmlToPlainText(string html)
     {
         if (string.IsNullOrEmpty(html)) return "";
