@@ -2,9 +2,9 @@
 
 | 属性 | 值 |
 |---|---|
-| 所属插件 | ZeroBot.Abstraction（接口）、ZeroBot.Synthesize（播报实现与指令）、ZeroBot.Bilibili / ZeroBot.Weibo（触发点接入） |
+| 所属插件 | ZeroBot.Synthesize.Abstraction（接口与共用类型库，新增）、ZeroBot.Synthesize（播报实现与指令）、ZeroBot.Bilibili / ZeroBot.Weibo（触发点接入） |
 | 关联文档 | [产品需求文档（PRD）](./notify-voice-broadcast-prd.md) |
-| 参照实现 | [语音合成插件](./synthesize-voice-tech.md)（`SynthesizeApi` / 别名配置 / `RecordOutgoingSegment` 发送） |
+| 参照实现 | [语音合成插件](./synthesize-voice-tech.md)（`SynthesizeApi` / 别名配置 / `RecordOutgoingSegment` 发送）；Endfield 家族库工程模式（`ZeroBot.Endfield.Api`） |
 
 ---
 
@@ -42,8 +42,9 @@
 
 ### 1.3 跨插件调用约束
 
-- 各插件工程仅引用 `ZeroBot.Abstraction` + `ZeroBot.Utility`，**无业务插件互相引用的先例**（Endfield 家族引用的是库工程）。
-- EmberFramework（外部包）是否把各插件 `BuildComponents` 返回的 `IServiceCollection` 合并为单一容器**未在本仓库验证**。因此跨插件注入必须按「可选依赖」设计，缺失时静默降级，不能导致宿主插件构造失败。
+- 各业务插件工程仅引用 `ZeroBot.Abstraction` + `ZeroBot.Utility`，**无业务插件互相引用的先例**；跨插件共用的契约应放入独立库工程，先例为 Endfield 家族：`ZeroBot.Endfield` 引用同目录库工程 `ZeroBot.Endfield.Api`（不实现 `IPlugin`）。
+- 因此本方案新增库工程 **`ZeroBot.Synthesize.Abstraction`** 承载播报接口与共用类型，由 `ZeroBot.Synthesize`（实现方）与 `ZeroBot.Bilibili` / `ZeroBot.Weibo`（消费方）共同引用，**不改动 `ZeroBot.Abstraction`**。
+- EmberFramework（外部包）是否把各插件 `BuildComponents` 返回的 `IServiceCollection` 合并为单一容器**未在本仓库验证**。因此跨插件注入按「可选依赖」设计（`IEnumerable<IVoiceBroadcaster>`），缺失时静默降级，不导致宿主插件构造失败。
 
 ### 1.4 动态/微博纯文本提取
 
@@ -52,16 +53,34 @@
 
 ## 2. 方案设计
 
-整体思路：**抽象层定义可选的播报接口，Synthesize 插件实现，Bilibili/Weibo 在通知发送点后以 `IEnumerable<IVoiceBroadcaster>` 可选注入调用**。不新增插件工程、无新增 NuGet 依赖、无跨业务插件 ProjectReference。
+整体思路：**新增 `ZeroBot.Synthesize.Abstraction` 库工程定义播报接口，Synthesize 插件实现，Bilibili/Weibo 引用该库并在通知发送点后以 `IEnumerable<IVoiceBroadcaster>` 可选注入调用**。无新增插件工程、无新增 NuGet 依赖、不改 `ZeroBot.Abstraction`。
 
-### 2.1 抽象层新增接口（ZeroBot.Abstraction）
+### 2.1 新增库工程 ZeroBot.Synthesize.Abstraction
 
-`src/ZeroBot.Abstraction/Bot/IVoiceBroadcaster.cs`：
+```
+src/plugins/ZeroBot.Synthesize.Abstraction/
+├── ZeroBot.Synthesize.Abstraction.csproj
+└── IVoiceBroadcaster.cs
+```
+
+`ZeroBot.Synthesize.Abstraction.csproj`（无工程/包引用，仅 BCL 类型，对齐 Endfield.Api 库工程风格）：
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+</Project>
+```
+
+`IVoiceBroadcaster.cs`：
 
 ```csharp
-namespace ZeroBot.Abstraction.Bot;
+namespace ZeroBot.Synthesize.Abstraction;
 
-/// <summary>通知语音播报。由语音合成插件实现，通知插件可选消费；未注册时注入空集合即静默不播报。</summary>
+/// <summary>通知语音播报。由语音合成插件（ZeroBot.Synthesize）实现，通知插件可选消费；未注册时注入空集合即静默不播报。</summary>
 public interface IVoiceBroadcaster
 {
     /// <summary>对开启了语音播报的群，将 text 合成语音并作为独立消息发送；groupIds 中未开启的群自动过滤。</summary>
@@ -69,7 +88,12 @@ public interface IVoiceBroadcaster
 }
 ```
 
+- 当前共用类型仅 `IVoiceBroadcaster`；后续若消费方需要更多播报契约（如播报状态查询），同样放本工程。
+- 该库**不是插件**（不实现 `IPlugin`），`Program.cs` 无需注册改动。
+
 ### 2.2 Synthesize 插件：播报服务与指令
+
+`ZeroBot.Synthesize.csproj` 增加 `ProjectReference` 指向 `ZeroBot.Synthesize.Abstraction`。
 
 #### 配置扩展（`SynthesizeOptions.cs`）
 
@@ -112,6 +136,8 @@ public int VoiceBroadcastMaxTextLength { get; init; } = 200;
 
 ### 2.3 Bilibili 插件接入（4 个 Subscriber）
 
+`ZeroBot.Bilibili.csproj` 增加 `ProjectReference` 指向 `ZeroBot.Synthesize.Abstraction`。
+
 4 个 Subscriber 构造函数追加可选注入 `IEnumerable<IVoiceBroadcaster> broadcasters`（无实现时为空集合，构造不受影响），并加私有方法：
 
 ```csharp
@@ -125,7 +151,7 @@ private async Task BroadcastVoiceAsync(IReadOnlyCollection<long> groupIds, strin
 }
 ```
 
-各挂载点在**文字通知发送之后**调用（均不 await 进通知主流程的关键路径，失败已隔离）：
+各挂载点在**文字通知发送之后**调用（失败已隔离，不影响通知主流程）：
 
 | 文件 | 位置 | 播报文本 |
 |---|---|---|
@@ -145,6 +171,8 @@ public static string BuildVoiceText(DynamicData data)
 
 ### 2.4 Weibo 插件接入
 
+`ZeroBot.Weibo.csproj` 增加 `ProjectReference` 指向 `ZeroBot.Synthesize.Abstraction`。
+
 `WeiboSubscriber` 同样可选注入 `IEnumerable<IVoiceBroadcaster>`，在 `:41-45` 发送后调用 `BroadcastVoiceAsync(targetGroups, WeiboMessageBuilder.BuildVoiceText(item), ct)`。
 
 `WeiboMessageBuilder` 新增：
@@ -156,48 +184,59 @@ public static string BuildVoiceText(WeiboTimelineItem item)
 
 复用现有 `HtmlToPlainText`（提升可见性或经新 public 方法内部调用），不含原文链接与 pics；`data == null` 返回空串。
 
-### 2.5 文档与注册
+### 2.5 工程与文档注册
 
-- `src/plugins/AGENTS.md` 的 ZeroBot.Synthesize 条目补充 `/动态语音播报` 指令与 `VoiceBroadcastGroups` 配置说明。
+- `ZeroBot.slnx`：`/src/plugins/` 分组加入 `ZeroBot.Synthesize.Abstraction`。
+- `src/ZeroBot.Core/Dockerfile`：新增一行 `COPY ["src/plugins/ZeroBot.Synthesize.Abstraction/ZeroBot.Synthesize.Abstraction.csproj", "src/plugins/ZeroBot.Synthesize.Abstraction/"]`（供容器构建 restore，与既有插件 csproj 同模式）。
+- `Program.cs` 无需改动（库工程非插件；`SynthesizePlugin` 已注册，其内新增服务注册即可）。
+- `src/plugins/AGENTS.md`：补充 `ZeroBot.Synthesize.Abstraction` 条目，并在 ZeroBot.Synthesize 条目补充 `/动态语音播报` 指令与 `VoiceBroadcastGroups` 配置说明。
 
 ## 3. 文件变更清单
 
 | 文件 | 动作 |
 |---|---|
-| `src/ZeroBot.Abstraction/Bot/IVoiceBroadcaster.cs` | 新增（播报接口） |
+| `src/plugins/ZeroBot.Synthesize.Abstraction/ZeroBot.Synthesize.Abstraction.csproj` | 新增（库工程，无依赖） |
+| `src/plugins/ZeroBot.Synthesize.Abstraction/IVoiceBroadcaster.cs` | 新增（播报接口及后续共用类型） |
+| `src/plugins/ZeroBot.Synthesize/ZeroBot.Synthesize.csproj` | 改：引用 Synthesize.Abstraction |
 | `src/plugins/ZeroBot.Synthesize/SynthesizeOptions.cs` | 改：加 `VoiceBroadcastGroups` / `VoiceBroadcastMaxTextLength` |
 | `src/plugins/ZeroBot.Synthesize/VoiceBroadcastService.cs` | 新增（`IVoiceBroadcaster` 实现） |
 | `src/plugins/ZeroBot.Synthesize/VoiceBroadcastCommandHandler.cs` | 新增（启用/禁用指令） |
 | `src/plugins/ZeroBot.Synthesize/SynthesizePlugin.cs` | 改：注册 `IVoiceBroadcaster` 与指令组件 |
+| `src/plugins/ZeroBot.Bilibili/ZeroBot.Bilibili.csproj` | 改：引用 Synthesize.Abstraction |
 | `src/plugins/ZeroBot.Bilibili/Live/LiveStatusSubscriber.cs` | 改：开播播报挂载 |
 | `src/plugins/ZeroBot.Bilibili/Dynamic/DynamicSubscriber.cs` | 改：动态播报挂载 |
 | `src/plugins/ZeroBot.Bilibili/Dynamic/DynamicMessageBuilder.cs` | 改：加 `BuildVoiceText` |
 | `src/plugins/ZeroBot.Bilibili/Live/LiveScSubscriber.cs` | 改：SC 播报挂载 |
 | `src/plugins/ZeroBot.Bilibili/Live/AnchorEventSubscriber.cs` | 改：主播弹幕播报挂载 |
+| `src/plugins/ZeroBot.Weibo/ZeroBot.Weibo.csproj` | 改：引用 Synthesize.Abstraction |
 | `src/plugins/ZeroBot.Weibo/Weibo/WeiboSubscriber.cs` | 改：微博播报挂载 |
 | `src/plugins/ZeroBot.Weibo/Weibo/WeiboMessageBuilder.cs` | 改：加 `BuildVoiceText` |
-| `src/plugins/AGENTS.md` | 改：Synthesize 条目补充 |
+| `ZeroBot.slnx` | 改：加入新库工程 |
+| `src/ZeroBot.Core/Dockerfile` | 改：新增新库工程 csproj 的 COPY |
+| `src/plugins/AGENTS.md` | 改：新增 Synthesize.Abstraction 条目、Synthesize 条目补充 |
 | `docs/plans/notify-voice-broadcast-prd.md` | 新增（PRD） |
 | `docs/plans/notify-voice-broadcast-tech.md` | 新增（本文档） |
 
-无新增工程、无新增 NuGet 依赖、无 csproj / slnx / Dockerfile / Program.cs 变更（Bilibili、Weibo 已引用 Abstraction；接口注入经框架容器解析）。
+**不改 `ZeroBot.Abstraction`**；无新增插件工程、无新增 NuGet 依赖；`Program.cs` 不变。
 
 ## 4. 关键决策点
 
-1. **跨插件解耦走抽象层可选注入**：`IVoiceBroadcaster` 定义在 `ZeroBot.Abstraction`，消费方注入 `IEnumerable<IVoiceBroadcaster>`。EmberFramework 容器合并语义未在仓库内验证，该写法在「容器合并」时正常播报、在「容器隔离」时解析为空集合静默降级，两种情况下宿主插件都能正常构造与运行，文字通知零影响。上线后若发现不播报，首先排查容器合并问题。
-2. **播报配置归属 synthesize-config.json**：别名与合成 endpoint 均在 Synthesize 插件，播报音色别名天然同域；`Dictionary<long groupId, string alias>` 结构简单，热加载后下一次通知即生效。
-3. **同一文本合成一次、多群多账号分发**：同一通知对全部开启播报的群文本相同（按 datasetId 分组），避免重复调用合成接口；账号遍历复用 `IBotContext` 现有模式。
-4. **不消耗用户每日额度**：播报为订阅后的自动行为，非用户主动触发，与 `/学` 的防滥用额度目标不同；以 `VoiceBroadcastMaxTextLength` 截断控制单次合成开销。后续如需总量控制可复用 `SynthesizeQuota` 思路另设播报额度。
-5. **开启指令不校验群订阅状态**：播报挂载在通知发送点之后，群未开启对应通知时链路不会触达该群，「已开启通知的群才能收到播报」由结构天然保证（PRD 3.4）；避免为校验引入 Bilibili 配置读取的跨插件耦合。
-6. **失败完全隔离**：播报所有异常在 `VoiceBroadcastService` 与调用侧双重 try/catch 内消化，仅记日志；合成失败不回复、不重试、不影响文字通知。
-7. **表情包弹幕不播报**：主播弹幕挂载点先判 `msg.Msg` 空白即跳过；动态/微博纯文本提取复用既有 Builder 逻辑，剔除图片/表情占位与 URL，保证播报文本可朗读。
+1. **共用契约放独立库工程 `ZeroBot.Synthesize.Abstraction`**（评审结论）：`IVoiceBroadcaster` 及相关共用类型不侵入 `ZeroBot.Abstraction`，由实现方（Synthesize）与消费方（Bilibili/Weibo）共同引用，沿用 Endfield 家族库工程的既有先例，保持 `ZeroBot.Abstraction` 只承载框架级抽象。
+2. **消费方仍以 `IEnumerable<IVoiceBroadcaster>` 可选注入**：EmberFramework 容器合并语义未在仓库内验证，该写法在「容器合并」时正常播报、在「容器隔离」时解析为空集合静默降级，两种情况下宿主插件都能正常构造与运行，文字通知零影响。上线后若发现不播报，首先排查容器合并问题，届时可改为直接注入（编译期引用已具备）。
+3. **播报配置归属 synthesize-config.json**：别名与合成 endpoint 均在 Synthesize 插件，播报音色别名天然同域；`Dictionary<long groupId, string alias>` 结构简单，热加载后下一次通知即生效。
+4. **同一文本合成一次、多群多账号分发**：同一通知对全部开启播报的群文本相同（按 datasetId 分组），避免重复调用合成接口；账号遍历复用 `IBotContext` 现有模式。
+5. **不消耗用户每日额度**：播报为订阅后的自动行为，非用户主动触发，与 `/学` 的防滥用额度目标不同；以 `VoiceBroadcastMaxTextLength` 截断控制单次合成开销。后续如需总量控制可复用 `SynthesizeQuota` 思路另设播报额度。
+6. **开启指令不校验群订阅状态**：播报挂载在通知发送点之后，群未开启对应通知时链路不会触达该群，「已开启通知的群才能收到播报」由结构天然保证（PRD 3.4）；避免为校验引入 Bilibili 配置读取的跨插件耦合。
+7. **失败完全隔离**：播报所有异常在 `VoiceBroadcastService` 与调用侧双重 try/catch 内消化，仅记日志；合成失败不回复、不重试、不影响文字通知。
+8. **表情包弹幕不播报**：主播弹幕挂载点先判 `msg.Msg` 空白即跳过；动态/微博纯文本提取复用既有 Builder 逻辑，剔除图片/表情占位与 URL，保证播报文本可朗读。
 
 ## 5. 风险与缓解
 
 | 风险 | 缓解 |
 |---|---|
-| EmberFramework 未合并插件容器导致播报静默缺失 | 设计上零副作用降级；上线验收标准第 3 条可直接暴露；若确认未合并，退化方案为在 Bilibili/Weibo 加对 Synthesize 的 ProjectReference 直接注入（改动仍小） |
+| EmberFramework 未合并插件容器导致播报静默缺失 | 设计上零副作用降级；上线验收标准第 3 条可直接暴露；因已有编译期引用，确认未合并后改为直接注入即可（改动小） |
 | 高频通知（如动态连发）产生合成压力 | 触发源均为人为内容（开播/动态/SC/主播弹幕），频率天然低；文本截断限制单次开销；后续可加最小播报间隔 |
 | 别名改绑/删除后播报音色漂移或失效 | 解析以播报时配置为准（改绑即换音色）；删除后告警跳过，文字通知不受影响 |
 | base64 语音体积大 | 与 `/学` 现有发送路径一致，可接受 |
 | `VoiceBroadcastGroups` 写入与其他配置写入并发 | 均经 `BeginConfigMutationScopeAsync` 串行化 mutation，与现有指令写配置模式一致 |
+| 新增库工程后旧 Dockerfile/解决方案未同步 | 文件变更清单已包含 slnx 与 Dockerfile 改动，提交前 `dotnet build` 全量验证 |
