@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Mikibot.Crawler.Http.Bilibili;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
+using ZeroBot.Abstraction.Service;
 using ZeroBot.Synthesize.Abstraction;
 using ZeroBot.Utility;
 using ZeroBot.Utility.FileWatcher;
@@ -14,7 +15,7 @@ public class LiveStatusSubscriber(
     BiliLiveCrawler crawler,
     ILogger<LiveStatusSubscriber> logger,
     IBotContext bot,
-    IEnumerable<IVoiceBroadcaster> broadcasters) : IExecutable
+    IServiceManager service) : IExecutable
 {
     private readonly Random _random = new();
     
@@ -106,7 +107,7 @@ public class LiveStatusSubscriber(
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
-        foreach (var broadcaster in broadcasters)
+        if (service.TryResolve<IVoiceBroadcaster>(out var broadcaster))
         {
             try
             {
