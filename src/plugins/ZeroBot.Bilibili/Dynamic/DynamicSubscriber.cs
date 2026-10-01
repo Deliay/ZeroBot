@@ -1,6 +1,7 @@
 using EmberFramework.Abstraction;
 using Microsoft.Extensions.Logging;
 using ZeroBot.Abstraction.Bot;
+using ZeroBot.Abstraction.Service;
 using ZeroBot.Synthesize.Abstraction;
 using ZeroBot.Utility.FileWatcher;
 
@@ -11,7 +12,7 @@ public class DynamicSubscriber(
     VtuberSpaceApi api,
     ILogger<DynamicSubscriber> logger,
     IBotContext bot,
-    IEnumerable<IVoiceBroadcaster> broadcasters) : IExecutable
+    IServiceManager service) : IExecutable
 {
     private readonly Random _random = new();
 
@@ -84,7 +85,7 @@ public class DynamicSubscriber(
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
-        foreach (var broadcaster in broadcasters)
+        if (service.TryResolve<IVoiceBroadcaster>(out var broadcaster))
         {
             try
             {

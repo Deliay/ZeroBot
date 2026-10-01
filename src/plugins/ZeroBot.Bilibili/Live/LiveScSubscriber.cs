@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using EmberFramework.Abstraction;
 using Microsoft.Extensions.Logging;
 using ZeroBot.Abstraction.Bot;
+using ZeroBot.Abstraction.Service;
 using ZeroBot.Synthesize.Abstraction;
 using ZeroBot.Utility.FileWatcher;
 
@@ -12,7 +13,7 @@ public class LiveScSubscriber(
     LiveScApi api,
     ILogger<LiveScSubscriber> logger,
     IBotContext bot,
-    IEnumerable<IVoiceBroadcaster> broadcasters) : IExecutable
+    IServiceManager service) : IExecutable
 {
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activeRooms = new();
 
@@ -97,7 +98,7 @@ public class LiveScSubscriber(
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
-        foreach (var broadcaster in broadcasters)
+        if (service.TryResolve<IVoiceBroadcaster>(out var broadcaster))
         {
             try
             {
