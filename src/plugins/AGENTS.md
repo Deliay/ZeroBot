@@ -309,7 +309,8 @@ TypedPluginLoader.Register<MyPlugin>();
 
 **命令:**
 - `/synthesize:dataset:{dataset-id}:{alias}` - 绑定数据集别名（高权限用户，兼容 `/synthesize:{dataset-id}:{alias}`）
-- `/学:{alias}:{text}` - 通过别名合成语音并发送到群聊（仅群聊，同群同人每天 3 条）
+- `/synthesize:limit:{number}` - 设置本群每人每日生成上限（高权限用户；-1 不限制，0 禁止，>0 为上限；未设置默认 3）
+- `/学:{alias}:{text}` - 通过别名合成语音并发送到群聊（仅群聊，同群同人每天受该群上限限制，默认 3 条）
 
 **配置文件:** `synthesize-config.json`（`endpoint` 支持热加载，默认可用环境变量 `Z_VTUBER_TRAINING_ENDPOINT`）
 

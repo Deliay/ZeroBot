@@ -8,7 +8,8 @@ namespace ZeroBot.Synthesize;
 /// <summary>
 /// 语音合成：/学:{alias}:{text}
 /// 通过别名解析 dataset-id，调用合成接口并把音频发送到群聊。
-/// 仅群聊可用，任何用户均可使用；同群同人每天最多生成 3 条（UTC+8 0 点刷新）。
+/// 仅群聊可用，任何用户均可使用；同群同人每天最多生成若干条（UTC+8 0 点刷新），
+/// 上限由 `/synthesize:limit:{number}` 按群设置，未设置时默认为 3 条。
 /// </summary>
 public class SynthesizeCommandHandler(
     ICommandDispatcher dispatcher,
@@ -45,17 +46,28 @@ public class SynthesizeCommandHandler(
             return;
         }
 
-        if (!await TryConsumeQuotaAsync(message.Data.PeerId, message.Data.SenderId, cancellationToken))
+        var limit = SynthesizeQuota.ResolveDailyLimit(options.GroupDailyLimits, message.Data.PeerId,
+            options.DailyLimit);
+        if (limit == 0)
         {
             await message.ReplyAsGroup(bot, cancellationToken,
-                [$"今日生成次数已用完（上限 {options.DailyLimit} 条/天），请明天再试。".ToMilkyTextSegment()]);
+                ["本群未开放语音合成功能。".ToMilkyTextSegment()]);
+            return;
+        }
+
+        // limit < 0 表示不限制，无需消耗额度。
+        var limited = limit > 0;
+        if (limited && !await TryConsumeQuotaAsync(message.Data.PeerId, message.Data.SenderId, limit, cancellationToken))
+        {
+            await message.ReplyAsGroup(bot, cancellationToken,
+                [$"今日生成次数已用完（上限 {limit} 条/天），请明天再试。".ToMilkyTextSegment()]);
             return;
         }
 
         var bytes = await api.SynthesizeAsync(options.Endpoint, datasetId, text, options.Lang, cancellationToken);
         if (bytes is null)
         {
-            await ReleaseQuotaAsync(message.Data.PeerId, message.Data.SenderId, cancellationToken);
+            if (limited) await ReleaseQuotaAsync(message.Data.PeerId, message.Data.SenderId, cancellationToken);
             await message.ReplyAsGroup(bot, cancellationToken,
                 ["语音合成失败，请稍后重试。".ToMilkyTextSegment()]);
             return;
@@ -88,7 +100,7 @@ public class SynthesizeCommandHandler(
         return alias.Length > 0 && text.Length > 0;
     }
 
-    private async ValueTask<bool> TryConsumeQuotaAsync(long peerId, long senderId,
+    private async ValueTask<bool> TryConsumeQuotaAsync(long peerId, long senderId, int limit,
         CancellationToken cancellationToken)
     {
         var key = SynthesizeQuota.Key(peerId, senderId);
@@ -100,7 +112,7 @@ public class SynthesizeCommandHandler(
                 value.DailyQuotas[key] = quota = new DailyQuota(today, 0);
             }
 
-            if (quota.Count >= value.DailyLimit) return false;
+            if (!SynthesizeQuota.CanConsume(limit, quota.Count)) return false;
 
             value.DailyQuotas[key] = quota with { Count = quota.Count + 1 };
             await config.SaveAsync(value, token);

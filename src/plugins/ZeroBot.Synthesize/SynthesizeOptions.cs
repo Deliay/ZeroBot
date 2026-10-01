@@ -13,14 +13,28 @@ public record SynthesizeOptions
     public const string DefaultEndpoint = "http://z-vtuber-training.vtuber.svc.cluster.local:8080";
 
     /// <summary>
+    /// 群未单独配置时使用的默认每日上限，默认为 3。
+    /// -1 表示不限制；0 表示不允许；&gt;0 表示上限。
+    /// </summary>
+    public const int DefaultDailyLimit = 3;
+
+    /// <summary>
     /// 合成服务地址，支持热加载动态修改。
     /// </summary>
     public string Endpoint { get; init; } = DefaultEndpoint;
 
     /// <summary>
-    /// 每个群聊 + 发送人每天的生成上限。
+    /// 每个群聊 + 发送人每天的默认生成上限（群未单独配置时使用，默认 3）。
+    /// -1 表示不限制；0 表示不允许；&gt;0 表示上限。
     /// </summary>
-    public int DailyLimit { get; init; } = 3;
+    public int DailyLimit { get; init; } = DefaultDailyLimit;
+
+    /// <summary>
+    /// 每个群聊单独配置的每日生成上限（key 为群 PeerId），由
+    /// <c>/synthesize:limit:{number}</c> 指令设置，未配置的群回落到 <see cref="DailyLimit"/>。
+    /// 语义同 <see cref="DailyLimit"/>：-1 不限制；0 不允许；&gt;0 为上限。
+    /// </summary>
+    public Dictionary<long, int> GroupDailyLimits { get; init; } = [];
 
     /// <summary>
     /// 合成语言。
