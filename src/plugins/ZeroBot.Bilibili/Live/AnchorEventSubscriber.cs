@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using EmberFramework.Abstraction;
 using Microsoft.Extensions.Logging;
 using ZeroBot.Abstraction.Bot;
+using ZeroBot.Synthesize.Abstraction;
 using ZeroBot.Utility.FileWatcher;
 
 namespace ZeroBot.Bilibili.Live;
@@ -10,7 +11,8 @@ public class AnchorEventSubscriber(
     IJsonConfig<BilibiliOptions> config,
     AnchorEventApi api,
     ILogger<AnchorEventSubscriber> logger,
-    IBotContext bot) : IExecutable
+    IBotContext bot,
+    IEnumerable<IVoiceBroadcaster> broadcasters) : IExecutable
 {
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activeRooms = new();
 
@@ -139,6 +141,9 @@ public class AnchorEventSubscriber(
             {
                 await bot.WriteManyGroupMessageAsync(accountId, subscription.GroupIds, cancellationToken, segments);
             }
+
+            // 文字通知之后追加独立语音（msg.Msg 空白时由 BroadcastVoiceAsync 跳过，覆盖表情包弹幕）
+            await BroadcastVoiceAsync(subscription.GroupIds, msg.Msg, cancellationToken);
         }
     }
 
@@ -155,6 +160,23 @@ public class AnchorEventSubscriber(
             await foreach (var (accountId, _) in bot.GetAccountInfoAsync(cancellationToken))
             {
                 await bot.WriteManyGroupMessageAsync(accountId, subscription.GroupIds, cancellationToken, segments);
+            }
+        }
+    }
+
+    private async Task BroadcastVoiceAsync(IReadOnlyCollection<long> groupIds, string? text,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        foreach (var broadcaster in broadcasters)
+        {
+            try
+            {
+                await broadcaster.BroadcastAsync(groupIds, text, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Voice broadcast failed");
             }
         }
     }

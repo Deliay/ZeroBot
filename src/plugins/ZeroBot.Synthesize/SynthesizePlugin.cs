@@ -1,5 +1,6 @@
 using EmberFramework.Abstraction.Layer.Plugin;
 using Microsoft.Extensions.DependencyInjection;
+using ZeroBot.Synthesize.Abstraction;
 using ZeroBot.Utility;
 using ZeroBot.Utility.FileWatcher;
 
@@ -16,6 +17,8 @@ public class SynthesizePlugin : IPlugin
         services.AddSingleton<SynthesizeApi>();
         services.AddSingletonComponent<DatasetAliasCommandHandler>();
         services.AddSingletonComponent<SynthesizeCommandHandler>();
+        services.AddSingleton<IVoiceBroadcaster, VoiceBroadcastService>();
+        services.AddSingletonComponent<VoiceBroadcastCommandHandler>();
 
         return ValueTask.FromResult(services);
     }
