@@ -163,7 +163,9 @@ public async Task<byte[]?> GenerateAsync(string endpoint, string prompt, IReadOn
 
 1. `using var form = new MultipartFormDataContent();`
    - `form.Add(new StringContent(prompt), "text");`（值即 prompt 原文，**不加引号**——curl 示例里的引号是导出工具/外壳语法）
-   - 每张图：`form.Add(new ByteArrayContent(img), "image", $"image-{i}.jpg");`（可选补 `Content-Type: image/jpeg`）
+   - 每张图：按**文件魔数**嗅探类型（PNG/JPEG/GIF/WebP/BMP，未知回落 `application/octet-stream`），
+     `form.Add(new ByteArrayContent(img), "image", $"image-{i}.{ext}");` 并显式设置对应的 `Content-Type`——
+     不能一律声称为 `image/jpeg`，否则训练服务按声明类型解码 PNG/WebP 等会产生本可避免的失败（而失败会计入用户额度）
 2. 请求级超时（热生效）：
 
    ```csharp
@@ -211,9 +213,9 @@ public static bool TryParsePrompt(string raw, out string prompt)
 
 **`DequeueAsync` 流程**（对应 PRD 3.3）：
 
-1. `TryParsePrompt` 失败 → 回复 Help（理论上谓词已挡，防御性分支）；`prompt` 空白 → 回复「提示词不能为空…」，**不计数、不调用接口**。
-2. `var options = config.Current;` 取 `Groups[peerId]` 为 `limit`（谓词已保证存在，取不到直接 `return` 兜底）。
-3. 限流：`TryConsumeQuotaAsync(peerId, senderId, limit, ct)`（见下）失败 → 回复「你今天在本群的绘图次数已用完（{limit} 张），明天再来吧」，不调用接口。
+1. **进入消费阶段第一步**：从「发起时上限」表 `TryTake` 取出并移除本请求的 `limit`（见下「发起时状态」）；取不到仅记 `LogWarning` 兜底返回。**该释放先于所有分支**，因此解析失败、空 prompt、额度用尽、正常处理等任何路径都不会残留记录（`PaintRequestLimits` 独立类型，`Count` 可断言无残留）。
+2. `TryParsePrompt` 失败 → 回复 Help（理论上谓词已挡，防御性分支）；`prompt` 空白 → 回复「提示词不能为空…」，**不计数、不调用接口**。
+3. 限流：`TryConsumeQuotaAsync(peerId, senderId, limit, ct)`（`limit` 即第 1 步取出值，不再重读 `config.Current.Groups`）失败 → 回复「你今天在本群的绘图次数已用完（{limit} 张），明天再来吧」，不调用接口。
 4. 取图 + 调用接口（**统一包一层 try/catch，异常仅记日志并按失败处理**）：
 
    ```csharp
@@ -225,7 +227,14 @@ public static bool TryParsePrompt(string raw, out string prompt)
 
 5. `bytes is null`（或第 4 步异常）→ 回复「绘图失败，请稍后重试。」；**用量已消耗，不回滚**。
 6. 成功 → `await @event.ReplyAsGroup(bot, ct, [bytes.ToMilkyImageSegment()]);`（回复原消息）。
-7. 整体 `catch (Exception e) => logger.LogError(...)` 兜底；`finally { await @event.RemoveReaction(bot, KnownReactionEmojiIds.Click, ct); }`（含额度用尽、失败等所有路径）。
+7. 整体 `catch (Exception e) => logger.LogError(...)` 兜底；`finally` 中移除表情，且**移除动作自身包一层 try/catch**（`LogWarning` 兜底）——`finally` 内异常会直接逃出 `DequeueAsync`，而 `CommandQueuedHandler` 的串行消费循环没有 try/catch，一旦抛出会永久中断绘图队列，此后所有绘图静默失效直至重启。
+
+**「发起时状态」与并发正确性（修正方案遗留冲突）**：
+
+- PRD §5 要求「开启状态修改/关闭与正在进行的绘图并发时，以发起时状态为准，进行中的调用完成并回发结果」；而原方案「Dequeue 时重读 Groups，取不到直接 return」会让排队期间被禁用的请求在贴过「处理中」表情后彻底静默，直接违反该条。
+- 修正：覆写 `HandleAsync`，在**入队（贴表情 + 写队列）之前**从 `Groups[peerId]` 捕获发起时上限，存入 `PaintRequestLimits`（内部 `ConcurrentDictionary<(long PeerId, long MessageSeq), int>`）；`DequeueAsync` **入口第一步**以 `(peerId, messageSeq)` `TryTake` 取出即移除后使用该值。队列等待期间管理员禁用本群或调低上限，均不影响在途请求：请求照常扣额、调用接口并回发结果/失败提示。
+- 派发谓词仍负责「未开启群静默」（验收 3）：未开启群在派发阶段即 `return false`，不会贴表情、不入队。
+- 若 `HandleAsync` 时发现群已在谓词与处理之间被关闭（极端窄窗口），则静默不入队；`base.HandleAsync` 抛异常时以 `TryTake` 清理已记录的上限，避免状态泄漏。`DequeueAsync` 入口即取出释放，任何后续分支都不会残留（长驻进程无内存增长）。
 
 **限流（先消耗、失败不回滚）**：
 
@@ -353,6 +362,7 @@ public class PainterPlugin : IPlugin
 | `src/plugins/ZeroBot.Painter/PainterQuota.cs` | 新增（额度 / 日期 / 上限校验纯函数） |
 | `src/plugins/ZeroBot.Painter/PainterManageCommandHandler.cs` | 新增（启用 / 禁用指令） |
 | `src/plugins/ZeroBot.Painter/PaintCommandHandler.cs` | 新增（绘图指令，`CommandQueuedHandler`） |
+| `src/plugins/ZeroBot.Painter/PaintRequestLimits.cs` | 新增（发起时上限暂存表，入队记录 / 消费入口取出即移除） |
 | `src/ZeroBot.Core/ZeroBot.Core.csproj` | 改：新增 ProjectReference |
 | `src/ZeroBot.Core/Program.cs` | 改：注册 `PainterPlugin` |
 | `src/ZeroBot.Core/Dockerfile` | 改：新增插件 csproj 的 COPY |
@@ -360,6 +370,8 @@ public class PainterPlugin : IPlugin
 | `src/plugins/AGENTS.md` | 改：新增 `ZeroBot.Painter` 条目 |
 | `test/ZeroBot.Core.Test/PainterQuotaTest.cs` | 新增 |
 | `test/ZeroBot.Core.Test/PaintCommandHandlerTest.cs` | 新增 |
+| `test/ZeroBot.Core.Test/PainterApiTest.cs` | 新增 |
+| `test/ZeroBot.Core.Test/PaintRequestLimitsTest.cs` | 新增 |
 | `docs/plans/painter-impl.md` | 新增（本文档） |
 
 **不改 `ZeroBot.Abstraction` / `ZeroBot.Utility` / 任何既有插件**；无新增 NuGet 依赖、无 `Directory.Packages.props` 改动；**不改动任何线上配置文件**（`painter-config.json` 由插件自身在运行目录 `~/Projects/Bot/ZeroBot` 首次写入时自动生成）。
@@ -380,6 +392,9 @@ public class PainterPlugin : IPlugin
 
 ## 6. 备注
 
+- **「以发起时状态为准」的落地**：群上限在 `HandleAsync`（入队前）捕获，`DequeueAsync` 不再重读 `Groups`，从而修复原方案「排队期间禁用则静默丢弃」与 PRD §5 / §3.1 的冲突（详见 Step 5）。
+- **队列健壮性**：`DequeueAsync` 的 `finally` 中移除「处理中」表情必须自带 try/catch，否则表情接口异常会中断 `CommandQueuedHandler` 的串行消费循环，导致绘图功能整体失效直至重启（存量 `ToAkumaria` 亦有此隐患，但本 PR 按「不改任何既有插件」约定仅修复新插件）。
+- **参考图类型嗅探**：参考图按魔数设置 `Content-Type` 与扩展名，避免把 PNG/WebP 等错误声明为 jpeg 导致接口失败并误扣用户额度。
 - **失败不回滚是与 Synthesize 的关键差异**：`/学` 失败会 `ReleaseQuotaAsync` 返还额度，小画家**不返还**（需求明确要求）；实现时勿照抄 synthesize 的回滚段落。
 - **表情时序**：按技术方案在 `EnqueueInspectorAsync` **入队即贴**「处理中」表情（让用户感知排队），`DequeueAsync` 的 `finally` 移除；与 PRD「消耗额度后贴表情」的唯一差异是「额度已用尽」的请求会短暂出现表情后移除（PRD 只对未开启群要求「不贴表情」，该场景由谓词保证完全静默）。
 - **多图取自本消息**：不复用 `GetMilkyImageMessagesAsync`（单消息只取首图且含回复图语义），改为枚举消息自身全部 `ImageIncomingSegment` 取前 `MaxImages` 张，精确对齐 PRD 验收 5；「回复某张图再画」的回复图语义本期不做，如需追加是 3 行改动。
