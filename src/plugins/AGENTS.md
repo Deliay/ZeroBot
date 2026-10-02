@@ -319,6 +319,29 @@ TypedPluginLoader.Register<MyPlugin>();
 
 ---
 
+### ZeroBot.Painter
+
+| 属性 | 值 |
+|------|-----|
+| 路径 | `src/plugins/ZeroBot.Painter/` |
+| 命名空间 | `ZeroBot.Painter` |
+
+**功能:** 小画家绘图，群聊内通过指令调用后台绘图训练服务生成图片，按群与群员做每日用量限制。
+
+**组件:**
+- `PainterManageCommandHandler` - 启用/禁用指令 (`/小画家:启用`、`/小画家:禁用`)
+- `PaintCommandHandler` - 绘图指令 (`/小画家:画`，`CommandQueuedHandler` + 表情反馈)
+- `PainterApi` - 绘图接口 HTTP 客户端（multipart 上传，请求级超时热生效）
+- `PainterQuota` - UTC+8 每日用量/日期/上限校验工具
+
+**命令:**
+- `/小画家:启用:{number}` / `/小画家:禁用` - 开启/关闭本群绘图功能（仅群聊，高权限用户，权限 `painter.manage`；number 为每人每日上限，1~5）
+- `/小画家:画:{prompt}` - 调用绘图接口并把结果发回群聊（仅群聊，附 0~10 张参考图，受群内每人每日上限限制；未开启的群完全静默）
+
+**配置文件:** `painter-config.json`（`Endpoint` 支持热加载，默认可用环境变量 `Z_VTUBER_TRAINING_ENDPOINT`；`HttpTimeoutSeconds` 默认 600；`Groups` 为群 PeerId → 每人每日上限；`DailyQuotas` 为当日用量表）
+
+---
+
 ### ZeroBot.Synthesize.Abstraction
 
 | 属性 | 值 |
