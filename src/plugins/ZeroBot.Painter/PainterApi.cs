@@ -26,16 +26,18 @@ public class PainterApi(ILogger<PainterApi> logger)
             form.Add(new StringContent(prompt), "text");
             for (var i = 0; i < images.Count; i++)
             {
+                // 按真实字节嗅探类型：QQ 图片可能是 PNG/WebP/GIF 等，不能一律声称为 jpeg。
+                var (contentType, extension) = DetectImageType(images[i]);
                 var content = new ByteArrayContent(images[i]);
-                content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-                form.Add(content, "image", $"image-{i}.jpg");
+                content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+                form.Add(content, "image", $"image-{i}.{extension}");
             }
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);
 
             var url = $"{endpoint.TrimEnd('/')}/api/training/images/generate";
-            var response = await Http.PostAsync(url, form, cts.Token);
+            using var response = await Http.PostAsync(url, form, cts.Token);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError("绘图请求失败，状态码 {Status}", response.StatusCode);
@@ -64,5 +66,42 @@ public class PainterApi(ILogger<PainterApi> logger)
             logger.LogError(e, "绘图请求异常");
             return null;
         }
+    }
+
+    /// <summary>
+    /// 按文件魔数嗅探图片类型，返回 (Content-Type, 扩展名)；未知类型回落到通用二进制。
+    /// </summary>
+    public static (string ContentType, string Extension) DetectImageType(byte[] data)
+    {
+        if (data.Length >= 8
+            && data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47)
+        {
+            return ("image/png", "png");
+        }
+
+        if (data.Length >= 3 && data[0] == 0xFF && data[1] == 0xD8 && data[2] == 0xFF)
+        {
+            return ("image/jpeg", "jpg");
+        }
+
+        if (data.Length >= 4
+            && data[0] == 0x47 && data[1] == 0x49 && data[2] == 0x46 && data[3] == 0x38)
+        {
+            return ("image/gif", "gif");
+        }
+
+        if (data.Length >= 12
+            && data[0] == 0x52 && data[1] == 0x49 && data[2] == 0x46 && data[3] == 0x46
+            && data[8] == 0x57 && data[9] == 0x45 && data[10] == 0x42 && data[11] == 0x50)
+        {
+            return ("image/webp", "webp");
+        }
+
+        if (data.Length >= 2 && data[0] == 0x42 && data[1] == 0x4D)
+        {
+            return ("image/bmp", "bmp");
+        }
+
+        return ("application/octet-stream", "bin");
     }
 }

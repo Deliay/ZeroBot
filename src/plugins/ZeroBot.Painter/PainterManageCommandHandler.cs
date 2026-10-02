@@ -49,13 +49,12 @@ public class PainterManageCommandHandler(
             case ["启用", var rawNumber, ..]:
                 await HandleEnableAsync(message, peerId, rawNumber, cancellationToken);
                 return;
+            case ["启用", ..]:
+                // 缺少 number：按参数错误提示（PRD §3.1「不合法……回复提示」）。
+                await ReplyParameterErrorAsync(message, cancellationToken);
+                return;
             case ["禁用", ..]:
-                await config.BeginConfigMutationScopeAsync(async (value, token) =>
-                {
-                    value.Groups.Remove(peerId);
-                    await config.SaveAsync(value, token);
-                    await message.ReplyAsGroup(bot, token, ["已关闭本群绘图功能。".ToMilkyTextSegment()]);
-                }, cancellationToken);
+                await HandleDisableAsync(message, peerId, cancellationToken);
                 return;
             default:
                 await message.ReplyAsGroup(bot, cancellationToken, [HelpStrings]);
@@ -70,18 +69,38 @@ public class PainterManageCommandHandler(
         if (!int.TryParse(rawNumber, out var number)
             || !PainterQuota.IsValidDailyLimit(number, options.MaxDailyLimit))
         {
-            await message.ReplyAsGroup(bot, cancellationToken,
-                [$"参数错误，请使用：/小画家:启用:{{number}}（1~{options.MaxDailyLimit}）"
-                    .ToMilkyTextSegment()]);
+            await ReplyParameterErrorAsync(message, cancellationToken);
             return;
         }
 
+        // 仅在 mutation scope（持信号量）内改配置并落盘，网络回复移出 scope，避免慢回复阻塞额度扣减。
         await config.BeginConfigMutationScopeAsync(async (value, token) =>
         {
             value.Groups[peerId] = number;
             await config.SaveAsync(value, token);
-            await message.ReplyAsGroup(bot, token,
-                [$"已开启本群绘图功能，每人每天最多绘制 {number} 张。".ToMilkyTextSegment()]);
         }, cancellationToken);
+
+        await message.ReplyAsGroup(bot, cancellationToken,
+            [$"已开启本群绘图功能，每人每天最多绘制 {number} 张。".ToMilkyTextSegment()]);
+    }
+
+    private async ValueTask HandleDisableAsync(Event<IncomingMessage> message, long peerId,
+        CancellationToken cancellationToken)
+    {
+        await config.BeginConfigMutationScopeAsync(async (value, token) =>
+        {
+            value.Groups.Remove(peerId);
+            await config.SaveAsync(value, token);
+        }, cancellationToken);
+
+        await message.ReplyAsGroup(bot, cancellationToken, ["已关闭本群绘图功能。".ToMilkyTextSegment()]);
+    }
+
+    private ValueTask ReplyParameterErrorAsync(Event<IncomingMessage> message,
+        CancellationToken cancellationToken)
+    {
+        var max = config.Current.MaxDailyLimit;
+        return message.ReplyAsGroup(bot, cancellationToken,
+            [$"参数错误，请使用：/小画家:启用:{{number}}（1~{max}）".ToMilkyTextSegment()]);
     }
 }

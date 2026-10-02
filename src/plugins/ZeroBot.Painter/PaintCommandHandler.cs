@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
@@ -11,6 +12,9 @@ namespace ZeroBot.Painter;
 /// 仅群聊可用，任何群员均可使用；本群必须已通过 /小画家:启用 开启，未开启的群完全静默。
 /// 同群同人每天（UTC+8）受该群上限限制，通过限额检查后、调用接口之前即消耗一次用量，
 /// 失败调用同样计入且不回滚。
+///
+/// 群上限在请求发起时（派发阶段）捕获，排队期间管理员禁用/调整上限不影响在途请求，
+/// 保证「以发起时状态为准，进行中的调用完成并回发结果」（PRD §5）。
 /// </summary>
 public class PaintCommandHandler(
     ICommandDispatcher dispatcher,
@@ -21,6 +25,11 @@ public class PaintCommandHandler(
 {
     private const string CommandPrefix = "/小画家:画";
     private const string CommandPrefixFullWidth = "/小画家：画";
+
+    /// <summary>
+    /// 入队前捕获的「发起时群上限」，key = (PeerId, MessageSeq)；DequeueAsync 取出即移除。
+    /// </summary>
+    private readonly ConcurrentDictionary<(long PeerId, long MessageSeq), int> _requestLimits = new();
 
     private static readonly OutgoingSegment HelpStrings =
         "/小画家:画:{prompt}\n示例：/小画家:画:一只在樱花树下打盹的猫".ToMilkyTextSegment();
@@ -72,6 +81,32 @@ public class PaintCommandHandler(
         return ValueTask.FromResult(config.Current.Groups.ContainsKey(message.Data.PeerId));
     }
 
+    /// <summary>
+    /// 在入队（贴表情 + 写入串行队列）之前，记录本请求发起时的群上限。
+    /// </summary>
+    protected override async ValueTask HandleAsync(Event<IncomingMessage> @event,
+        CancellationToken cancellationToken = default)
+    {
+        if (!config.Current.Groups.TryGetValue(@event.Data.PeerId, out var limit))
+        {
+            // 谓词刚通过、此处状态已变化（如热加载禁用）：静默，不贴表情、不入队。
+            return;
+        }
+
+        var key = (@event.Data.PeerId, @event.Data.MessageSeq);
+        _requestLimits[key] = limit;
+        try
+        {
+            await base.HandleAsync(@event, cancellationToken);
+        }
+        catch
+        {
+            // 入队失败时清理，避免状态泄漏。
+            _requestLimits.TryRemove(key, out _);
+            throw;
+        }
+    }
+
     protected override async ValueTask DequeueAsync(Event<IncomingMessage> @event,
         CancellationToken cancellationToken = default)
     {
@@ -94,10 +129,12 @@ public class PaintCommandHandler(
 
             var peerId = @event.Data.PeerId;
             var senderId = @event.Data.SenderId;
-            var options = config.Current;
-            if (!options.Groups.TryGetValue(peerId, out var limit))
+
+            // 使用发起时捕获的上限；队列等待期间管理员禁用/改上限不影响本请求（PRD §5）。
+            if (!_requestLimits.TryRemove((peerId, @event.Data.MessageSeq), out var limit))
             {
-                // 谓词已保证开启，取不到兜底静默。
+                logger.LogWarning("未找到绘图请求的发起时群上限，跳过处理：peer={PeerId} seq={Seq}",
+                    peerId, @event.Data.MessageSeq);
                 return;
             }
 
@@ -111,6 +148,7 @@ public class PaintCommandHandler(
             byte[]? bytes;
             try
             {
+                var options = config.Current;
                 var images = new List<byte[]>();
                 foreach (var seg in @event.Data.Segments.OfType<ImageIncomingSegment>().Take(options.MaxImages))
                 {
@@ -142,7 +180,16 @@ public class PaintCommandHandler(
         }
         finally
         {
-            await @event.RemoveReaction(bot, KnownReactionEmojiIds.Click, cancellationToken);
+            // 摘除表情必须自行兜底：finally 内的异常会直接逃出 DequeueAsync，
+            // 而 CommandQueuedHandler 串行消费循环没有 try/catch，一旦抛出会永久中断绘图队列。
+            try
+            {
+                await @event.RemoveReaction(bot, KnownReactionEmojiIds.Click, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "移除处理中表情失败");
+            }
         }
     }
 
