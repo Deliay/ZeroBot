@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
@@ -27,9 +26,9 @@ public class PaintCommandHandler(
     private const string CommandPrefixFullWidth = "/小画家：画";
 
     /// <summary>
-    /// 入队前捕获的「发起时群上限」，key = (PeerId, MessageSeq)；DequeueAsync 取出即移除。
+    /// 入队前捕获的「发起时群上限」，key = (PeerId, MessageSeq)；DequeueAsync 入口取出即移除。
     /// </summary>
-    private readonly ConcurrentDictionary<(long PeerId, long MessageSeq), int> _requestLimits = new();
+    private readonly PaintRequestLimits _requestLimits = new();
 
     private static readonly OutgoingSegment HelpStrings =
         "/小画家:画:{prompt}\n示例：/小画家:画:一只在樱花树下打盹的猫".ToMilkyTextSegment();
@@ -93,8 +92,7 @@ public class PaintCommandHandler(
             return;
         }
 
-        var key = (@event.Data.PeerId, @event.Data.MessageSeq);
-        _requestLimits[key] = limit;
+        _requestLimits.Record(@event.Data.PeerId, @event.Data.MessageSeq, limit);
         try
         {
             await base.HandleAsync(@event, cancellationToken);
@@ -102,7 +100,7 @@ public class PaintCommandHandler(
         catch
         {
             // 入队失败时清理，避免状态泄漏。
-            _requestLimits.TryRemove(key, out _);
+            _requestLimits.TryTake(@event.Data.PeerId, @event.Data.MessageSeq, out _);
             throw;
         }
     }
@@ -112,6 +110,19 @@ public class PaintCommandHandler(
     {
         try
         {
+            var peerId = @event.Data.PeerId;
+            var senderId = @event.Data.SenderId;
+
+            // 消费第一步即取出并移除「发起时上限」，保证后续所有分支
+            //（解析失败 / 空 prompt / 额度用尽 / 正常处理）都不会残留记录。
+            // 使用发起时捕获的上限：队列等待期间管理员禁用/改上限不影响本请求（PRD §5）。
+            if (!_requestLimits.TryTake(peerId, @event.Data.MessageSeq, out var limit))
+            {
+                logger.LogWarning("未找到绘图请求的发起时群上限，跳过处理：peer={PeerId} seq={Seq}",
+                    peerId, @event.Data.MessageSeq);
+                return;
+            }
+
             var raw = @event.ToText().Trim();
             if (!TryParsePrompt(raw, out var prompt))
             {
@@ -124,17 +135,6 @@ public class PaintCommandHandler(
             {
                 await @event.ReplyAsGroup(bot, cancellationToken,
                     ["提示词不能为空，请使用：/小画家:画:{prompt}".ToMilkyTextSegment()]);
-                return;
-            }
-
-            var peerId = @event.Data.PeerId;
-            var senderId = @event.Data.SenderId;
-
-            // 使用发起时捕获的上限；队列等待期间管理员禁用/改上限不影响本请求（PRD §5）。
-            if (!_requestLimits.TryRemove((peerId, @event.Data.MessageSeq), out var limit))
-            {
-                logger.LogWarning("未找到绘图请求的发起时群上限，跳过处理：peer={PeerId} seq={Seq}",
-                    peerId, @event.Data.MessageSeq);
                 return;
             }
 
