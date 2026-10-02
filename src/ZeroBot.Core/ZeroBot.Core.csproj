@@ -8,6 +8,7 @@
       <ProjectReference Include="..\plugins\ZeroBot.Bilibili\ZeroBot.Bilibili.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.ComfyUI\ZeroBot.ComfyUI.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Endfield\ZeroBot.Endfield.csproj" />
+      <ProjectReference Include="..\plugins\ZeroBot.Painter\ZeroBot.Painter.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.PermissionCommandPlugin\ZeroBot.PermissionCommandPlugin.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Synthesize\ZeroBot.Synthesize.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.TestPlugin\ZeroBot.TestPlugin.csproj" />
