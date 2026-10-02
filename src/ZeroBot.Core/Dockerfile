@@ -15,6 +15,7 @@ COPY ["src/plugins/ZeroBot.ComfyUI/ZeroBot.ComfyUI.csproj", "src/plugins/ZeroBot
 COPY ["src/plugins/ZeroBot.Endfield.Api/ZeroBot.Endfield.Api.csproj", "src/plugins/ZeroBot.Endfield.Api/"]
 COPY ["src/plugins/ZeroBot.Endfield/ZeroBot.Endfield.csproj", "src/plugins/ZeroBot.Endfield/"]
 COPY ["src/plugins/ZeroBot.Endfield.Credential.Json/ZeroBot.Endfield.Credential.Json.csproj", "src/plugins/ZeroBot.Endfield.Credential.Json/"]
+COPY ["src/plugins/ZeroBot.Painter/ZeroBot.Painter.csproj", "src/plugins/ZeroBot.Painter/"]
 COPY ["src/plugins/ZeroBot.PermissionCommandPlugin/ZeroBot.PermissionCommandPlugin.csproj", "src/plugins/ZeroBot.PermissionCommandPlugin/"]
 COPY ["src/plugins/ZeroBot.Synthesize/ZeroBot.Synthesize.csproj", "src/plugins/ZeroBot.Synthesize/"]
 COPY ["src/plugins/ZeroBot.Synthesize.Abstraction/ZeroBot.Synthesize.Abstraction.csproj", "src/plugins/ZeroBot.Synthesize.Abstraction/"]

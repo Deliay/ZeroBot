@@ -10,6 +10,7 @@ using ZeroBot.ComfyUI;
 using ZeroBot.Core.Services;
 using ZeroBot.Endfield;
 using ZeroBot.Milky;
+using ZeroBot.Painter;
 using ZeroBot.PermissionCommandPlugin;
 using ZeroBot.Repository.Mongo;
 using ZeroBot.Synthesize;
@@ -26,6 +27,7 @@ TypedPluginLoader.Register<BiliBiliPlugin>();
 TypedPluginLoader.Register<EndfieldPlugin>();
 TypedPluginLoader.Register<WeiboPlugin>();
 TypedPluginLoader.Register<SynthesizePlugin>();
+TypedPluginLoader.Register<PainterPlugin>();
 
 Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
 var root = RootBuilder

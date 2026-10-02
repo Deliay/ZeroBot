@@ -15,6 +15,7 @@
     <Project Path="src/plugins/ZeroBot.Endfield/ZeroBot.Endfield.csproj" />
     <Project Path="src/plugins/ZeroBot.Meme/ZeroBot.Meme.csproj" />
     <Project Path="src/plugins/ZeroBot.Milky/ZeroBot.Milky.csproj" />
+    <Project Path="src/plugins/ZeroBot.Painter/ZeroBot.Painter.csproj" />
     <Project Path="src/plugins/ZeroBot.Weibo/ZeroBot.Weibo.csproj" />
     <Project Path="src/plugins/ZeroBot.PermissionCommandPlugin/ZeroBot.PermissionCommandPlugin.csproj" />
     <Project Path="src/plugins/ZeroBot.Repository.Mongo/ZeroBot.Repository.Mongo.csproj" />
