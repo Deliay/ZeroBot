@@ -24,5 +24,5 @@ public static class PainterQuota
     /// <summary>
     /// 启用指令 number 合法性：1 &lt;= number &lt;= max。
     /// </summary>
-    public static bool IsValidDailyLimit(int number, int max) => number >= 1 && number <= max;
+    public static bool IsValidDailyLimit(int number, int max) => number == -1 || (number >= 1 && number <= max);
 }

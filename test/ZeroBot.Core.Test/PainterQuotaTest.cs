@@ -29,7 +29,7 @@ public class PainterQuotaTest
     [InlineData(1, true)]
     [InlineData(5, true)]
     [InlineData(6, false)]
-    [InlineData(-1, false)]
+    [InlineData(-1, true)]
     public void IsValidDailyLimit_ShouldRespectBoundaries(int number, bool expected)
     {
         Assert.Equal(expected, PainterQuota.IsValidDailyLimit(number, 5));
