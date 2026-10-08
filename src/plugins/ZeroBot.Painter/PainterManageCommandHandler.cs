@@ -40,7 +40,7 @@ public class PainterManageCommandHandler(
     protected override async ValueTask HandleAsync(Event<IncomingMessage> message,
         CancellationToken cancellationToken = default)
     {
-        var command = message.ToTextCommands().FirstOrDefault();
+        var command = message.ToTextCommands(argumentSplitters: "：:").FirstOrDefault();
         var arguments = command?.Arguments ?? [];
         var peerId = message.Data.PeerId;
 

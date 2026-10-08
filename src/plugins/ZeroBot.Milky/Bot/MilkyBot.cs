@@ -49,6 +49,12 @@ public class MilkyBot(
         await milky.Friend.AcceptFriendRequestAsync(param, cancellationToken);
     }
 
+    public async ValueTask UploadFileToGroupAsync(long accountId, long groupId, string fileName, MilkyUri fileUri,
+        CancellationToken cancellationToken = default)
+    {
+        await milky.File.UploadGroupFileAsync(new UploadGroupFileInput(groupId, "/", fileUri, fileName), cancellationToken);
+    }
+
     public async ValueTask<GetLoginInfoOutput> GetCurrentAccountAsync(CancellationToken cancellationToken = default)
     {
         return await botInfos.GetAccountInfoAsync(cancellationToken);

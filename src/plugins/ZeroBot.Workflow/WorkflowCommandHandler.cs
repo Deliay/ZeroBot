@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Milky.Net.Client;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.Abstraction.Service;
@@ -20,7 +19,6 @@ public class WorkflowCommandHandler(
     IPermission permission,
     IOptions<WorkflowOptions> options,
     WorkflowApi api,
-    MilkyClient milky,
     ILogger<WorkflowCommandHandler> logger) : CommandQueuedHandler(dispatcher)
 {
     private const string CommandPrefix = "/workflow";
@@ -146,8 +144,11 @@ public class WorkflowCommandHandler(
         }
 
         var fileName = GuessFileName(data);
-        await milky.File.UploadGroupFileAsync(
-            new UploadGroupFileInput(@event.Data.PeerId, "/", new MilkyUri($"base64://{base64}"), fileName),
+        await bot.UploadFileToGroupAsync(
+            @event.SelfId,
+            @event.Data.PeerId,
+            fileName,
+            new MilkyUri($"base64://{base64}"),
             cancellationToken);
     }
 

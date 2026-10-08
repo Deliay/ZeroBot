@@ -153,6 +153,14 @@ public class BotContext(ILogger<BotContext> logger) : IBotContext
             : botService.GetTempResourceUrlAsync(id, cancellationToken);
     }
 
+    public ValueTask UploadFileToGroupAsync(long accountId, long groupId, string fileName, MilkyUri fileUri,
+        CancellationToken cancellationToken = default)
+    {
+        return !_services.TryGetValue(accountId, out var botService)
+            ? default
+            : botService.UploadFileToGroupAsync(accountId, groupId, fileName, fileUri, cancellationToken);
+    }
+
     public async ValueTask UpdateGroupReactionAsync(long accountId, long groupId, long messageId, string reactionId, bool add,
         CancellationToken cancellationToken = default)
     {

@@ -212,7 +212,7 @@ public class PaintCommandHandler(
                 value.DailyQuotas[key] = quota = new DailyQuota(today, 0);
             }
 
-            if (quota.Count >= limit) return false;
+            if (limit > -1 && quota.Count >= limit) return false;
 
             value.DailyQuotas[key] = quota with { Count = quota.Count + 1 };
             await config.SaveAsync(value, token);
