@@ -13,6 +13,7 @@
       <ProjectReference Include="..\plugins\ZeroBot.Synthesize\ZeroBot.Synthesize.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.TestPlugin\ZeroBot.TestPlugin.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Weibo\ZeroBot.Weibo.csproj" />
+      <ProjectReference Include="..\plugins\ZeroBot.Workflow\ZeroBot.Workflow.csproj" />
       <ProjectReference Include="..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Milky\ZeroBot.Milky.csproj" />
       <ProjectReference Include="..\plugins\ZeroBot.Repository.Mongo\ZeroBot.Repository.Mongo.csproj" />
