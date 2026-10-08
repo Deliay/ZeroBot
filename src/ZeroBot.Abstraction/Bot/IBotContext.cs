@@ -38,4 +38,7 @@ public interface IBotContext
     void SetEventRepository(IBotEventRepository repository);
     
     ValueTask<string> GetTempResourceUrlAsync(long accountId, string id, CancellationToken cancellationToken = default);
+    
+    ValueTask UploadFileToGroupAsync(long accountId, long groupId, string fileName, MilkyUri fileUri,
+        CancellationToken cancellationToken = default);
 }

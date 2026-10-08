@@ -10,7 +10,6 @@
         <ProjectReference Include="..\..\ZeroBot.Abstraction\ZeroBot.Abstraction.csproj" />
         <ProjectReference Include="..\..\ZeroBot.Utility\ZeroBot.Utility.csproj" />
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
-        <PackageReference Include="ZeroAsh.Milky.Net.Client" />
     </ItemGroup>
 
 </Project>
