@@ -31,4 +31,7 @@ public interface IBotService : IExecutable
     ValueTask<string> GetTempResourceUrlAsync(string id, CancellationToken cancellationToken = default);
     
     ValueTask AcceptFriendRequestAsync(string uid, CancellationToken cancellationToken = default);
+
+    ValueTask UploadFileToGroupAsync(long accountId, long groupId, string fileName, MilkyUri fileUri,
+        CancellationToken cancellationToken = default);
 }

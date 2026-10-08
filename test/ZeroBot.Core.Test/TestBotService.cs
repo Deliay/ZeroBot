@@ -70,4 +70,10 @@ internal class TestBotService : IBotService
     {
         throw new NotImplementedException();
     }
+
+    public ValueTask UploadFileToGroupAsync(long accountId, long groupId, string fileName, MilkyUri fileUri,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }
