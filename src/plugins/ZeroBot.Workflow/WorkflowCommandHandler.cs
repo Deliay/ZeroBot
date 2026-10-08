@@ -4,12 +4,13 @@ using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
 using ZeroBot.Abstraction.Service;
 using ZeroBot.Utility;
+using ZeroBot.Utility.FileWatcher;
 
 namespace ZeroBot.Workflow;
 
 /// <summary>
 /// 工作流指令：/workflow:run:{file|voice}:{script}
-/// 仅群聊可用，且仅高权限用户（sudoers / 群管理员）可触发。
+/// 仅群聊可用，需所在群已通过 /workflow:enable 启用，且仅高权限用户（sudoers / 群管理员）可触发。
 /// script 为指令第二个分隔符之后的全部内容（可换行）。
 /// 执行流程：/v1/compile 校验展开 → /v1/run 执行 → 按 file/voice 发送结果；任一步失败均回复错误信息。
 /// </summary>
@@ -18,6 +19,7 @@ public class WorkflowCommandHandler(
     IBotContext bot,
     IPermission permission,
     IOptions<WorkflowOptions> options,
+    IJsonConfig<WorkflowGroupOptions> groupConfig,
     WorkflowApi api,
     ILogger<WorkflowCommandHandler> logger) : CommandQueuedHandler(dispatcher)
 {
@@ -35,6 +37,8 @@ public class WorkflowCommandHandler(
         CancellationToken cancellationToken = default)
     {
         if (message.Scene != MessageScene.Group) return false;
+        // 未通过 /workflow:enable 启用的群不允许使用工作流。
+        if (!groupConfig.Current.EnabledGroups.Contains(message.Data.PeerId)) return false;
         if (!IsRunCommand(message.ToText().TrimStart())) return false;
 
         return await permission.IsSudoerOrGroupAdminAsync(bot, message, cancellationToken);
