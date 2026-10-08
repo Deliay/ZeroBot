@@ -342,6 +342,28 @@ TypedPluginLoader.Register<MyPlugin>();
 
 ---
 
+### ZeroBot.Workflow
+
+| 属性 | 值 |
+|------|-----|
+| 路径 | `src/plugins/ZeroBot.Workflow/` |
+| 命名空间 | `ZeroBot.Workflow` |
+
+**功能:** 工作流执行插件，通过后台工作流服务运行脚本并按结果类型（音频/文件）发回群聊。
+
+**组件:**
+- `WorkflowCommandHandler` - 工作流指令 (`/workflow:run`，`CommandQueuedHandler` + 表情反馈)
+- `WorkflowApi` - 工作流服务 HTTP 客户端（先 `/v1/compile` 校验展开，再 `/v1/run` 执行；请求级超时）
+
+**命令:**
+- `/workflow:run:{file|voice}:{script}` - 仅群聊、仅高权限用户（sudoers / 群管理员）可用；`script` 吃掉第二个分隔符之后的全部内容（可换行），`file` 发送文件、`voice` 发送语音
+
+**配置:** 配置节 `WorkflowService`，例如环境变量 `WorkflowService__BaseUrl`（服务基地址）；`WorkflowService__HttpTimeoutSeconds`（单次请求超时秒数，默认 600）
+
+**依赖:** `ZeroAsh.Milky.Net.Client`（通过群文件上传发送 `file` 结果）
+
+---
+
 ### ZeroBot.Synthesize.Abstraction
 
 | 属性 | 值 |
