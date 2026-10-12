@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.Extensions.Logging;
 using Milky.Net.Model;
 using ZeroBot.Abstraction.Bot;
@@ -12,6 +13,10 @@ namespace ZeroBot.Painter;
 /// 同群同人每天（UTC+8）受该群上限限制，通过限额检查后、调用接口之前即消耗一次用量，
 /// 失败调用同样计入且不回滚。
 ///
+/// 参赛图片的优先级：引用消息中的图片 &gt; 本条消息中的图片 &gt; 提示词开头 <c>{name}</c> 引用的公共素材图片。
+/// 提示词开头的 <c>{name}</c> 引用命中本群公共素材时从提示词中移除并追加其图片，
+/// 未命中则原样保留（不替换）。
+///
 /// 群上限在请求发起时（派发阶段）捕获，排队期间管理员禁用/调整上限不影响在途请求，
 /// 保证「以发起时状态为准，进行中的调用完成并回发结果」（PRD §5）。
 /// </summary>
@@ -20,6 +25,7 @@ public class PaintCommandHandler(
     IBotContext bot,
     IJsonConfig<PainterOptions> config,
     PainterApi api,
+    PainterMaterialStore store,
     ILogger<PaintCommandHandler> logger) : CommandQueuedHandler(dispatcher)
 {
     private const string CommandPrefix = "/小画家:画";
@@ -68,6 +74,32 @@ public class PaintCommandHandler(
 
         prompt = rest[1..];
         return true;
+    }
+
+    /// <summary>
+    /// 切出提示词开头连续的 <c>{name}</c> 引用。
+    /// 返回每个引用的原文（含花括号）与其中的名称，以及引用之后的剩余提示词；
+    /// 首字符不是 <c>{</c>、<c>{}</c> 或缺少右花括号时停止切分（后续内容整体作为剩余提示词）。
+    /// 名称非法（空）的引用视为普通文本，停止切分。
+    /// </summary>
+    public static (List<(string Raw, string Name)> References, string Remaining) SplitMaterialReferences(string prompt)
+    {
+        var references = new List<(string Raw, string Name)>();
+        var remaining = prompt;
+
+        while (remaining.Length > 1 && remaining[0] == '{')
+        {
+            var close = remaining.IndexOf('}');
+            if (close <= 1) break;
+
+            var name = remaining[1..close].Trim();
+            if (name.Length == 0) break;
+
+            references.Add((remaining[..(close + 1)], name));
+            remaining = remaining[(close + 1)..];
+        }
+
+        return (references, remaining);
     }
 
     protected override ValueTask<bool> PredicateAsync(Event<IncomingMessage> message,
@@ -131,7 +163,25 @@ public class PaintCommandHandler(
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(prompt))
+            // 提示词开头的 {name} 引用本群公共素材：命中则移除占位符并追加其图片，未命中则保留原文。
+            var (references, remainingPrompt) = SplitMaterialReferences(prompt.TrimStart());
+            var materialNames = new List<string>();
+            var builder = new StringBuilder();
+            foreach (var (rawReference, materialName) in references)
+            {
+                if (store.Find(peerId, materialName) is null)
+                {
+                    builder.Append(rawReference);
+                    continue;
+                }
+
+                if (!materialNames.Contains(materialName)) materialNames.Add(materialName);
+            }
+
+            builder.Append(remainingPrompt);
+            var finalPrompt = builder.ToString();
+
+            if (string.IsNullOrWhiteSpace(finalPrompt))
             {
                 await @event.ReplyAsGroup(bot, cancellationToken,
                     ["提示词不能为空，请使用：/小画家:画:{prompt}".ToMilkyTextSegment()]);
@@ -145,34 +195,46 @@ public class PaintCommandHandler(
                 return;
             }
 
-            byte[]? bytes;
+            PaintResult result;
             try
             {
                 var options = config.Current;
-                var images = new List<byte[]>();
-                foreach (var seg in @event.Data.Segments.OfType<ImageIncomingSegment>().Take(options.MaxImages))
+
+                // 优先级：引用消息的图片 > 本条消息的图片 > 提示词引用素材的图片，总计不超过 MaxImages 张。
+                var images = await PainterImages.CollectContextImagesAsync(bot, @event, options.MaxImages,
+                    cancellationToken);
+                foreach (var materialName in materialNames)
                 {
-                    images.Add(await seg.GetMilkyImageBytesAsync(bot, @event, cancellationToken));
+                    if (images.Count >= options.MaxImages) break;
+
+                    foreach (var materialImage in await store.LoadImagesAsync(peerId, materialName, cancellationToken))
+                    {
+                        if (images.Count >= options.MaxImages) break;
+                        images.Add(materialImage);
+                    }
                 }
 
-                bytes = await api.GenerateAsync(options.Endpoint, prompt, images,
+                result = await api.GenerateAsync(options.Endpoint, finalPrompt, images,
                     TimeSpan.FromSeconds(options.HttpTimeoutSeconds), cancellationToken);
             }
             catch (Exception e)
             {
                 // 取图或调用异常：仅记日志并按失败处理；用量已消耗，不回滚。
                 logger.LogError(e, "绘图调用异常");
-                bytes = null;
+                result = PaintResult.Fail(null);
             }
 
-            if (bytes is null)
+            if (!result.Success || result.Data is not { Length: > 0 } image)
             {
-                await @event.ReplyAsGroup(bot, cancellationToken,
-                    ["绘图失败，请稍后重试。".ToMilkyTextSegment()]);
+                // 带上上游返回的错误详情（PainterApi 已截断），便于用户与运维定位问题。
+                var message = string.IsNullOrWhiteSpace(result.Error)
+                    ? "绘图失败，请稍后重试。"
+                    : $"绘图失败：{result.Error}";
+                await @event.ReplyAsGroup(bot, cancellationToken, [message.ToMilkyTextSegment()]);
                 return;
             }
 
-            await @event.ReplyAsGroup(bot, cancellationToken, [bytes.ToMilkyImageSegment()]);
+            await @event.ReplyAsGroup(bot, cancellationToken, [image.ToMilkyImageSegment()]);
         }
         catch (Exception e)
         {

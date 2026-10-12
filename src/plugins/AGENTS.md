@@ -326,19 +326,25 @@ TypedPluginLoader.Register<MyPlugin>();
 | 路径 | `src/plugins/ZeroBot.Painter/` |
 | 命名空间 | `ZeroBot.Painter` |
 
-**功能:** 小画家绘图，群聊内通过指令调用后台绘图训练服务生成图片，按群与群员做每日用量限制。
+**功能:** 小画家绘图，群聊内通过指令调用后台绘图训练服务生成图片，按群与群员做每日用量限制；支持群公共素材库（图片素材随消息或引用消息添加，绘图时按名称引用）。
 
 **组件:**
 - `PainterManageCommandHandler` - 启用/禁用指令 (`/小画家:启用`、`/小画家:禁用`)
+- `PainterMaterialCommandHandler` - 公共素材指令 (`/小画家:公共素材`，增删需高权限，列出对群员开放)
 - `PaintCommandHandler` - 绘图指令 (`/小画家:画`，`CommandQueuedHandler` + 表情反馈)
-- `PainterApi` - 绘图接口 HTTP 客户端（multipart 上传，请求级超时热生效）
+- `PainterApi` - 绘图接口 HTTP 客户端（multipart 上传，请求级超时热生效；失败时回发上游状态码与响应体原文，截断至 300 字符）
+- `PainterMaterialStore` - 公共素材落盘（工作目录 `painter/{群uid}/{名称SHA-256前16位}/`，含 `material.json` 与图片文件）
+- `PainterImages` - 引用消息 / 本消息图片收集（引用消息的图片优先，不复用只取首图的 `GetMilkyImageMessagesAsync`）
 - `PainterQuota` - UTC+8 每日用量/日期/上限校验工具
 
 **命令:**
-- `/小画家:启用:{number}` / `/小画家:禁用` - 开启/关闭本群绘图功能（仅群聊，高权限用户，权限 `painter.manage`；number 为每人每日上限，1~5）
-- `/小画家:画:{prompt}` - 调用绘图接口并把结果发回群聊（仅群聊，附 0~10 张参考图，受群内每人每日上限限制；未开启的群完全静默）
+- `/小画家:启用:{number}` / `/小画家:禁用` - 开启/关闭本群绘图功能（仅群聊，高权限用户，权限 `painter.manage`；number 为每人每日上限，1~5，-1 不限制）
+- `/小画家:画:{prompt}` - 调用绘图接口并把结果发回群聊（仅群聊，附 0~10 张参考图，受群内每人每日上限限制；未开启的群完全静默）。参考图优先级：引用消息中的图片 > 本条消息中的图片 > 提示词开头 `{name}` 引用的公共素材图片；`{name}` 未命中素材时原样保留在提示词中
+- `/小画家:公共素材` - 列出本群公共素材（仅群聊、本群已开启，所有群员可用）
+- `/小画家:公共素材:添加:{name}` - 把本条消息（或引用消息）中的图片添加为公共素材，同名覆盖（高权限用户，权限 `painter.manage`）
+- `/小画家:公共素材:删除:{name}` - 删除本群公共素材（高权限用户，权限 `painter.manage`）
 
-**配置文件:** `painter-config.json`（`Endpoint` 支持热加载，默认可用环境变量 `Z_VTUBER_TRAINING_ENDPOINT`；`HttpTimeoutSeconds` 默认 600；`Groups` 为群 PeerId → 每人每日上限；`DailyQuotas` 为当日用量表）
+**配置文件:** `painter-config.json`（`Endpoint` 支持热加载，默认可用环境变量 `Z_VTUBER_TRAINING_ENDPOINT`；`HttpTimeoutSeconds` 默认 600；`MaxImages` 单次最多参考图数，默认 10；`Groups` 为群 PeerId → 每人每日上限；`DailyQuotas` 为当日用量表）
 
 ---
 
