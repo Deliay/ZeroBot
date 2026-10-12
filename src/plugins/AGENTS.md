@@ -360,7 +360,7 @@ TypedPluginLoader.Register<MyPlugin>();
 - `/workflow:enable` / `/workflow:disable` - 开启/关闭本群工作流功能（仅群聊，仅 bot 管理员即 sudoers，群管理员无权操作）
 - `/workflow:run:{file|voice}:{script}` - 仅群聊、需本群已启用、仅高权限用户（sudoers / 群管理员）可用；`script` 吃掉第二个分隔符之后的全部内容（可换行），`file` 发送文件、`voice` 发送语音；未启用的群静默忽略
 
-**配置:** 配置节 `WorkflowService`，例如环境变量 `WorkflowService__BaseUrl`（服务基地址）；`WorkflowService__HttpTimeoutSeconds`（单次请求超时秒数，默认 600）。群开关持久化于热加载的 `workflow-config.json`（`EnabledGroups` 为已启用群 PeerId 集合）
+**配置:** 配置节 `WorkflowService`，例如环境变量 `WorkflowService__BaseUrl`（服务基地址）；`WorkflowService__HttpTimeoutSeconds`（单次请求超时秒数，默认 1800 即 30 分钟）。群开关持久化于热加载的 `workflow-config.json`（`EnabledGroups` 为已启用群 PeerId 集合）
 
 **依赖:** `ZeroAsh.Milky.Net.Client`（通过群文件上传发送 `file` 结果）
 
