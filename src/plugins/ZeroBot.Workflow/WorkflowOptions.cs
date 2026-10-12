@@ -13,7 +13,7 @@ public record WorkflowOptions
     public string BaseUrl { get; init; } = string.Empty;
 
     /// <summary>
-    /// 单次请求超时时间（秒），默认 600。
+    /// 单次请求超时时间（秒），默认 1800（30 分钟）。
     /// </summary>
-    public int HttpTimeoutSeconds { get; init; } = 600;
+    public int HttpTimeoutSeconds { get; init; } = 1800;
 }

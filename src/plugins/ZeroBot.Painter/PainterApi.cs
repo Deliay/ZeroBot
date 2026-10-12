@@ -4,6 +4,18 @@ using Microsoft.Extensions.Logging;
 namespace ZeroBot.Painter;
 
 /// <summary>
+/// 绘图接口调用结果：成功时 <see cref="Data"/> 为图片二进制；
+/// 失败时 <see cref="Error"/> 为可直接回复到聊天中的错误信息（尽力包含上游返回的错误详情），
+/// 无上游详情时为 null，由调用方回落到通用失败提示。
+/// </summary>
+public sealed record PaintResult(bool Success, byte[]? Data, string? Error)
+{
+    public static PaintResult Ok(byte[] data) => new(true, data, null);
+
+    public static PaintResult Fail(string? error) => new(false, null, error);
+}
+
+/// <summary>
 /// 绘图训练服务接口客户端。
 /// 自持专用 <see cref="HttpClient"/>（实例级超时置为无限），唯一超时来源是请求级
 /// <see cref="CancellationTokenSource"/>，因此热加载修改 <c>HttpTimeoutSeconds</c> 无需重启即生效。
@@ -14,10 +26,14 @@ public class PainterApi(ILogger<PainterApi> logger)
     // 也不与 SynthesizePlugin 注册的 AddSingleton<HttpClient>() 抢解析。
     private static readonly HttpClient Http = new() { Timeout = Timeout.InfiniteTimeSpan };
 
+    /// <summary>回复到聊天中的错误信息最大长度，超出截断，避免上游长响应刷屏。</summary>
+    private const int MaxErrorLength = 300;
+
     /// <summary>
-    /// 以 multipart/form-data 调用绘图接口，成功返回图片二进制；失败（非 2xx / 超时 / 异常 / 空体 / JSON 响应）返回 null。
+    /// 以 multipart/form-data 调用绘图接口，成功返回图片二进制；
+    /// 失败（非 2xx / 超时 / 异常 / 空体 / JSON 响应）返回 <see cref="PaintResult"/>，尽量带上上游错误详情。
     /// </summary>
-    public async Task<byte[]?> GenerateAsync(string endpoint, string prompt, IReadOnlyList<byte[]> images,
+    public async Task<PaintResult> GenerateAsync(string endpoint, string prompt, IReadOnlyList<byte[]> images,
         TimeSpan timeout, CancellationToken cancellationToken = default)
     {
         try
@@ -40,33 +56,64 @@ public class PainterApi(ILogger<PainterApi> logger)
             using var response = await Http.PostAsync(url, form, cts.Token);
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogError("绘图请求失败，状态码 {Status}", response.StatusCode);
-                return null;
+                var body = await response.Content.ReadAsStringAsync(cts.Token);
+                logger.LogError("绘图请求失败，状态码 {Status}，响应 {Body}",
+                    response.StatusCode, Truncate(body, MaxErrorLength));
+                return PaintResult.Fail(DescribeFailure(response, body));
             }
 
-            // 防御分支：接口若改为 JSON 结构响应，本期不解析，避免把 JSON 当图片发出。
+            // 防御分支：接口若改为 JSON 结构响应，本期不解析，避免把 JSON 当图片发出；
+            // 但尽量把响应内容（通常是错误详情）回传给用户，便于定位问题。
             var mediaType = response.Content.Headers.ContentType?.MediaType;
             if (string.Equals(mediaType, "application/json", StringComparison.OrdinalIgnoreCase))
             {
-                logger.LogError("绘图接口返回 JSON（{MediaType}），本期不支持解析，按失败处理", mediaType);
-                return null;
+                var body = await response.Content.ReadAsStringAsync(cts.Token);
+                logger.LogError("绘图接口返回 JSON（{MediaType}），本期不支持解析，按失败处理：{Body}",
+                    mediaType, Truncate(body, MaxErrorLength));
+
+                var detail = NormalizeBody(body);
+                return PaintResult.Fail(string.IsNullOrWhiteSpace(detail)
+                    ? "绘图接口返回了非图片响应"
+                    : $"绘图接口返回了非图片响应：{detail}");
             }
 
             var bytes = await response.Content.ReadAsByteArrayAsync(cts.Token);
-            return bytes.Length == 0 ? null : bytes;
+            return bytes.Length == 0
+                ? PaintResult.Fail("绘图接口返回了空响应")
+                : PaintResult.Ok(bytes);
         }
         catch (TaskCanceledException e) when (!cancellationToken.IsCancellationRequested)
         {
             // 外层令牌未取消 → 请求级 CTS 触发，即超时。
-            logger.LogError(e, "绘图请求超时（{TimeoutSeconds} 秒）", timeout.TotalSeconds);
-            return null;
+            var seconds = timeout.TotalSeconds;
+            logger.LogError(e, "绘图请求超时（{TimeoutSeconds} 秒）", seconds);
+            return PaintResult.Fail($"绘图请求超时（{seconds:0.##} 秒）");
         }
         catch (Exception e)
         {
             logger.LogError(e, "绘图请求异常");
-            return null;
+            return PaintResult.Fail(null);
         }
     }
+
+    /// <summary>
+    /// 拼装非 2xx 的失败信息，形如 <c>上游返回 500 Internal Server Error：{响应体}</c>。
+    /// </summary>
+    private static string DescribeFailure(HttpResponseMessage response, string body)
+    {
+        var status = $"上游返回 {(int)response.StatusCode} {response.StatusCode}";
+        var detail = NormalizeBody(body);
+        return string.IsNullOrWhiteSpace(detail) ? status : $"{status}：{detail}";
+    }
+
+    /// <summary>
+    /// 把上游响应体按原文整理为可直接回复的错误信息：去首尾空白并截断；空白响应返回 null。
+    /// </summary>
+    public static string? NormalizeBody(string? body)
+        => string.IsNullOrWhiteSpace(body) ? null : Truncate(body.Trim(), MaxErrorLength);
+
+    private static string Truncate(string value, int maxLength)
+        => value.Length <= maxLength ? value : value[..maxLength] + "…";
 
     /// <summary>
     /// 按文件魔数嗅探图片类型，返回 (Content-Type, 扩展名)；未知类型回落到通用二进制。

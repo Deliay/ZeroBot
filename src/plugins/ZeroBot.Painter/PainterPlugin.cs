@@ -13,7 +13,9 @@ public class PainterPlugin : IPlugin
 
         services.ConfigureJsonConfig("painter-config.json", PainterOptions.Default, cancellationToken);
         services.AddSingleton<PainterApi>();
+        services.AddSingleton<PainterMaterialStore>();
         services.AddSingletonComponent<PainterManageCommandHandler>();
+        services.AddSingletonComponent<PainterMaterialCommandHandler>();
         services.AddSingletonComponent<PaintCommandHandler>();
 
         return ValueTask.FromResult(services);
