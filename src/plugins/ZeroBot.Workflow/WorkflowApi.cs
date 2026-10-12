@@ -19,32 +19,54 @@ public class WorkflowApi(ILogger<WorkflowApi> logger)
 {
     private static readonly HttpClient Http = new() { Timeout = Timeout.InfiniteTimeSpan };
 
+    /// <summary>
+    /// 单个二进制输入：<paramref name="Name"/> 对应脚本中的 <c>[input:name]</c>（缺省为 <c>input</c>）。
+    /// </summary>
+    public sealed record BinaryInput(string Name, byte[] Data);
+
+    private sealed record WorkflowValueSpec(
+        [property: JsonPropertyName("type")] string Type,
+        [property: JsonPropertyName("data")] string Data);
+
     private sealed record WorkflowRequest(
-        [property: JsonPropertyName("input_types")] Dictionary<string, object> InputTypes,
-        [property: JsonPropertyName("script")] string Script);
+        [property: JsonPropertyName("script")] string Script,
+        [property: JsonPropertyName("input_types")] IReadOnlyDictionary<string, string> InputTypes,
+        [property: JsonPropertyName("inputs")] IReadOnlyDictionary<string, WorkflowValueSpec> Inputs);
 
     /// <summary>
     /// 调用 <c>/v1/compile</c> 测试脚本展开；不解析返回数据。
+    /// <paramref name="inputTypes"/> 用于提前声明输入类型（如引用了群文件时声明 <c>input= binary</c>）。
     /// </summary>
     public Task<WorkflowResult> CompileAsync(string baseUrl, string script, TimeSpan timeout,
+        IReadOnlyDictionary<string, string>? inputTypes = null,
         CancellationToken cancellationToken = default)
-        => PostAsync(baseUrl, "compile", script, timeout, parseData: false, cancellationToken);
+        => PostAsync(baseUrl, "compile", script, timeout, inputTypes, input: null, parseData: false,
+            cancellationToken);
 
     /// <summary>
     /// 调用 <c>/v1/run</c> 执行工作流，并解析 <c>outputs.final.data</c>（base64）。
+    /// <paramref name="input"/> 为可选的二进制输入（如被引用的群文件内容）。
     /// </summary>
     public Task<WorkflowResult> RunAsync(string baseUrl, string script, TimeSpan timeout,
+        IReadOnlyDictionary<string, string>? inputTypes = null, BinaryInput? input = null,
         CancellationToken cancellationToken = default)
-        => PostAsync(baseUrl, "run", script, timeout, parseData: true, cancellationToken);
+        => PostAsync(baseUrl, "run", script, timeout, inputTypes, input, parseData: true, cancellationToken);
 
     private async Task<WorkflowResult> PostAsync(string baseUrl, string api, string script, TimeSpan timeout,
-        bool parseData, CancellationToken cancellationToken)
+        IReadOnlyDictionary<string, string>? inputTypes, BinaryInput? input, bool parseData,
+        CancellationToken cancellationToken)
     {
         var label = api == "compile" ? "编译" : "执行";
         try
         {
             var url = $"{baseUrl.TrimEnd('/')}/v1/{api}";
-            var payload = new WorkflowRequest([], script);
+            var inputs = input is null
+                ? new Dictionary<string, WorkflowValueSpec>()
+                : new Dictionary<string, WorkflowValueSpec>
+                {
+                    [input.Name] = new("binary", Convert.ToBase64String(input.Data)),
+                };
+            var payload = new WorkflowRequest(script, inputTypes ?? new Dictionary<string, string>(), inputs);
 
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);

@@ -29,6 +29,7 @@ public class WorkflowCommandHandler(
 
     private static readonly OutgoingSegment HelpStrings =
         ("/workflow:run:{file|voice}:{script}\n" +
+         "引用一条含群文件的消息时，该文件会作为二进制输入 input 传入工作流，脚本中用 [input] 引用。\n" +
          "示例：/workflow:run:voice:\n" +
          "print('hello')\n" +
          "script 可换行，会作为剩余全部内容执行。").ToMilkyTextSegment();
@@ -80,14 +81,46 @@ public class WorkflowCommandHandler(
 
             var timeout = TimeSpan.FromSeconds(Math.Max(1, value.HttpTimeoutSeconds));
 
-            var compile = await api.CompileAsync(value.BaseUrl, script, timeout, cancellationToken);
+            // 引用（或本条）消息中的群文件作为工作流二进制输入。
+            var fileSegment = await WorkflowFileInput.FindAsync(bot, @event, cancellationToken);
+            var inputTypes = fileSegment is null
+                ? null
+                : new Dictionary<string, string> { [WorkflowFileInput.InputName] = "binary" };
+
+            var compile = await api.CompileAsync(value.BaseUrl, script, timeout, inputTypes, cancellationToken);
             if (!compile.Success)
             {
                 await ReplyErrorAsync(@event, compile.Error, cancellationToken);
                 return;
             }
 
-            var run = await api.RunAsync(value.BaseUrl, script, timeout, cancellationToken);
+            WorkflowApi.BinaryInput? input = null;
+            if (fileSegment is not null)
+            {
+                byte[]? bytes;
+                try
+                {
+                    bytes = await WorkflowFileInput.DownloadAsync(bot, @event, fileSegment, cancellationToken);
+                }
+                catch (Exception e) when (e is not OperationCanceledException)
+                {
+                    logger.LogError(e, "下载被引用的群文件失败");
+                    await @event.ReplyAsGroup(bot, cancellationToken,
+                        ["下载被引用的群文件失败，请稍后重试。".ToMilkyTextSegment()]);
+                    return;
+                }
+
+                if (bytes is null || bytes.Length == 0)
+                {
+                    await @event.ReplyAsGroup(bot, cancellationToken,
+                        ["无法读取被引用的群文件，请确认文件仍然有效。".ToMilkyTextSegment()]);
+                    return;
+                }
+
+                input = new WorkflowApi.BinaryInput(WorkflowFileInput.InputName, bytes);
+            }
+
+            var run = await api.RunAsync(value.BaseUrl, script, timeout, inputTypes, input, cancellationToken);
             if (!run.Success || run.Data is null || run.Data.Length == 0)
             {
                 await ReplyErrorAsync(@event, run.Error, cancellationToken);
@@ -159,7 +192,7 @@ public class WorkflowCommandHandler(
     /// <summary>
     /// 匹配 <c>/workflow:run:...</c> 指令形状（不校验 result-sink 与 script）。
     /// </summary>
-    private static bool IsRunCommand(string raw)
+    public static bool IsRunCommand(string raw)
     {
         if (!raw.StartsWith(CommandPrefix, StringComparison.OrdinalIgnoreCase)) return false;
 
@@ -176,7 +209,7 @@ public class WorkflowCommandHandler(
     /// 解析 <c>/workflow:run:{sink}:{script}</c>，script 保留换行（仅修剪首尾空白）；
     /// script 可包含分隔符。形状不合法（如缺少 sink 分隔符）时返回 false。
     /// </summary>
-    private static bool TryParse(string raw, out string sink, out string script)
+    public static bool TryParse(string raw, out string sink, out string script)
     {
         sink = string.Empty;
         script = string.Empty;

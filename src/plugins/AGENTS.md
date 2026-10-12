@@ -355,20 +355,21 @@ TypedPluginLoader.Register<MyPlugin>();
 | 路径 | `src/plugins/ZeroBot.Workflow/` |
 | 命名空间 | `ZeroBot.Workflow` |
 
-**功能:** 工作流执行插件，通过后台工作流服务运行脚本并按结果类型（音频/文件）发回群聊；群功能默认关闭，需由 bot 管理员启用。
+**功能:** 工作流执行插件，通过后台工作流服务运行脚本并按结果类型（音频/文件）发回群聊；群功能默认关闭，需由 bot 管理员启用。引用含群文件的消息时，会下载该群文件并作为二进制输入 `input` 传给工作流。
 
 **组件:**
 - `WorkflowCommandHandler` - 工作流指令 (`/workflow:run`，`CommandQueuedHandler` + 表情反馈)
 - `WorkflowManageCommandHandler` - 群开关指令 (`/workflow:enable`、`/workflow:disable`)
-- `WorkflowApi` - 工作流服务 HTTP 客户端（先 `/v1/compile` 校验展开，再 `/v1/run` 执行；请求级超时）
+- `WorkflowApi` - 工作流服务 HTTP 客户端（先 `/v1/compile` 校验展开，再 `/v1/run` 执行并传入 `input_types` / `inputs`；请求级超时）
+- `WorkflowFileInput` - 从被引用（或本条）消息中取出群文件，并经协议端下载其内容作为工作流输入
 
 **命令:**
 - `/workflow:enable` / `/workflow:disable` - 开启/关闭本群工作流功能（仅群聊，仅 bot 管理员即 sudoers，群管理员无权操作）
-- `/workflow:run:{file|voice}:{script}` - 仅群聊、需本群已启用、仅高权限用户（sudoers / 群管理员）可用；`script` 吃掉第二个分隔符之后的全部内容（可换行），`file` 发送文件、`voice` 发送语音；未启用的群静默忽略
+- `/workflow:run:{file|voice}:{script}` - 仅群聊、需本群已启用、仅高权限用户（sudoers / 群管理员）可用；`script` 吃掉第二个分隔符之后的全部内容（可换行），`file` 发送文件、`voice` 发送语音；未启用的群静默忽略。引用一条含群文件的消息时，该文件下载后作为二进制输入 `input` 传入工作流（脚本中用 `[input]` 引用）
 
 **配置:** 配置节 `WorkflowService`，例如环境变量 `WorkflowService__BaseUrl`（服务基地址）；`WorkflowService__HttpTimeoutSeconds`（单次请求超时秒数，默认 1800 即 30 分钟）。群开关持久化于热加载的 `workflow-config.json`（`EnabledGroups` 为已启用群 PeerId 集合）
 
-**依赖:** `ZeroAsh.Milky.Net.Client`（通过群文件上传发送 `file` 结果）
+**依赖:** `ZeroAsh.Milky.Net.Client`（通过群文件上传发送 `file` 结果，通过 `GetGroupFileDownloadUrlAsync` 下载被引用的群文件）
 
 ---
 
