@@ -40,4 +40,27 @@ public class PainterApiTest
         var data = new byte[] { 0x00, 0x01, 0x02, 0x03 };
         Assert.Equal(("application/octet-stream", "bin"), PainterApi.DetectImageType(data));
     }
+
+    [Fact]
+    public void NormalizeBody_ShouldTrimAndKeepJsonAsIs()
+    {
+        Assert.Equal("{\"detail\":\"出错了\"}", PainterApi.NormalizeBody("  {\"detail\":\"出错了\"}\n"));
+    }
+
+    [Fact]
+    public void NormalizeBody_ShouldReturnNullForBlank()
+    {
+        Assert.Null(PainterApi.NormalizeBody(null));
+        Assert.Null(PainterApi.NormalizeBody(""));
+        Assert.Null(PainterApi.NormalizeBody("   \n"));
+    }
+
+    [Fact]
+    public void NormalizeBody_ShouldTruncateLongBody()
+    {
+        var body = new string('a', 400);
+        var result = PainterApi.NormalizeBody(body);
+        Assert.NotNull(result);
+        Assert.Equal(new string('a', 300) + "…", result);
+    }
 }
