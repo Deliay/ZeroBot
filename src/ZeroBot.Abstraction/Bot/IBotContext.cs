@@ -41,4 +41,7 @@ public interface IBotContext
     
     ValueTask UploadFileToGroupAsync(long accountId, long groupId, string fileName, MilkyUri fileUri,
         CancellationToken cancellationToken = default);
+
+    ValueTask<string> GetGroupFileDownloadUrlAsync(long accountId, long groupId, string fileId,
+        CancellationToken cancellationToken = default);
 }

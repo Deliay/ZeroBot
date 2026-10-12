@@ -161,6 +161,14 @@ public class BotContext(ILogger<BotContext> logger) : IBotContext
             : botService.UploadFileToGroupAsync(accountId, groupId, fileName, fileUri, cancellationToken);
     }
 
+    public ValueTask<string> GetGroupFileDownloadUrlAsync(long accountId, long groupId, string fileId,
+        CancellationToken cancellationToken = default)
+    {
+        return !_services.TryGetValue(accountId, out var botService)
+            ? ValueTask.FromResult(string.Empty)
+            : botService.GetGroupFileDownloadUrlAsync(groupId, fileId, cancellationToken);
+    }
+
     public async ValueTask UpdateGroupReactionAsync(long accountId, long groupId, long messageId, string reactionId, bool add,
         CancellationToken cancellationToken = default)
     {

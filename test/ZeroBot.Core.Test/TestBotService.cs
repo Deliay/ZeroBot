@@ -76,4 +76,10 @@ internal class TestBotService : IBotService
     {
         throw new NotImplementedException();
     }
+
+    public ValueTask<string> GetGroupFileDownloadUrlAsync(long groupId, string fileId,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }
